@@ -1,0 +1,1 @@
+/home/lyr/p/dotfiles/.zshrc
