@@ -1,0 +1,43 @@
+#! /bin/bash
+#
+# Remember the latest cd and execute
+#
+# Dependencies: [ realpath ]
+#
+
+TEMP_FILE=/tmp/latest_cd
+
+add_zsh_alias() {
+	CD_ALIAS="# added by latest_cd
+alias cd=\"FROM_CD_ALIAS=true . latest_cd\"
+alias lcd=\"cd \$(latest_cd)\"" 
+	if ! grep -qF "$CD_ALIAS" ~/.zshrc ; then
+		echo "Adding zsh alias"
+		echo "$CD_ALIAS" >> ~/.zshrc
+	fi
+}
+
+cd_alias() {
+	if [[ $1 != "" && $1 != "-" ]]; then
+		echo $(realpath $1) > $TEMP_FILE 
+	fi
+
+	builtin cd $@
+}
+
+
+to_latest_path() {
+	LATEST_CD=$(cat $TEMP_FILE 2>/dev/null || echo "~")
+
+	LATEST_PATH=$(realpath "$LATEST_CD")
+
+	echo $LATEST_PATH
+}
+
+add_zsh_alias
+
+if [[ $FROM_CD_ALIAS ]]; then
+	cd_alias "$@"
+else
+	to_latest_path
+fi

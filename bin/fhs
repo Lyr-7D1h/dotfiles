@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -e
+
+export NIXPKGS_ALLOW_UNFREE=1
+
+echo $@
+
+nix-shell -p steam-run --command "steam-run zsh"

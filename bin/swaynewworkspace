@@ -1,0 +1,31 @@
+#!/usr/bin/env node
+
+const { exec } = require("child_process");
+const { argv } = require("process");
+
+const subcommand = argv[2];
+
+exec("swaymsg -t get_workspaces --raw", (err, stdout, stderr) => {
+  if (err) throw err;
+  if (stderr.length > 0) console.error(stderr);
+
+  const workspaces = JSON.parse(stdout);
+
+  // const nums = workspaces.map((workspace) => workspace.num);
+  // let emptyWorkspace;
+  // for (i = 1; i < 100; i++) {
+  //   if (!nums.includes(i)) {
+  //     emptyWorkspace = i;
+  //     break;
+  //   }
+  // }
+
+  const latestWorkspace = workspaces.reduce((a, b) => {
+    return a.num > b.num ? a : b;
+  }).num;
+
+  const move = subcommand === "move" ? "move container to " : "";
+  exec(`swaymsg "${move}workspace number ${latestWorkspace + 1}"`, (err) => {
+    if (err) throw err;
+  });
+});

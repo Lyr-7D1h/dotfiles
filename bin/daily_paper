@@ -1,0 +1,123 @@
+#!/usr/bin/env node
+
+const fs = require("fs");
+const path = require("path");
+const { readdir, rename } = require("fs/promises");
+const { exec } = require("child_process");
+const https = require("https");
+
+const HOME_FOLDER = `/home/${process.env.USER}`;
+const WALLPAPERS_PATH = HOME_FOLDER + "/Pictures/daily_paper";
+
+fs.mkdirSync(WALLPAPERS_PATH, { recursive: true });
+
+function fetchWallpaperPosts() {
+  return new Promise((res, rej) => {
+    https
+      .request("https://www.reddit.com/r/wallpaper/.json?", (response) => {
+        if (response.statusCode !== 200)
+          return rej(
+            new Error(
+              `Could not fetch posts: call failed with code "${response.statusCode}"`
+            )
+          );
+
+        let body = "";
+        response.on("data", (d) => {
+          body += d;
+        });
+
+        response.on("error", rej);
+
+        response.on("end", () => {
+          res(JSON.parse(body));
+        });
+      })
+      .on("error", rej)
+      .end();
+  });
+}
+
+function fetchImage(url, path) {
+  return new Promise((res, rej) => {
+    https
+      .request(url, (response) => {
+        if (response.statusCode !== 200)
+          return rej(
+            new Error(
+              `Could not fetch posts: call failed with code "${response.statusCode}"`
+            )
+          );
+
+        response.pipe(fs.createWriteStream(path)).on("close", res);
+      })
+      .on("error", rej)
+      .end();
+  });
+}
+
+async function execWallpaper(path) {
+  return new Promise((resolve, reject) => {
+    // Safe wallpaper as ~/.wallpaper
+    fs.rmSync(`${HOME_FOLDER}/.wallpaper`);
+    fs.symlinkSync(path, `${HOME_FOLDER}/.wallpaper`);
+
+    exec(
+      `gsettings set org.gnome.desktop.background picture-uri file://${path}`,
+      (e, stdout, stderr) => {
+        if (e) reject(e);
+        if (stdout) console.log(stdout);
+        if (stderr) console.error(stderr);
+
+        resolve();
+      }
+    );
+  });
+}
+
+async function setWallpaper() {
+  const posts = await fetchWallpaperPosts();
+
+  const files = await readdir(WALLPAPERS_PATH);
+
+  const validPosts = posts?.data?.children
+    .map((p) => p.data)
+    .filter((p) => /^https.*(jpeg)|(png)|(jpg)$/g.test(p.url));
+
+  const fetchMostRecent = async () => {
+    postLoop: for (const post of validPosts) {
+      for (const f of files) {
+        const exists = f.startsWith(post.id);
+        const is_used = f.includes("used");
+
+        // If exists and is not used don't fetch
+        if (exists && is_used == false) {
+          return path.join(WALLPAPERS_PATH, f);
+        }
+        // If exists and is used fetch next post
+        if (exists && is_used) {
+          continue postLoop;
+        }
+      }
+
+      const extension = path.parse(post.url).ext;
+      const latestPath = path.join(WALLPAPERS_PATH, `${post.id}${extension}`);
+      await fetchImage(post.url, latestPath);
+      return latestPath;
+    }
+  };
+
+  const latestPath = await fetchMostRecent();
+
+  const filename = path.parse(latestPath).name;
+  const extension = path.parse(latestPath).ext;
+  await rename(
+    latestPath,
+    path.join(WALLPAPERS_PATH, `${filename}_used${extension}`)
+  );
+  await execWallpaper(
+    path.join(WALLPAPERS_PATH, `${filename}_used${extension}`)
+  );
+}
+
+setWallpaper();

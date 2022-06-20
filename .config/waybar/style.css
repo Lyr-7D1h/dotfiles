@@ -1,0 +1,98 @@
+* {
+  border: none;
+  border-radius: 0;
+  font-family: UbuntoMono;
+  font-size: 14px;
+  box-shadow: none;
+  text-shadow: none;
+  transition-duration: 0s;
+}
+
+window {
+  color: rgba(217, 216, 216, 1);
+  background: rgba(35, 39, 42, 0.95);
+}
+
+window#waybar.top {
+  color: rgba(217, 216, 216, 1);
+  border-bottom: 1px solid rgba(56, 56, 56, 0.7);
+}
+
+window#waybar.bottom {
+  border-top: 1px solid rgba(56, 56, 56, 0.7);
+}
+
+#workspaces {
+  margin: 0 5px;
+}
+
+#workspaces button {
+  padding: 0 5px;
+  color: rgba(217, 216, 216, 0.4);
+}
+
+#workspaces button.visible {
+  border-top: 3px solid rgba(217, 216, 216, 0);
+  color: rgba(217, 216, 216, 1);
+}
+
+#workspaces button.focused {
+  border-top: 3px solid rgba(144,167,248,1);
+  background-color: rgba(144,167,248,0.7); 
+  /* rgb(153, 170, 181); */
+  color: black;
+}
+
+#workspaces button.urgent {
+  color: rgba(238, 46, 36, 1);
+}
+
+#network {
+	min-width: 50px;
+	margin: 0px 10px 0px 10px;
+	/* word-spacing: 30px; */
+}
+
+#mode,
+#battery,
+#disk,
+#temperature,
+#cpu,
+#memory,
+#pulseaudio,
+#idle_inhibitor,
+#backlight,
+#custom-storage,
+#custom-spotify,
+#custom-weather,
+#custom-mail {
+  margin: 0px 10px 0px 10px;
+  min-width: 25px;
+}
+
+#tray {
+  margin-right: 10px;
+}
+
+#clock {
+  margin: 0px 16px 0px 10px;
+  min-width: 140px;
+}
+
+#battery.warning {
+  color: rgba(255, 210, 4, 1);
+}
+#temperature.critical,
+#battery.critical {
+  color: rgba(238, 46, 36, 1);
+}
+#battery.charging {
+  color: rgba(217, 216, 216, 1);
+}
+
+#disk.warning {
+  color: rgba(255, 210, 4, 1);
+}
+#disk.critical {
+  color: rgba(238, 46, 36, 1);
+}

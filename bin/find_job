@@ -1,0 +1,45 @@
+#!/usr/bin/env python3
+
+import string
+import random
+import os
+import subprocess
+import argparse
+
+parser = argparse.ArgumentParser(
+    description='Find a job by using opensource repositories')
+
+parser.add_argument('repository')
+
+args = vars(parser.parse_args())
+
+repo = args['repository']
+
+blacklist = ["gmail.com", "users.noreply.github.com",
+             "protonmail.com", "localhost.localdomain", "outlook.com", "pm.me", "hotmail.com", "protonmail.ch"]
+
+path = "/tmp/" + "".join(random.choices(string.ascii_lowercase, k=10))
+os.mkdir(path)
+os.chdir(path)
+
+
+os.system(f"git clone {repo} {path}")
+output = subprocess.check_output(f"git --no-pager shortlog -sne", shell=True)
+
+users = output.decode("utf-8")
+
+ranking = {}
+for user in users.splitlines():
+    domain = user.split("@")[1].replace(">", "")
+
+    user = "".join(user.split("\t")[1].split("<")[0])
+    if domain not in blacklist:
+        if domain in ranking:
+            ranking[domain].append(user)
+        else:
+            ranking[domain] = [user]
+
+for company in ranking:
+    print(company)
+    for user in ranking[company]:
+        print("\t", user)

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+now=`date '+%s'`
+
+vim ~/notes/${now}_$@.md

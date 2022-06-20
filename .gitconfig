@@ -1,0 +1,13 @@
+[user]
+	email = lyr-7d1h@pm.me
+	name = Lyr-7D1h 
+	signingkey = F0E576DC4C752710F168C87C650AC1B95E7FEE6E
+[init]
+	defaultBranch = master
+[pull]
+	rebase = false
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

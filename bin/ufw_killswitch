@@ -1,0 +1,74 @@
+#!/bin/bash
+
+BLUE='\033[0;34m'
+NC='\033[0m' 
+
+VPN_IP=$(curl -s ifconfig.me)
+
+OPTIONS=$1
+
+set -e
+
+manual() {
+	echo "ufw_killswitch [enable|disable] {IP_RANGE}"
+	echo ""
+	echo "	IP_RANGE"
+	echo "		Your local ip range eg 192.168.2.0/24"
+	exit 1
+}
+
+print() {
+	echo -e "${BLUE}${1}${NC}"
+}
+
+enable() {
+	IP_RANGE=$2
+
+	if [[ -z $IP_RANGE ]]; then
+		manual
+	fi
+
+	print "Allowing local network"
+	ufw allow in to $IP_RANGE 
+	ufw allow out to $IP_RANGE
+
+	
+	print "Block all traffic"
+	ufw default deny outgoing
+	ufw default deny incoming
+	
+	print "Allowing outgoing traffic if going to $VPN_IP"
+	ufw allow out on tun0 
+	ufw allow out to $VPN_IP port 1194 proto udp
+	
+	print "Allow in only for ssh"
+	ufw allow in on tun0 from any port 22
+}
+
+disable() {
+	IP_RANGE=$2
+
+	if [[ -z $IP_RANGE ]]; then
+		manual
+	fi
+	
+	print "Removing ufw rules"
+	ufw delete allow in to $IP_RANGE 
+	ufw delete allow out to $IP_RANGE
+
+	
+	ufw default allow outgoing
+	ufw default allow incoming
+	
+	ufw delete allow out on tun0 
+	ufw delete allow out to $VPN_IP port 1194 proto udp
+	
+	ufw delete allow in on tun0 from any port 22
+}
+
+if [[ $OPTIONS != "enable" && $OPTIONS != "disable" ]]; then
+	manual
+fi
+
+$OPTIONS $@
+
