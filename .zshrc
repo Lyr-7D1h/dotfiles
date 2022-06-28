@@ -60,7 +60,7 @@ fi
 
 # Autocompletions
 autoload -U compinit && compinit
-complete -o nospace -C /usr/bin/terraform terraform
+# complete -o nospace -C /usr/bin/terraform terraform
 
 ### Keybindings
 # set emacs keybinds (ctrl+a, ctrl+e)
@@ -97,7 +97,7 @@ bindkey  "^[[3~"  delete-char
 
 ### Autocompletions
 # Kubectl autocompletion
-source <(kubectl completion zsh)
+# source <(kubectl completion zsh)
 
 # dotnet autocompletion
 _dotnet_zsh_complete()
