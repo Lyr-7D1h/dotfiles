@@ -40,7 +40,7 @@ window#waybar.bottom {
   border-top: 3px solid rgba(144,167,248,1);
   background-color: rgba(144,167,248,0.7); 
   /* rgb(153, 170, 181); */
-  color: black;
+  color: white;
 }
 
 #workspaces button.urgent {

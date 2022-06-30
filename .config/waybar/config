@@ -70,7 +70,7 @@
 	"layer": "bottom",
 	"position": "bottom",
 	"height": 25,
-	"modules-center": ["cpu", "memory", "temperature", "disk#root", "disk#home", "disk#back"],
+	"modules-center": ["cpu", "memory", "temperature", "disk#root"],
 
 	"cpu": {
 		"interval": 1,
