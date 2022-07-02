@@ -22,10 +22,6 @@ window#waybar.bottom {
   border-top: 1px solid rgba(56, 56, 56, 0.7);
 }
 
-#workspaces {
-  margin: 0 5px;
-}
-
 #workspaces button {
   padding: 0 5px;
   color: rgba(217, 216, 216, 0.4);
@@ -37,9 +33,8 @@ window#waybar.bottom {
 }
 
 #workspaces button.focused {
-  border-top: 3px solid rgba(144,167,248,1);
-  background-color: rgba(144,167,248,0.7); 
-  /* rgb(153, 170, 181); */
+  border-top: 3px solid #7289da;
+  background-color: #7289da; 
   color: white;
 }
 

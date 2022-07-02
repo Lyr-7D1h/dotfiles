@@ -67,7 +67,7 @@ autoload -U compinit && compinit
 bindkey -e
 
 # ctrl + space to accept suggestions
-bindkey '^ ' autosuggest-accept
+bindkey '^n' autosuggest-accept
 
 autoload -Uz select-word-style
 select-word-style bash
@@ -139,7 +139,8 @@ alias sudo='sudo -v; sudo '
 # added by latest_cd
 alias cd="FROM_CD_ALIAS=true . latest_cd"
 alias lcd="cd $(latest_cd)"
-
+alias csway="vim ~/.config/sway/config"
+alias cvim="vim ~/.config/nvim/init.vim"
 
 ### Functions
 kaws() {

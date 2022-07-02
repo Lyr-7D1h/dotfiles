@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+set -e
+
+cl_high=#7289da
+cl_indi=#99aab5
+cl_back=#23272a
+cl_fore=#ffffff
+cl_urge=#ee2e24
+
+
+options="Lock\nSuspend\nPower Off\nReboot"
+
+action=`echo -en $options | bemenu \
+    -H 27 \
+    --tb "$cl_back" \
+    --tf "$cl_fore" \
+    --fb "$cl_back" \
+    --nb "$cl_back" \
+    --hb "$cl_high" \
+    --hf "$cl_fore"`
+
+case $action in
+    "Lock")
+        if [[ "$XDG_CURRENT_DESKTOP" == "sway" ]]; then
+            swaylock
+        fi
+        ;;
+    "Suspend")
+        systemctl suspend
+        ;;
+    "Power Off")
+        systemctl poweroff
+        ;;
+    "Reboot")
+        systemctl reboot
+        ;;
+    *)
+        echo "Could not read $action" 1>&2
+        exit 1
+        ;;
+esac
