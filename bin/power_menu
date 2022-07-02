@@ -11,7 +11,7 @@ cl_urge=#ee2e24
 
 options="Lock\nSuspend\nPower Off\nReboot"
 
-action=`echo -en $options | bemenu \
+action=`echo -en $options | bemenu -i \
     -H 27 \
     --tb "$cl_back" \
     --tf "$cl_fore" \
