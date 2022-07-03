@@ -87,7 +87,11 @@ exec sworkstyle --log-level debug &> /tmp/sworkstyle.log
 exec nm-applet --indicator
 # exec blueman-applet
 exec daily_paper
-exec swayidle -w before-sleep 'swaysuspend -c 000000'
+exec swayidle -w \
+    timeout 300 'swaylock -f' \
+    timeout 600 'swaymsg "output * dpms off"' \
+    resume 'swaymsg "output * dpms on"' \
+    before-sleep 'swaylock -f'
 exec bitwarden-desktop &
 
 ### Output configuration (swaymsg -t get_outputs)
@@ -118,9 +122,9 @@ output HDMI-A-1 resolution 1920x1080 position 1920,0
     bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
 
     # Media keys
-    bindsym $mod+XF86AudioRaiseVolume exec $soundraise
-    bindsym $mod+XF86AudioLowerVolume exec $soundlower
-    bindsym $mod+XF86AudioMute exec $soundmute
+    bindsym XF86AudioRaiseVolume exec $soundraise
+    bindsym XF86AudioLowerVolume exec $soundlower
+    bindsym XF86AudioMute exec $soundmute
 
     bindsym $mod+Shift+minus exec $suspend
 
