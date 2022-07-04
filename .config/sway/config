@@ -68,8 +68,11 @@ for_window [app_id="seahorse"] floating enable
 for_window [class="Steam"] floating enable
 for_window [class="Steam" title="^Steam$"] floating disable
 for_window [app_id="nm-connection-editor"] floating enable
-for_window [class="Bitwarden"] floating enable
+for_window [class="Bitwarden" title="Bitwarden"] floating enable
 for_window [app_id="pulseUI"] floating enable
+# prevent idleness for fullscreen
+for_window [class=.*] inhibit_idle fullscreen
+for_window [title="Meet - .* -.*"] inhibit_idle fullscreen
 
 # gaps inner 5
 
@@ -88,10 +91,10 @@ exec nm-applet --indicator
 # exec blueman-applet
 exec daily_paper
 exec swayidle -w \
-    timeout 300 'swaylock -f' \
-    timeout 600 'swaymsg "output * dpms off"' \
-    resume 'swaymsg "output * dpms on"' \
     before-sleep 'swaylock -f'
+    # timeout 300 'swaylock -f' \
+    # timeout 600 'swaymsg "output * dpms off"' \
+    # resume 'swaymsg "output * dpms on"' \
 exec bitwarden-desktop &
 
 ### Output configuration (swaymsg -t get_outputs)

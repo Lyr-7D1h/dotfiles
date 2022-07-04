@@ -34,21 +34,19 @@ export PATH="$HOME/.serverless/bin:$PATH"
 export PATH="$PATH:$HOME/.rvm/bin"
 
 
-if systemctl -q is-active graphical.target && [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; then
-	if [[ $HOST == "home" ]]; then
-		# Startup X
-		#  exec ssh-agent startx
+if [[ $HOST == "home" ]]; then
+	# Wayland specific env variable
+	export MOZ_ENABLE_WAYLAND=1
+	export MOZ_DBUS_REMOTE=1 # Testing out
+	export XDG_CURRENT_DESKTOP=sway
+	export XDG_SESSION_TYPE=wayland
+	export _JAVA_AWT_WM_NONREPARENTING=1
+	export QT_QPA_PLATFORM=wayland
 
-		# Startup Sway
-		eval $(ssh-agent)
-
-		export MOZ_ENABLE_WAYLAND=1
-		export MOZ_DBUS_REMOTE=1 # Testing out
-		export XDG_CURRENT_DESKTOP=sway
-		export XDG_SESSION_TYPE=wayland
-		export _JAVA_AWT_WM_NONREPARENTING=1
-		export QT_QPA_PLATFORM=wayland
-
-		exec sway &> /tmp/sway.log
-	fi
+	# Launching through gdm
+	# Startup Sway
+	# if [ -z $DISPLAY ] && [ "$(tty)" = "/dev/tty1" ]; then
+	#	eval $(ssh-agent)
+	#   exec sway &> /tmp/sway.log
+	# fi
 fi

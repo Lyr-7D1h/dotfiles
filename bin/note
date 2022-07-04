@@ -1,5 +1,25 @@
 #!/usr/bin/env bash
 
-now=`date '+%s'`
+if [[ ! -d ~/notes  ]]; then
+	echo "Making notes directory..."
+	mkdir ~/notes
+	chmod -R 644 ~/notes/*
+fi
 
-vim ~/notes/${now}_$@.md
+if [[ -z $@ ]]; then
+	echo "No name given"
+	exit 1
+fi
+
+# now=`date '+%a_%d-%m-%Y_%T_%Z'`
+# now=`date '+%s'`
+# Latest id + 1
+# id=`ls ~/notes | grep -e '[0-9]_' | sed 's/_.*//' | tail -n 1`
+# ((id++))
+id=`date '+%y%m%d'`
+
+file="${id}_${@}.md"
+path=$(printf ~/notes/%q "$file")
+
+echo "Note written to $path"
+vim "$path"
