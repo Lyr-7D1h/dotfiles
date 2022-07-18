@@ -62,16 +62,24 @@ async function execWallpaper(path) {
     fs.rmSync(`${HOME_FOLDER}/.wallpaper`);
     fs.symlinkSync(path, `${HOME_FOLDER}/.wallpaper`);
 
-    exec(
-      `gsettings set org.gnome.desktop.background picture-uri file://${path}`,
-      (e, stdout, stderr) => {
-        if (e) reject(e);
-        if (stdout) console.log(stdout);
-        if (stderr) console.error(stderr);
+    const execOutput = (e, stdout, stderr) => {
+      if (e) reject(e);
+      if (stdout) console.log(stdout);
+      if (stderr) console.error(stderr);
 
-        resolve();
-      }
-    );
+      resolve();
+    }
+
+    if (process.env.XDG_CURRENT_DESKTOP === "sway") {
+      console.log("Setting wallpaper for sway")
+      exec(`swaymsg output "*" background ${path} fill`, execOutput)
+    } else {
+      console.log("Setting wallpaper for gnome")
+      exec(
+        `gsettings set org.gnome.desktop.background picture-uri file://${path}`,
+        execOutput
+      );
+    }
   });
 }
 

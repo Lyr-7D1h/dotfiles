@@ -7,6 +7,7 @@ set shiftwidth=4
 set clipboard+=unnamedplus
 set encoding=utf-8
 set scrolloff=8
+set mouse=a
 
 " Always show the signcolumn, otherwise it would shift the text each time
 " diagnostics appear/become resolved.

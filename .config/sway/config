@@ -69,8 +69,9 @@ for_window [app_id="seahorse"] floating enable
 for_window [class="Steam"] floating enable
 for_window [class="Steam" title="^Steam$"] floating disable
 for_window [app_id="nm-connection-editor"] floating enable
-for_window [class="Bitwarden" title="Bitwarden"] floating enable
+for_window [class="Bitwarden"] floating enable
 for_window [app_id="pulseUI"] floating enable
+for_window [app_id="org.gnome.Calculator"] floating enable
 # prevent idleness for fullscreen
 for_window [class=.*] inhibit_idle fullscreen
 for_window [title="Meet - .* -.*"] inhibit_idle fullscreen
