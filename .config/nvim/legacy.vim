@@ -1,0 +1,28 @@
+"
+" OPTIONS
+"
+set number
+set tabstop=4
+set shiftwidth=4
+set clipboard+=unnamedplus
+set encoding=utf-8
+set scrolloff=8
+
+" Always show the signcolumn, otherwise it would shift the text each time
+" diagnostics appear/become resolved.
+if has("nvim-0.5.0") || has("patch-8.1.1564")
+  " Recently vim can merge signcolumn and number column into one
+  set signcolumn=number
+else
+  set signcolumn=yes
+endif
+
+
+"
+" MAPS
+"
+
+" FZF Find files
+nnoremap <silent> <C-p> :Files<CR>
+" C-g: FZF ('g'rep)/find in files
+nnoremap <silent> <C-g> :Rg<CR>
