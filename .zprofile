@@ -1,6 +1,8 @@
 # Fix for monitor sizes using DisplayPort
 export WINIT_HIDPI_FACTOR=1.0
 
+export LANG=en_US.UTF-8
+
 #
 # Custom Executables
 #
@@ -43,10 +45,9 @@ if [[ $HOST == "home" ]]; then
 	export _JAVA_AWT_WM_NONREPARENTING=1
 	export QT_QPA_PLATFORM=wayland
 
-	# Launching through gdm
 	# Startup Sway
-	# if [ -z $DISPLAY ] && [ "$(tty)" = "/dev/tty1" ]; then
-	#	eval $(ssh-agent)
-	#   exec sway &> /tmp/sway.log
-	# fi
+	if [ -z $DISPLAY ] && [ "$(tty)" = "/dev/tty1" ]; then
+		eval $(ssh-agent)
+		exec sway &> /tmp/sway.log
+	fi
 fi

@@ -156,8 +156,6 @@ ktx() {
 }
 
 ### Autoloads
-# Nix
-if [ -e /home/lyr/.nix-profile/etc/profile.d/nix.sh ]; then . /home/lyr/.nix-profile/etc/profile.d/nix.sh; fi
 # Asdf
 if [[ -f /opt/asdf-vm/asdf.sh ]]; then
   . /opt/asdf-vm/asdf.sh

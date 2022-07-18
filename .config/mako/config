@@ -4,3 +4,4 @@ text-color=#ffffff
 border-color=#23272a
 border-size=1
 margin=10
+on-notify=exec play /usr/share/sounds/freedesktop/stereo/message.oga
