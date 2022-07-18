@@ -1,20 +1,16 @@
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
-fi
-#
+# Performance testing using 'zprof'
+# zmodload zsh/zprof
+
 # Powerlevel10k config
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
+# typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
 ### Plugins
 source ~/.zplug/init.zsh
 export ZPLUG_HOME=/home/lyr/.zplug
-zplug "plugins/kubectl", from:oh-my-zsh
+# zplug "plugins/kubectl", from:oh-my-zsh
 zplug "plugins/git", from:oh-my-zsh
-zplug "plugins/aws", from:oh-my-zsh
+# zplug "plugins/aws", from:oh-my-zsh
 zplug "plugins/terraform", from:oh-my-zsh
 zplug "plugins/npm", from:oh-my-zsh
 zplug "plugins/poetry", from:oh-my-zsh
@@ -23,12 +19,12 @@ zplug "plugins/docker-compose", from:oh-my-zsh
 zplug "plugins/tmux", from:oh-my-zsh
 zplug "zsh-users/zsh-autosuggestions"
 zplug "romkatv/powerlevel10k", as:theme, depth:1
+zplug "zplug/zplug", hook-build: 'zplug --self-manage'
+
 if ! zplug check ; then
-    printf "Install? [y/N]: "
-    if read -q; then
-        echo; zplug install
-    fi
+      zplug install
 fi
+
 zplug load 
 
 
@@ -58,9 +54,32 @@ else
   export EDITOR='nvim'
 fi
 
-# Autocompletions
+### Autocompletions
+autoload bashcompinit && bashcompinit
 autoload -U compinit && compinit
-# complete -o nospace -C /usr/bin/terraform terraform
+
+if command -v aws_compiler &> /dev/null; then
+  complete -C `which aws_completer` aws
+fi
+
+# Kubectl autocompletion
+if command -v kubectl &> /dev/null; then
+  # source <(kubectl completion zsh)
+fi
+
+# dotnet autocompletion
+_dotnet_zsh_complete()
+{
+	local completions=("$(dotnet complete "$words")")
+
+	reply=( "${(ps:\n:)completions}" )
+}
+compctl -K _dotnet_zsh_complete dotnet
+
+# Helm autocompletaion
+if command -v helm &> /dev/null; then
+  source <(helm completion zsh)
+fi
 
 ### Keybindings
 # set emacs keybinds (ctrl+a, ctrl+e)
@@ -95,23 +114,6 @@ bindkey  "^[[F"   end-of-line
 bindkey  "^[[3~"  delete-char
 
 
-### Autocompletions
-# Kubectl autocompletion
-# source <(kubectl completion zsh)
-
-# dotnet autocompletion
-_dotnet_zsh_complete()
-{
-	local completions=("$(dotnet complete "$words")")
-
-	reply=( "${(ps:\n:)completions}" )
-}
-compctl -K _dotnet_zsh_complete dotnet
-
-# Helm autocompletaion
-if command -v helm &> /dev/null; then
-  source <(helm completion zsh)
-fi
 
 
 ### Exports
@@ -140,7 +142,6 @@ alias sudo='sudo -v; sudo '
 alias cd="FROM_CD_ALIAS=true . latest_cd"
 alias lcd="cd $(latest_cd)"
 alias csway="vim ~/.config/sway/config"
-alias cvim="vim ~/.config/nvim/init.vim"
 
 ### Functions
 kaws() {
@@ -171,3 +172,8 @@ fi
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# Pyenv
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
