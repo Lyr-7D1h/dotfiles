@@ -1,4 +1,3 @@
-#
 # Requirements:
 #   libalsa
 #   slurp
@@ -8,6 +7,8 @@
 #   daily_paper (custom script)
 #   power_menu (custom script using bemenu)
 #   wl-copy
+#   brightnessctl (if on laptop)
+#   playerctl
 #
 
 ### Variables
@@ -79,6 +80,12 @@ for_window [title="Meet - .* -.*"] inhibit_idle fullscreen
 font UbuntuMono:Sans 10 
 
 ### Autostart apps
+
+# Set environment variables
+exec dbus-update-activation-environment --systemd XDG_CURRENT_DESKTOP=sway
+exec eval $(gnome-keyring-daemon --start)
+exec export SSH_AUTH_SOCK
+
 # exec wl-paste -t text --watch clipman store 1>> /tmp/clipman.log 2>&1 &
 # exec lxsession
 exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
@@ -91,6 +98,7 @@ exec nm-applet --indicator
 # exec blueman-applet
 exec daily_paper
 exec swayidle -w \
+    before-sleep 'playerctl pause' \
     before-sleep 'swaylock -f'
     # timeout 300 'swaylock -f' \
     # timeout 600 'swaymsg "output * dpms off"' \
@@ -128,6 +136,12 @@ output HDMI-A-1 resolution 1920x1080 position 1920,0
     bindsym XF86AudioRaiseVolume exec $soundraise
     bindsym XF86AudioLowerVolume exec $soundlower
     bindsym XF86AudioMute exec $soundmute
+    bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
+    bindsym XF86MonBrightnessUp exec brightnessctl set 5%+
+    bindsym XF86AudioPlay exec playerctl play-pause
+    bindsym XF86AudioNext exec playerctl next
+    bindsym XF86AudioPrev exec playerctl previous
+    bindsym XF86Search exec $menu
 
     bindsym $mod+Shift+minus exec $suspend
 

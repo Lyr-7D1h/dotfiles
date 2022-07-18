@@ -10,7 +10,7 @@
 
 window {
   color: rgba(217, 216, 216, 1);
-  background: rgba(35, 39, 42, 0.95);
+  background: rgba(35, 39, 42, 1);
 }
 
 window#waybar.top {
@@ -28,12 +28,10 @@ window#waybar.bottom {
 }
 
 #workspaces button.visible {
-  border-top: 3px solid rgba(217, 216, 216, 0);
   color: rgba(217, 216, 216, 1);
 }
 
 #workspaces button.focused {
-  border-top: 3px solid #7289da;
   background-color: #7289da; 
   color: white;
 }
