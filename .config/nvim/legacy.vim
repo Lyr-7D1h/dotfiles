@@ -8,6 +8,7 @@ set clipboard+=unnamedplus
 set encoding=utf-8
 set scrolloff=8
 set mouse=a
+set completeopt=menu,menuone,noselect
 
 " Always show the signcolumn, otherwise it would shift the text each time
 " diagnostics appear/become resolved.
@@ -24,6 +25,6 @@ endif
 "
 
 " FZF Find files
-nnoremap <silent> <C-p> :Files<CR>
+" nnoremap <silent> <C-p> :Files<CR>
 " C-g: FZF ('g'rep)/find in files
-nnoremap <silent> <C-g> :Rg<CR>
+" nnoremap <silent> <C-g> :Rg<CR>

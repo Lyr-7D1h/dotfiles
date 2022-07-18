@@ -142,6 +142,9 @@ alias sudo='sudo -v; sudo '
 alias cd="FROM_CD_ALIAS=true . latest_cd"
 alias lcd="cd $(latest_cd)"
 alias csway="vim ~/.config/sway/config"
+alias clsp="vim ~/.config/nvim/lua/lsp.lua"
+alias cplugin="vim ~/.config/nvim/lua/plugins.lua"
+alias cvim="vim ~/.config/nvim/init.lua"
 
 ### Functions
 kaws() {

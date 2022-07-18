@@ -2,11 +2,14 @@ require("nvim-lsp-installer").setup {
   automatic_installation = true
 }
 
+-- Auto format before write
+vim.cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_sync()]]
+
 local lspconfig = require("lspconfig")
 
 -- Mappings.
 -- See `:help vim.diagnostic.*` for documentation on any of the below functions
-local opts = { noremap=true, silent=true }
+local opts = { noremap = true, silent = true }
 vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
@@ -20,7 +23,7 @@ local on_attach = function(client, bufnr)
 
   -- Mappings.
   -- See `:help vim.lsp.*` for documentation on any of the below functions
-  local bufopts = { noremap=true, silent=true, buffer=bufnr }
+  local bufopts = { noremap = true, silent = true, buffer = bufnr }
   vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
   vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
   vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
@@ -44,25 +47,25 @@ local lsp_flags = {
 }
 
 -- Python
-lspconfig.pyright.setup{
-    on_attach = on_attach,
-    flags = lsp_flags,
+lspconfig.pyright.setup {
+  on_attach = on_attach,
+  flags = lsp_flags,
 }
 
 -- Typescript
-lspconfig.tsserver.setup{
-    on_attach = on_attach,
-    flags = lsp_flags,
+lspconfig.tsserver.setup {
+  on_attach = on_attach,
+  flags = lsp_flags,
 }
 
 -- Rust
-lspconfig.rust_analyzer.setup{
-    on_attach = on_attach,
-    flags = lsp_flags,
-    -- Server-specific settings...
-    settings = {
-      ["rust-analyzer"] = {}
-    }
+lspconfig.rust_analyzer.setup {
+  on_attach = on_attach,
+  flags = lsp_flags,
+  -- Server-specific settings...
+  settings = {
+    ["rust-analyzer"] = {}
+  }
 }
 
 -- Lua

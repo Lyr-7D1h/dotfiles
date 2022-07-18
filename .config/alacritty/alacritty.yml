@@ -24,7 +24,7 @@
   #TERM: alacritty
 
 window:
-  opacity: 0.95
+  opacity: 1.00
 
   # Window dimensions (changes require restart)
   #
