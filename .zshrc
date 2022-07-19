@@ -9,7 +9,7 @@
 source ~/.zplug/init.zsh
 export ZPLUG_HOME=/home/lyr/.zplug
 # zplug "plugins/kubectl", from:oh-my-zsh
-zplug "plugins/git", from:oh-my-zsh
+# zplug "plugins/git", from:oh-my-zsh
 # zplug "plugins/aws", from:oh-my-zsh
 zplug "plugins/terraform", from:oh-my-zsh
 zplug "plugins/npm", from:oh-my-zsh
@@ -129,7 +129,13 @@ export QT_QPA_PLATFORM=wayland
 
 
 ### Aliases
-alias configure='vim ~/.config/nixpkgs/home.nix'
+alias g="git"
+alias gsw="git switch"
+alias gst="git status"
+alias gb="git branch"
+alias gc="git commit -v"
+alias gca="git commit -a"
+alias gcam="git commit -am"
 alias ls='ls --color=auto'
 # Fix screen coloring since most remote clients don't support alacritty
 alias ssh='TERM=xterm ssh'
