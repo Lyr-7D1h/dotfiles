@@ -86,24 +86,68 @@ fi
 bindkey -e
 
 # ctrl + space to accept suggestions
-bindkey '^n' autosuggest-accept
+bindkey '^N' autosuggest-accept
+
+# find_directory() {
+#   cd $(find ~/p ~/dpg -maxdepth 4 -type d -print | fzf)
+# }
+# ctrl + p - cd into the selected directory
+__fzfcmd() {
+  [ -n "$TMUX_PANE" ] && { [ "${FZF_TMUX:-0}" != 0 ] || [ -n "$FZF_TMUX_OPTS" ]; } &&
+    echo "fzf-tmux ${FZF_TMUX_OPTS:--d${FZF_TMUX_HEIGHT:-40%}} -- " || echo "fzf"
+}
+find_directory() {
+  local cmd="${FZF_ALT_C_COMMAND:-"command find -L . -mindepth 1 -maxdepth 4 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune \
+    -o -type d -print 2> /dev/null | cut -b3-"}"
+  setopt localoptions pipefail no_aliases 2> /dev/null
+  local dir="$(eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --bind=ctrl-z:ignore $FZF_DEFAULT_OPTS $FZF_ALT_C_OPTS" $(__fzfcmd) +m)"
+  if [[ -z "$dir" ]]; then
+    zle redisplay
+    return 0
+  fi
+  zle push-line # Clear buffer. Auto-restored on next prompt.
+  BUFFER="builtin cd -- ${(q)dir}"
+  zle accept-line
+  local ret=$?
+  unset dir # ensure this doesn't end up appearing in prompt expansion
+  zle reset-prompt
+  return $ret
+}
+zle -N find_directory
+bindkey '^P' find_directory
+
+# CTRL-R - Paste the selected command from history into the command line
+fzf_history() {
+  local selected num
+  setopt localoptions noglobsubst noposixbuiltins pipefail no_aliases 2> /dev/null
+  selected=( $(fc -rl 1 | perl -ne 'print if !$seen{(/^\s*[0-9]+\**\s+(.*)/, $1)}++' |
+    FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} $FZF_DEFAULT_OPTS -n2..,.. --tiebreak=index --bind=ctrl-r:toggle-sort,ctrl-z:ignore $FZF_CTRL_R_OPTS --query=${(qqq)LBUFFER} +m" $(__fzfcmd)) )
+  local ret=$?
+  if [ -n "$selected" ]; then
+    num=$selected[1]
+    if [ -n "$num" ]; then
+      zle vi-fetch-history -n $num
+    fi
+  fi
+  zle reset-prompt
+  return $ret
+}
+zle -N fzf_history
+bindkey '^R' fzf_history 
+# bindkey '^R' history-incremental-search-backward
 
 autoload -Uz select-word-style
 select-word-style bash
 
-x-backward-kill-word(){
+x_backward_kill_word(){
   WORDCHARS='*?_-[]~\!#$%^(){}<>|`@#$%^*()+:?' zle backward-kill-word
 }
-zle -N x-backward-kill-word
-
+zle -N x_backward_kill_word
 # alt + backspace 
-bindkey '^[^?' x-backward-kill-word
+bindkey '^[^?' x_backward_kill_word
 
 # alt + delete remove word
 bindkey '^[[3;5~' kill-word
-
-# Enable reverse search
-bindkey '^R' history-incremental-search-backward
 
 # alt + <- and alt + -> move a word
 bindkey "^[[1;3C" forward-word
@@ -145,12 +189,11 @@ alias vim='nvim'
 # Refresh sudo session
 alias sudo='sudo -v; sudo '
 # added by latest_cd
-alias cd="FROM_CD_ALIAS=true . latest_cd"
-alias lcd="cd $(latest_cd)"
 alias csway="vim ~/.config/sway/config"
 alias clsp="vim ~/.config/nvim/lua/lsp.lua"
 alias cplugin="vim ~/.config/nvim/lua/plugins.lua"
 alias cvim="vim ~/.config/nvim/init.lua"
+
 
 ### Functions
 kaws() {
@@ -186,3 +229,4 @@ if command -v pyenv &> /dev/null; then
 	export PATH="$PYENV_ROOT/bin:$PATH"
 	eval "$(pyenv init -)"
 fi
+
