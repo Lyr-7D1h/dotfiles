@@ -2,7 +2,7 @@
 vim.cmd([[
   augroup packer_user_config
     autocmd!
-    autocmd BufWritePost plugins.lua source ~/.config/nvim/lua/plugins.lua | PackerCompile
+    autocmd BufWritePost plugins.lua source ~/.config/nvim/lua/plugins.lua | PackerSync
   augroup end
 ]])
 
@@ -18,8 +18,9 @@ return require('packer').startup(function()
   use 'hrsh7th/cmp-cmdline'
   use 'hrsh7th/nvim-cmp'
 
-  use 'dcampos/nvim-snippy'
-  use 'dcampos/cmp-snippy'
+  use 'hrsh7th/cmp-vsnip'
+  use 'hrsh7th/vim-vsnip'
+  use 'hrsh7th/vim-vsnip-integ'
 
   -- Theme
   use 'jacoborus/tender.vim'
@@ -36,6 +37,8 @@ return require('packer').startup(function()
 
   -- Show function signatures when typing
   use 'ray-x/lsp_signature.nvim'
+  -- Show lsp progress
+  use 'j-hui/fidget.nvim'
 
   use 'tpope/vim-commentary'
   use 'junegunn/fzf'
@@ -47,7 +50,7 @@ return require('packer').startup(function()
   -- Toml
   use 'cespare/vim-toml'
 
-  -- use 'rust-lang/rust.vim'
+  -- Rust
   -- https://github.com/neovim/nvim-lspconfig/wiki/Language-specific-plugins
   use 'simrat39/rust-tools.nvim'
   -- Debugging
@@ -56,7 +59,7 @@ return require('packer').startup(function()
   -- use 'roxma/nvim-cm-racer'
   -- use {
   --   'saecki/crates.nvim',
-  --   tag = 'v0.2.1',
+  --   tag = 'v0.2.0',
   --   requires = { 'nvim-lua/plenary.nvim' },
   --   config = function()
   --     require('crates').setup()

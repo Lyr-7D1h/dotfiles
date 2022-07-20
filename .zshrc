@@ -180,6 +180,8 @@ alias gb="git branch"
 alias gc="git commit -v"
 alias gca="git commit -a"
 alias gcam="git commit -am"
+alias gda="git diff -a"
+alias gp="git pull"
 alias ls='ls --color=auto'
 # Fix screen coloring since most remote clients don't support alacritty
 alias ssh='TERM=xterm ssh'
