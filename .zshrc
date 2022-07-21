@@ -88,15 +88,35 @@ bindkey -e
 # ctrl + space to accept suggestions
 bindkey '^N' autosuggest-accept
 
-# find_directory() {
-#   cd $(find ~/p ~/dpg -maxdepth 4 -type d -print | fzf)
-# }
+# https://github.com/junegunn/fzf/blob/master/shell/key-bindings.zsh
+# ctrl + o - fzf for file path
+__fzfsel() {
+  local cmd="${FZF_CTRL_T_COMMAND:-"command find -L . -mindepth 1 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune \
+    -o -type b,c,f,l,p,s -print 2> /dev/null | cut -b3-"}"
+  setopt localoptions pipefail no_aliases 2> /dev/null
+  local item
+  eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --bind=ctrl-z:ignore $FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" $(__fzfcmd) -m "$@" | while read item; do
+    echo -n "${(q)item} "
+  done
+  local ret=$?
+  echo
+  return $ret
+}
+fzf_get_file_path() {
+  LBUFFER="${LBUFFER}$(__fzfsel)"
+  local ret=$?
+  zle reset-prompt
+  return $ret
+}
+zle -N fzf_get_file_path
+bindkey '^O' fzf_get_file_path
+
 # ctrl + p - cd into the selected directory
 __fzfcmd() {
   [ -n "$TMUX_PANE" ] && { [ "${FZF_TMUX:-0}" != 0 ] || [ -n "$FZF_TMUX_OPTS" ]; } &&
     echo "fzf-tmux ${FZF_TMUX_OPTS:--d${FZF_TMUX_HEIGHT:-40%}} -- " || echo "fzf"
 }
-find_directory() {
+fzf_find_directory() {
   local cmd="${FZF_ALT_C_COMMAND:-"command find -L . -mindepth 1 -maxdepth 4 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune \
     -o -type d -print 2> /dev/null | cut -b3-"}"
   setopt localoptions pipefail no_aliases 2> /dev/null
@@ -113,8 +133,8 @@ find_directory() {
   zle reset-prompt
   return $ret
 }
-zle -N find_directory
-bindkey '^P' find_directory
+zle -N fzf_find_directory
+bindkey '^P' fzf_find_directory
 
 # CTRL-R - Paste the selected command from history into the command line
 fzf_history() {
@@ -181,7 +201,8 @@ alias gc="git commit -v"
 alias gca="git commit -a"
 alias gcam="git commit -am"
 alias gda="git diff -a"
-alias gp="git pull"
+alias gp="git push"
+alias gf="git fetch"
 alias ls='ls --color=auto'
 # Fix screen coloring since most remote clients don't support alacritty
 alias ssh='TERM=xterm ssh'

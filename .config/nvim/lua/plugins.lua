@@ -27,7 +27,7 @@ return require('packer').startup(function()
   use 'morhetz/gruvbox'
 
   -- Lsp based highlighting for any color theme
-  use 'folke/lsp-colors.nvim'
+  -- use 'folke/lsp-colors.nvim'
 
 
   use {

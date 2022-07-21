@@ -18,13 +18,3 @@ if has("nvim-0.5.0") || has("patch-8.1.1564")
 else
   set signcolumn=yes
 endif
-
-
-"
-" MAPS
-"
-
-" FZF Find files
-" nnoremap <silent> <C-p> :Files<CR>
-" C-g: FZF ('g'rep)/find in files
-" nnoremap <silent> <C-g> :Rg<CR>
