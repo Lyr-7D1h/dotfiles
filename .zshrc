@@ -182,6 +182,7 @@ bindkey  "^[[3~"  delete-char
 
 ### Aliases
 alias g="git"
+alias ga="git add"
 alias gsw="git switch"
 alias gst="git status"
 alias gb="git branch"
