@@ -55,7 +55,7 @@
 			"format-alt-click": "click-right",
 			"format-muted": "",
 			"format-icons": {
-				"phone": [" ", " ", " ", " "],
+				"phone": [" ", " ", " ", " "],
 				"default": ["", "", "", ""]
 			},
 			"scroll-step": 1,

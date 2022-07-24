@@ -11,12 +11,13 @@ return require('packer').startup(function()
   use "williamboman/nvim-lsp-installer"
   use 'neovim/nvim-lspconfig'
 
-  -- Autocompletions
+  -- Snipets
   use 'hrsh7th/cmp-nvim-lsp'
   use 'hrsh7th/cmp-buffer'
   use 'hrsh7th/cmp-path'
   use 'hrsh7th/cmp-cmdline'
   use 'hrsh7th/nvim-cmp'
+
 
   use 'hrsh7th/cmp-vsnip'
   use 'hrsh7th/vim-vsnip'
@@ -25,21 +26,39 @@ return require('packer').startup(function()
   -- Theme
   use 'jacoborus/tender.vim'
   use 'morhetz/gruvbox'
+  use 'tomasiser/vim-code-dark'
+  use 'Mofiqul/vscode.nvim'
 
-  -- Lsp based highlighting for any color theme
-  -- use 'folke/lsp-colors.nvim'
-
+  use 'kyazdani42/nvim-web-devicons'
+  use {
+    'kyazdani42/nvim-tree.lua',
+    requires = {
+      'kyazdani42/nvim-web-devicons', -- optional, for file icons
+    },
+    tag = 'nightly' -- optional, updated every week. (see issue #1193)
+  }
 
   use {
     'nvim-treesitter/nvim-treesitter',
     run = function() require('nvim-treesitter.install').update({ with_sync = true }) end,
   }
 
-  -- Show function signatures when typing
-  use 'ray-x/lsp_signature.nvim'
+  -- Show error lines
+  use({
+    "https://git.sr.ht/~whynothugo/lsp_lines.nvim",
+    config = function()
+      require("lsp_lines").setup()
+    end,
+  })
+
   -- Show lsp progress
   use 'j-hui/fidget.nvim'
 
+  -- Autocomplete pairs
+  use {
+    "windwp/nvim-autopairs",
+    config = function() require("nvim-autopairs").setup {} end
+  }
   use 'tpope/vim-commentary'
   use 'junegunn/fzf'
   use 'junegunn/fzf.vim'

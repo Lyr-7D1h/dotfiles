@@ -141,7 +141,7 @@ fzf_history() {
   local selected num
   setopt localoptions noglobsubst noposixbuiltins pipefail no_aliases 2> /dev/null
   selected=( $(fc -rl 1 | perl -ne 'print if !$seen{(/^\s*[0-9]+\**\s+(.*)/, $1)}++' |
-    FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} $FZF_DEFAULT_OPTS -n2..,.. --tiebreak=index --bind=ctrl-r:toggle-sort,ctrl-z:ignore $FZF_CTRL_R_OPTS --query=${(qqq)LBUFFER} +m" $(__fzfcmd)) )
+    FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} $FZF_DEFAULT_OPTS -n2..,.. --tiebreak=index --reverse --bind=ctrl-r:toggle-sort,ctrl-z:ignore $FZF_CTRL_R_OPTS --query=${(qqq)LBUFFER} +m" $(__fzfcmd)) )
   local ret=$?
   if [ -n "$selected" ]; then
     num=$selected[1]
@@ -178,18 +178,6 @@ bindkey  "^[[F"   end-of-line
 bindkey  "^[[3~"  delete-char
 
 
-
-
-### Exports
-# Adding custom executables
-export PATH="$PATH:$HOME/.npm/bin"
-export PATH="$HOME/bin:$PATH"
-export PATH="$HOME/.local/bin:$PATH"
-export PATH="$HOME/.cargo/bin:$PATH"
-# You may need to manually set your language environment
-export LANG=en_US.UTF-8
-# Needed for obs on wayland
-export QT_QPA_PLATFORM=wayland
 
 
 ### Aliases

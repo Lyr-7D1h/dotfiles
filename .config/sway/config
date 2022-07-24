@@ -109,6 +109,8 @@ exec bitwarden-desktop
 ### Output configuration (swaymsg -t get_outputs)
 output * bg ~/.wallpaper fill 
 output DP-1 resolution 1920x-1080 position 0,0
+# TODO check if works
+output DP-1 adaptive_sync on
 output HDMI-A-1 resolution 1920x1080 position 1920,0
 # output DP-3 resolution 1024x768 position 3840,148
 
