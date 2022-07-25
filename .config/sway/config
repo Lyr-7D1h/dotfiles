@@ -56,6 +56,10 @@ client.focused_inactive $cl_back $cl_back $cl_fore $cl_back $cl_back
 client.unfocused        $cl_back $cl_back $cl_fore $cl_back $cl_back
 client.urgent           $cl_urge $cl_urge $cl_fore $cl_urge $cl_urge
 
+# Disable title bar
+default_border pixel
+default_floating_border pixel
+
 # Focus to urgent window (only works for xwayland)
 for_window [urgent="latest"] focus
 
@@ -107,12 +111,18 @@ exec swayidle -w \
 exec bitwarden-desktop
 
 ### Output configuration (swaymsg -t get_outputs)
+set $main "DP-3"
+set $second "HDMI-A-1"
 output * bg ~/.wallpaper fill 
-output DP-1 resolution 1920x-1080 position 0,0
-# TODO check if works
-output DP-1 adaptive_sync on
-output HDMI-A-1 resolution 1920x1080 position 1920,0
+output $main resolution 2560x1440 position 1920,0
+output $main adaptive_sync on
+workspace number 1 output $main
+workspace number 2 output $main
+workspace number 3 output $main 
+workspace number 4 output $main 
+output $second resolution 1920x1080 position 0,360
 # output DP-3 resolution 1024x768 position 3840,148
+
 
 ### Key bindings
     # Open Terminal

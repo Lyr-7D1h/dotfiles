@@ -31,9 +31,10 @@ if vim.fn.exists('g:vscode') == 0 then
 	-- require('vscode').setup({})
 
 	-- TODO setup keybind
-	require 'nvim-web-devicons'.setup {}
-	require("nvim-tree").setup()
-	vim.keymap.set('n', '<C-e>', ':NvimTreeToggle<CR>')
+	-- require 'nvim-web-devicons'.setup {}
+	-- require("nvim-tree").setup()
+	-- vim.keymap.set('n', '<C-e>', ':NvimTreeToggle<CR>')
+	vim.keymap.set('n', '<C-e>', ':Explore<CR>')
 
 	require "fidget".setup {}
 
