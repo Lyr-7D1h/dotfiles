@@ -98,7 +98,7 @@ exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 # exec protonmail-bridge --no-window
 exec mako 
 # exec wlsunset -l 52.379189 -L 4.899431 -t 5000 -T 5700 -g 0.9 &> /tmp/wlsunset.log
-exec sworkstyle --log-level debug &> /tmp/sworkstyle.log
+exec sworkstyle -d --log-level debug &> /tmp/sworkstyle.log
 exec nm-applet --indicator
 # exec blueman-applet
 exec daily_paper
@@ -115,11 +115,10 @@ set $main "DP-3"
 set $second "HDMI-A-1"
 output * bg ~/.wallpaper fill 
 output $main resolution 2560x1440 position 1920,0
-output $main adaptive_sync on
-workspace number 1 output $main
-workspace number 2 output $main
-workspace number 3 output $main 
-workspace number 4 output $main 
+workspace 1 output $main
+workspace 2 output $main
+workspace 3 output $main 
+workspace 4 output $main 
 output $second resolution 1920x1080 position 0,360
 # output DP-3 resolution 1024x768 position 3840,148
 

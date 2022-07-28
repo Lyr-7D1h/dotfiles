@@ -16,11 +16,14 @@ if vim.fn.exists('g:vscode') == 0 then
 		virtual_text = false,
 	})
 
+
 	vim.keymap.set('n', '<C-p>', ':GFiles<CR>')
 	vim.keymap.set('n', '<C-g>', ':Rg<CR>')
 	-- This unsets the "last search pattern" register by hitting escape
 	vim.keymap.set('n', '<esc>', ':noh<CR><esc>')
 	vim.keymap.set('n', '<esc>^[', '<esc>^[')
+
+	vim.keymap.set('n', '<leader>b', ':ToggleBlameLine<CR>')
 
 	-- Theming
 	-- vim.cmd("set termguicolors")

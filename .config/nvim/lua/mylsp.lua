@@ -65,7 +65,7 @@ require('rust-tools').setup({
 })
 
 -- Basic setup
-local servers = { 'pyright', 'tsserver', 'sumneko_lua' }
+local servers = { 'pyright', 'tsserver', 'sumneko_lua', 'eslint' }
 
 
 for _, lsp in ipairs(servers) do

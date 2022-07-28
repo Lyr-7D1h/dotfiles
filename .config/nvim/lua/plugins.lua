@@ -51,6 +51,9 @@ return require('packer').startup(function()
     end,
   })
 
+  -- Show git blame on current line
+  use 'tveskag/nvim-blame-line'
+
   -- Show lsp progress
   use 'j-hui/fidget.nvim'
 
