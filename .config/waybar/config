@@ -1,70 +1,70 @@
 [
 {
 	"layer": "bottom",
-		"position": "top",
-		"height": 27,
+	"position": "top",
+	"height": 27,
 
-		"modules-left": ["sway/workspaces", "sway/mode"],
-		"modules-center": ["sway/window"],
-		"modules-right": ["network", "pulseaudio", "clock", "tray"],
-		"sway/mode": {
-			"format": " {}"
+	"modules-left": ["sway/workspaces", "sway/mode"],
+	"modules-center": ["sway/window"],
+	"modules-right": ["network", "pulseaudio", "battery", "clock", "tray"],
+	"sway/mode": {
+		"format": " {}"
+	},
+	"sway/workspaces": {
+		"format": "{}",
+		"smooth-scrolling-threshold": 1.5,
+		"enable-bar-scroll": false
+	},
+	"sway/window": {
+		"max-length": 80,
+		"tooltip": false
+	},
+	"clock": {
+		"interval": 1,
+		"format": "{:%a %d %b %Y %T}",
+		"tooltip": false
+	},
+	"battery": {
+		"format": "{capacity}% {icon}",
+		"format-alt": "{time} {icon}",
+		"format-icons": ["", "", "", "", ""],
+		"format-charging": "{capacity}% ",
+		"interval": 30,
+		"states": {
+			"warning": 25,
+			"critical": 10
 		},
-		"sway/workspaces": {
-			"format": "{}",
-			"smooth-scrolling-threshold": 1.5,
-			"enable-bar-scroll": false
+		"tooltip": false
+	},
+	"network": {
+		"format": "{ipaddr}/{cidr} {icon}",
+		"asdf": "{bandwidthDownBits}  {bandwidthUpBits}  {ipaddr} {icon}",
+		"interval": 1,
+		"format-icons": {
+			"wifi": [""],
+			"ethernet": [""],
+			"disconnected": [""]
 		},
-		"sway/window": {
-			"max-length": 80,
-			"tooltip": false
+		"on-click": "termite -e nmtui",
+		"tooltip": false
+	},
+	"pulseaudio": {
+		"format": "{volume}% {icon}",
+		"format-alt": "{desc} {volume}% {icon}",
+		"max-length": 20,
+		"format-alt-click": "click-right",
+		"format-muted": "",
+		"format-icons": {
+			"phone": [" ", " ", " ", " "],
+			"default": ["", "", "", ""]
 		},
-		"clock": {
-			"interval": 1,
-			"format": "{:%a %d %b %Y %T}",
-			"tooltip": false
-		},
-		"battery": {
-			"format": "{capacity}% {icon}",
-			"format-alt": "{time} {icon}",
-			"format-icons": ["", "", "", "", ""],
-			"format-charging": "{capacity}% ",
-			"interval": 30,
-			"states": {
-				"warning": 25,
-				"critical": 10
-			},
-			"tooltip": false
-		},
-		"network": {
-			"format": "{ipaddr}/{cidr} {icon}",
-			"asdf": "{bandwidthDownBits}  {bandwidthUpBits}  {ipaddr} {icon}",
-			"interval": 1,
-			"format-icons": {
-				"wifi": [""],
-				"ethernet": [""],
-				"disconnected": [""]
-			},
-			"on-click": "termite -e nmtui",
-			"tooltip": false
-		},
-		"pulseaudio": {
-			"format": "{volume}% {icon}",
-			"format-alt": "{desc} {volume}% {icon}",
-			"max-length": 20,
-			"format-alt-click": "click-right",
-			"format-muted": "",
-			"format-icons": {
-				"phone": [" ", " ", " ", " "],
-				"default": ["", "", "", ""]
-			},
-			"scroll-step": 1,
-			"on-click": "pavucontrol"
-		},
-		"tray": {
-			"icon-size": 16,
-			"spacing": 10
-		}
+		"scroll-step": 1,
+		"on-click": "pavucontrol"
+	},
+	"tray": {
+		"icon-size": 16,
+		"spacing": 10
+	}
 },
 {
 	"layer": "bottom",
