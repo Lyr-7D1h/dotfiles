@@ -1,4 +1,5 @@
 # Requirements:
+#   xdg-desktop-portal-wlr
 #   libalsa
 #   slurp
 #   grim
@@ -118,11 +119,8 @@ output * bg ~/.wallpaper fill
 set $main "DP-3"
 set $second "HDMI-A-1"
 output $main resolution 2560x1440 position 1920,0
-workspace 1 output $main
-workspace 2 output $main
-workspace 3 output $main 
-workspace 4 output $main 
 output $second resolution 1920x1080 position 0,360
+workspace 5 output $second
 # output DP-3 resolution 1024x768 position 3840,148
 
 input "type:touchpad" {
