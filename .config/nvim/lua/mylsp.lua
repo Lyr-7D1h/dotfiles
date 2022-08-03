@@ -82,7 +82,7 @@ lspconfig.diagnosticls.setup {
 }
 
 -- Basic setup
-local servers = { 'tsserver', 'sumneko_lua', 'eslint' }
+local servers = { 'tsserver', 'sumneko_lua', 'eslint', 'ccls' }
 
 
 for _, lsp in ipairs(servers) do
