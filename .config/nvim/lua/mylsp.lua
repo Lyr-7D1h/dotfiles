@@ -64,8 +64,25 @@ require('rust-tools').setup({
   }
 })
 
+-- Setup up python
+lspconfig.diagnosticls.setup {
+  filetypes = { "python" },
+  init_options = {
+    formatters = {
+      black = {
+        command = "black",
+        args = { "--quiet", "-" },
+        rootPatterns = { "pyproject.toml" },
+      },
+      formatFiletypes = {
+        python = { "black" }
+      }
+    }
+  }
+}
+
 -- Basic setup
-local servers = { 'pyright', 'tsserver', 'sumneko_lua', 'eslint' }
+local servers = { 'tsserver', 'sumneko_lua', 'eslint' }
 
 
 for _, lsp in ipairs(servers) do
