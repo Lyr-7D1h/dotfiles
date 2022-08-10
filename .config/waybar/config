@@ -36,6 +36,13 @@
 		},
 		"tooltip": false
 	},
+	"idle_inhibitor": {
+      "format": "{icon}",
+      "format-icons": {
+        "activated": "",
+        "deactivated": ""
+      }
+    },
 	"network": {
 		"format": "{ipaddr}/{cidr} {icon}",
 		"asdf": "{bandwidthDownBits}  {bandwidthUpBits}  {ipaddr} {icon}",
