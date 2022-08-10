@@ -1,4 +1,16 @@
 #!/usr/bin/env bash
+#
+# For sync features set a "Host home" in .ssh/config
+#
+# Requirements:
+#	- nvim, vim or nano
+#	- scp
+#	- fzf
+#
+
+SYNC_HOST="home"
+
+set -e
 
 if [[ ! -d ~/notes  ]]; then
 	echo "Making notes directory..."
@@ -7,30 +19,78 @@ if [[ ! -d ~/notes  ]]; then
 fi
 
 if [[ -z $@ ]]; then
-	echo "No name given"
+	echo "note {[name]|open|rm|sync|latest|todo|}"
 	exit 1
 fi
 
+# Overwrite local files by newer host files
+sync_down() {
+	# TODO improve performance by using tar
+	local path=$(mktemp --directory)
+	# Copy from host to local
+	# ssh $SYNC_HOST 'TMP=$(mktemp --directory) ; tar cvf $TMP/notes.tar ~/notes/* ; rm -r $TMP' 
+	scp -prq "$SYNC_HOST:~/notes/*" $path
+	cp -ru $path/* ~/notes
+	rm -r $path
+}
+
+# Overwrite host files by newer local files
+sync_up() {
+	# Copy from local to host
+	local path=$(ssh home mktemp --directory)
+	scp -prq ~/notes/* "$SYNC_HOST:$path"
+	ssh $SYNC_HOST "cp -ru $path/* ~/notes ; rm -r $path"
+}
+
+get_note() {
+	ls ~/notes | fzf
+}
+
+rm_file() {
+	path="/home/$USER/notes/$1"
+	echo "Removing $path"
+	rm ~/notes/$1
+	ssh $SYNC_HOST "rm ~/notes/$1"
+}
+
+# open {filename}
+open() {
+	if [[ -z $1 ]]; then
+		echo "Invalid file given"
+		exit 1
+	fi
+	path=$(printf ~/notes/%q "$1")
+
+	echo "Opened note $path"
+	if command -v nvim &>/dev/null ; then
+		nvim "$path"
+	elif command -v vim &>/dev/null ; then
+		vim "$path"
+	else
+		nano "$path"
+	fi
+}
+
+if [[ "$1" == "sync" ]]; then
+	sync_down
+	# sync_up
+	exit 0
+elif [[ "$1" == "rm" ]]; then
+	file=$(get_note)
+	rm_file $file 
+	exit 0
+fi
+
+
+sync_down
 if [[ "$1" == "latest" ]]; then
-	file=$(ls ~/notes | grep -E '^[0-9]{6}' | tail -n 1)
+	open "$(ls ~/notes | grep -E '^[0-9]{6}' | tail -n 1)"
 elif [[ "$1" == "todo" ]]; then
-	file="todo"
+	open "todo"
+elif [[ "$1" == "open" ]]; then
+	open $(get_note)
 else
 	id=`date '+%y%m%d'`
-	file="${id}_${@}.md"
+	open "${id}_${@}.md"
 fi
-
-# now=`date '+%a_%d-%m-%Y_%T_%Z'`
-# now=`date '+%s'`
-# Latest id + 1
-# id=`ls ~/notes | grep -e '[0-9]_' | sed 's/_.*//' | tail -n 1`
-# ((id++))
-
-path=$(printf ~/notes/%q "$file")
-
-echo "Opening note $path"
-if command -v nvim &>/dev/null ; then
-	nvim "$path"
-else
-	vim "$path"
-fi
+sync_up &
