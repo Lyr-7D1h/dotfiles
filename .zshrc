@@ -96,7 +96,7 @@ bindkey -e
 bindkey '^N' autosuggest-accept
 
 # https://github.com/junegunn/fzf/blob/master/shell/key-bindings.zsh
-# ctrl + o - fzf for file path
+# ctrl + p - fzf for file path
 __fzfsel() {
   local cmd="${FZF_CTRL_T_COMMAND:-"command find -L . -mindepth 1 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune \
     -o -type b,c,f,l,p,s -print 2> /dev/null | cut -b3-"}"
@@ -116,9 +116,9 @@ fzf_get_file_path() {
   return $ret
 }
 zle -N fzf_get_file_path
-bindkey '^O' fzf_get_file_path
+bindkey '^P' fzf_get_file_path
 
-# ctrl + p - cd into the selected directory
+# ctrl + o - cd into the selected directory
 __fzfcmd() {
   [ -n "$TMUX_PANE" ] && { [ "${FZF_TMUX:-0}" != 0 ] || [ -n "$FZF_TMUX_OPTS" ]; } &&
     echo "fzf-tmux ${FZF_TMUX_OPTS:--d${FZF_TMUX_HEIGHT:-40%}} -- " || echo "fzf"
@@ -141,7 +141,7 @@ fzf_find_directory() {
   return $ret
 }
 zle -N fzf_find_directory
-bindkey '^P' fzf_find_directory
+bindkey '^O' fzf_find_directory
 
 # CTRL-R - Paste the selected command from history into the command line
 fzf_history() {

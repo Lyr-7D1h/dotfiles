@@ -109,7 +109,7 @@ exec swayidle -w \
     before-sleep 'swaylock -f'
     # timeout 300 'swaylock -f' \
     # timeout 600 'swaymsg "output * dpms off"' \
-    # resume 'swaymsg "output * dpms on"' \
+    # resume 'swaymsg "output * dpms on"'
 exec bitwarden-desktop
 exec blueman-applet
 
@@ -297,18 +297,18 @@ bar {
 
 # Status Bar:
 # bar {
-#     position top
+#      position top
 
-#     # When the status_command prints a new line to stdout, swaybar updates.
-#     # The default just shows the current date and time.
-#     status_command while date +'%Y-%m-%d %H:%M:%S'; do sleep 1; done
+#      # When the status_command prints a new line to stdout, swaybar updates.
+#      # The default just shows the current date and time.
+#      status_command while date +'%Y-%m-%d %H:%M:%S'; do sleep 1; done
 
-#     colors {
-#         statusline $cl_fore
-#         background $cl_back
-# 	focused_workspace #323232 $cl_high $cl_fore
-#         inactive_workspace #323232 #33373a #5c5c5c
-#     }
+#      colors {
+#          statusline $cl_fore
+#          background $cl_back
+#  	focused_workspace #323232 $cl_high $cl_fore
+#          inactive_workspace #323232 #33373a #5c5c5c
+#      }
 # }
 
 include /etc/sway/config.d/*

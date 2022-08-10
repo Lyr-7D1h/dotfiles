@@ -5,7 +5,7 @@ vim.cmd([[
 	so ~/.config/nvim/legacy.vim
 ]])
 
-if vim.fn.exists('g:vscode') == 0 then
+if vim.g.vscode ~= 1 then
 	-- Load all plugins when not in vscode
 	require('plugins')
 	require('mylsp')
