@@ -43,6 +43,9 @@ if [[ $HOST == "home" || $HOST == "latitude" ]]; then
 	# Needed for obs on wayland
 	export QT_QPA_PLATFORM=wayland
 	export BEMENU_BACKEND=wayland
+
+	# Android studio doesn't support wayland 
+	alias android-studio="QT_QPA_PLATFORM=xcb android-studio"
 	
 	# Fix for monitor sizes using DisplayPort
 	export WINIT_HIDPI_FACTOR=1.0
