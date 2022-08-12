@@ -23,8 +23,19 @@ if [[ -z $@ ]]; then
 	exit 1
 fi
 
+sync_host_exists() {
+	if [[ ! -d .ssh/config ]] || [[ $(grep -r "Host $SYNC_HOST" ~/.ssh/config) == "" ]]; then
+		return 1
+	fi
+	return 0
+}
+
 # Overwrite local files by newer host files
 sync_down() {
+	if ! sync_host_exists ; then
+		echo "Sync disabled host doesn't exist"
+		return 0
+	fi
 	# TODO improve performance by using tar
 	local path=$(mktemp --directory)
 	# Copy from host to local
@@ -36,6 +47,10 @@ sync_down() {
 
 # Overwrite host files by newer local files
 sync_up() {
+	if ! sync_host_exists ; then
+		echo "Sync disabled host doesn't exist"
+		return 0
+	fi
 	# Copy from local to host
 	local path=$(ssh home mktemp --directory)
 	scp -prq ~/notes/* "$SYNC_HOST:$path"
