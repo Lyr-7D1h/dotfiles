@@ -24,7 +24,7 @@ if [[ -z $@ ]]; then
 fi
 
 sync_host_exists() {
-	if [[ ! -d .ssh/config ]] || [[ $(grep -r "Host $SYNC_HOST" ~/.ssh/config) == "" ]]; then
+	if [[ ! -f ~/.ssh/config ]] || [[ "$(grep -r "Host $SYNC_HOST" ~/.ssh/config)" == "" ]]; then
 		return 1
 	fi
 	return 0
