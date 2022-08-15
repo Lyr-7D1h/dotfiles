@@ -81,6 +81,11 @@ for_window [app_id="org.gnome.Calculator"] floating enable
 # prevent idleness for fullscreen
 for_window [class=.*] inhibit_idle fullscreen
 for_window [title="Meet - .* -.*"] inhibit_idle fullscreen
+for_window [title="Meet - .* -.*"] inhibit_idle fullscreen
+
+# make dev windows float
+for_window [class=dev_*] floating enable
+for_window [app_id=dev_*] floating enable
 
 # gaps inner 5
 
