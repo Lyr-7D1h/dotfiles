@@ -87,6 +87,8 @@ if [[ "$1" == "latest" ]]; then
 	open "$(ls ~/notes | grep -E '^[0-9]{6}' | tail -n 1)"
 elif [[ "$1" == "todo" ]]; then
 	open "todo"
+elif [[ "$1" == "journal" ]]; then
+	open "journal"
 elif [[ "$1" == "open" ]]; then
 	open $(get_note)
 else
