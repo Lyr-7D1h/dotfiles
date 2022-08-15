@@ -12,12 +12,12 @@ if vim.g.vscode ~= 1 then
 	require('autocmp')
 
 	-- Disable text after line cause we're using lsp_lines
-	vim.diagnostic.config({
-		virtual_text = false,
-	})
+	-- vim.diagnostic.config({
+	-- 	virtual_text = false,
+	-- })
 
 
-	vim.keymap.set('n', '<C-p>', ':GFiles<CR>')
+	vim.keymap.set('n', '<C-p>', ':Files<CR>')
 	vim.keymap.set('n', '<C-g>', ':Rg<CR>')
 	-- This unsets the "last search pattern" register by hitting escape
 	vim.keymap.set('n', '<esc>', ':noh<CR><esc>')

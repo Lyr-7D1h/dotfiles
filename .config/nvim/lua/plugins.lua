@@ -44,12 +44,12 @@ return require('packer').startup(function()
   }
 
   -- Show error lines
-  use({
-    "https://git.sr.ht/~whynothugo/lsp_lines.nvim",
-    config = function()
-      require("lsp_lines").setup()
-    end,
-  })
+  -- use({
+  --   "https://git.sr.ht/~whynothugo/lsp_lines.nvim",
+  --   config = function()
+  --     require("lsp_lines").setup()
+  --   end,
+  -- })
 
   -- Show git blame on current line
   use 'tveskag/nvim-blame-line'
