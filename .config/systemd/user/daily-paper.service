@@ -1,0 +1,11 @@
+[Unit]
+Description=Set your daily wallpaper
+
+[Service]
+# Sorry for this didn't manage to get it to run as user service
+ExecStart=%h/bin/daily_paper
+Type=oneshot
+
+[Install]
+After=network-online.target
+Wants=network-online.target
