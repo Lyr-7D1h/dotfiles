@@ -2,10 +2,15 @@
 Description=Set your daily wallpaper
 
 [Service]
-# Sorry for this didn't manage to get it to run as user service
-ExecStart=%h/bin/daily_paper
 Type=oneshot
+ExecStart=%h/bin/daily_paper
+; Give priority to other services
+Nice=19
+IOSchedulingClass=idle
+IOSchedulingPriority=7
 
-[Install]
-After=network-online.target
-Wants=network-online.target
+
+; Don't need install managed by timer
+; [Install]
+; After=network-online.target
+; Wants=network-online.target
