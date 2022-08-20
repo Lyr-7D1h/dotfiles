@@ -6,7 +6,6 @@
 #   alacritty
 #   swaybg
 #   bemenu
-#   daily_paper (custom script)
 #   power_menu (custom script using bemenu)
 #   wl-clipboard
 #   brightnessctl (if on laptop)
@@ -108,7 +107,7 @@ exec mako
 exec sworkstyle -d --log-level debug &> /tmp/sworkstyle.log
 exec nm-applet --indicator
 # exec blueman-applet
-exec daily_paper
+# exec daily_paper
 exec swayidle -w \
     before-sleep 'playerctl pause' \
     before-sleep 'swaylock -f'
