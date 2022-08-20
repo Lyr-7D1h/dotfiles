@@ -228,6 +228,9 @@ ktx() {
   fi
 }
 
+### Exports
+export DOCKER_BUILDKIT=1
+
 ### Autoloads
 # Asdf
 if [[ -f /opt/asdf-vm/asdf.sh ]]; then

@@ -97,7 +97,7 @@ elif [[ "$1" == "rm" ]]; then
 fi
 
 
-sync_down
+sync_down || true
 if [[ "$1" == "latest" ]]; then
 	open "$(ls ~/notes | grep -E '^[0-9]{6}' | tail -n 1)"
 elif [[ "$1" == "todo" ]]; then
@@ -110,4 +110,4 @@ else
 	id=`date '+%y%m%d'`
 	open "${id}_${@}.md"
 fi
-sync_up &
+sync_up & || true
