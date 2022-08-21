@@ -230,6 +230,7 @@ ktx() {
 
 ### Exports
 export DOCKER_BUILDKIT=1
+export FZF_DEFAULT_COMMAND='rg --files'
 
 ### Autoloads
 # Asdf

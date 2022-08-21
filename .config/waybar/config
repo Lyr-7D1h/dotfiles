@@ -28,8 +28,8 @@
 		"format": "{capacity}% {icon}",
 		"format-alt": "{time} {icon}",
 		"format-icons": ["", "", "", "", ""],
-		"format-charging": "{capacity}% ",
-		"interval": 30,
+		"format-charging": "{capacity}% *",
+		"interval": 20,
 		"states": {
 			"warning": 25,
 			"critical": 10
