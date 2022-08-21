@@ -3,7 +3,7 @@ Description=Set your daily wallpaper
 
 [Timer]
 OnCalendar=daily
-RandomizedDelaySec=12h
+RandomizedDelaySec=6h
 Persistent=true
 
 [Install]
