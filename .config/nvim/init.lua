@@ -16,9 +16,12 @@ if vim.g.vscode ~= 1 then
 	-- 	virtual_text = false,
 	-- })
 
+	vim.keymap.set('n', '<leader>sv', ':source $MYVIMRC<CR>')
+
 
 	vim.keymap.set('n', '<C-p>', ':Files<CR>')
 	vim.keymap.set('n', '<C-g>', ':Rg<CR>')
+	vim.keymap.set('n', '<C-t>', ':Buffers<CR>')
 	-- This unsets the "last search pattern" register by hitting escape
 	vim.keymap.set('n', '<esc>', ':noh<CR><esc>')
 	vim.keymap.set('n', '<esc>^[', '<esc>^[')

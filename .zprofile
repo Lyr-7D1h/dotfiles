@@ -53,6 +53,7 @@ if [[ $HOST == "home" || $HOST == "latitude" ]]; then
 	# Startup Sway
 	if [ -z $DISPLAY ] && [ "$(tty)" = "/dev/tty1" ]; then
 		eval $(ssh-agent)
+		# Run using dbus (used by tray)
 		exec sway &> /tmp/sway.log
 	fi
 fi

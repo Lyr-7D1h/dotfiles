@@ -197,6 +197,7 @@ alias gc="git commit -v"
 alias gca="git commit -a"
 alias gcam="git commit -am"
 alias gda="git diff -a"
+alias gd="git diff"
 alias gp="git push"
 alias gf="git fetch"
 alias ls='ls --color=auto'

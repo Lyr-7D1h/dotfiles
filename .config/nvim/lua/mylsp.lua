@@ -3,8 +3,7 @@ require("nvim-lsp-installer").setup {
 }
 
 -- Auto format before write
-vim.cmd [[autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_sync()]]
-
+-- vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.formatting_sync()]]
 
 
 local lspconfig = require("lspconfig")
@@ -17,9 +16,28 @@ vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
 vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
 
+local function has_value(tab, val)
+  for index, value in ipairs(tab) do
+    if value == val then
+      return true
+    end
+  end
+
+  return false
+end
+
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
+  local format_on_save_servers = { "rust_analyzer" }
+  -- If formatting is supported and it is one of the known servers add format on save
+  if client.resolved_capabilities.document_formatting and has_value(format_on_save_servers, client.name) then
+    vim.api.nvim_command [[augroup Format]]
+    vim.api.nvim_command [[autocmd! * <buffer>]]
+    vim.api.nvim_command [[autocmd BufWritePost <buffer> lua vim.lsp.buf.formatting()]]
+    vim.api.nvim_command [[augroup END]]
+  end
+
   -- Enable completion triggered by <c-x><c-o>
   vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
@@ -65,24 +83,29 @@ require('rust-tools').setup({
 })
 
 -- Setup up python
-lspconfig.diagnosticls.setup {
-  filetypes = { "python" },
-  init_options = {
-    formatters = {
-      black = {
-        command = "black",
-        args = { "--quiet", "-" },
-        rootPatterns = { "pyproject.toml" },
+-- https://github.com/mattn/efm-langserver
+lspconfig.efm.setup {
+  filetypes = { "python", "javascript", "typescript", "javascriptreact", "javascript.jsx", "typescript",
+    "typescriptreact", "typescript.tsx" }, -- See `:Filetypes`
+  init_options = { documentFormatting = true },
+  settings = {
+    rootMarkers = { ".git/" },
+    languages = {
+      python = {
+        { formatCommand = "black --quiet -", formatStdin = true },
+        { formatCommand = "isort --quiet -", formatStdin = true }
       },
-      formatFiletypes = {
-        python = { "black" }
+      typescript = {
+        formatCommand = "node_modules/.bin/prettier --tab-width:Tabwidth --stdin-filepath " ..
+            vim.api.nvim_buf_get_name(0),
+        stdin = true
       }
     }
   }
 }
 
 -- Basic setup
-local servers = { 'tsserver', 'sumneko_lua', 'eslint', 'ccls' }
+local servers = { 'pyright', 'tsserver', 'sumneko_lua', 'eslint', 'ccls' }
 
 
 for _, lsp in ipairs(servers) do
