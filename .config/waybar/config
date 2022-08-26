@@ -19,6 +19,15 @@
 		"max-length": 80,
 		"tooltip": false
 	},
+	"custom/gnma": {
+        "format": " {} ",
+        "interval": 5,
+        "exec": "gnome-next-meeting-applet dbus get_event",
+        "exec-if": "pgrep -f gnome-next-meeting-applet",
+        "max-length": 50,
+        "min-length": 1,
+        "on-click": "gnome-next-meeting-applet dbus open_event_url",
+    },
 	"clock": {
 		"interval": 1,
 		"format": "{:%a %d %b %Y %T}",
