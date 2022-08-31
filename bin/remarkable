@@ -19,7 +19,7 @@
 #   - uuidgen
 
 # This is where ssh will try to copy the files associated with the document
-REMARKABLE_HOST=${REMARKABLE_HOST:-remarkable}
+REMARKABLE_HOST=$1
 REMARKABLE_XOCHITL_DIR=${REMARKABLE_XOCHITL_DIR:-.local/share/remarkable/xochitl/}
 
 ssh_cmd() {
@@ -28,7 +28,7 @@ ssh_cmd() {
         -o PasswordAuthentication=no \
         -o PubkeyAcceptedKeyTypes=+ssh-rsa \
         -o HostKeyAlgorithms=+ssh-rsa \
-        remarkable "$@"
+        "$REMARKABLE_HOST" "$@"
 }
 
 # https://github.com/adaerr/reMarkableScripts/blob/master/pdf2remarkable.sh
@@ -392,9 +392,9 @@ stream() {
         )
 }
 
-if [[ -z $1 ]]; then
-    echo "usage: $(basename $0) {upload|stream} [OPTIONS]"
+if [[ -z $2 ]]; then
+    echo "usage: $(basename $0) {host} {upload|stream} [OPTIONS]"
     exit 1
 fi
 
-$1 ${@:2}
+$2 ${@:3}

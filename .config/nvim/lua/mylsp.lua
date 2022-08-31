@@ -107,7 +107,6 @@ lspconfig.efm.setup {
 -- Basic setup
 local servers = { 'pyright', 'tsserver', 'sumneko_lua', 'eslint', 'ccls' }
 
-
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
     on_attach = on_attach,

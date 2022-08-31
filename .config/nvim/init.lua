@@ -18,6 +18,22 @@ if vim.g.vscode ~= 1 then
 
 	vim.keymap.set('n', '<leader>sv', ':source $MYVIMRC<CR>')
 
+	local telescope = require('telescope.builtin')
+	local telescope_actions = require('telescope.actions')
+	vim.keymap.set('n', 'ff', telescope.find_files)
+	vim.keymap.set('n', 'fg', telescope.live_grep)
+	vim.keymap.set('n', 'fb', telescope.buffers)
+	vim.keymap.set('n', 'fh', telescope.help_tags)
+	require("telescope").setup({
+		defaults = {
+			mappings = {
+				i = {
+					["<esc>"] = telescope_actions.close
+				}
+			}
+		}
+	})
+
 
 	vim.keymap.set('n', '<C-p>', ':Files<CR>')
 	vim.keymap.set('n', '<C-g>', ':Rg<CR>')

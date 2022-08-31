@@ -61,6 +61,9 @@ client.urgent           $cl_urge $cl_urge $cl_fore $cl_urge $cl_urge
 default_border pixel
 default_floating_border pixel
 
+# Assign apps to workspaces
+assign [class="^Steam$"] number 8
+
 # Focus to urgent window (only works for xwayland)
 for_window [urgent="latest"] focus
 
