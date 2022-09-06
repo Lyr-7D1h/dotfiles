@@ -38,10 +38,14 @@ return require('packer').startup(function()
     tag = 'nightly' -- optional, updated every week. (see issue #1193)
   }
 
+  use 'jose-elias-alvarez/null-ls.nvim'
+  use 'MunifTanjim/prettier.nvim'
+
   use {
     'nvim-treesitter/nvim-treesitter',
     run = function() require('nvim-treesitter.install').update({ with_sync = true }) end,
   }
+  use 'nvim-treesitter/nvim-treesitter-context'
 
   -- Show error lines
   -- use({
@@ -67,8 +71,8 @@ return require('packer').startup(function()
   -- Fuzzy finder
   use {
     'nvim-telescope/telescope.nvim', tag = '0.1.0',
-  -- or                            , branch = '0.1.x',
-    requires = { {'nvim-lua/plenary.nvim'} }
+    -- or                            , branch = '0.1.x',
+    requires = { { 'nvim-lua/plenary.nvim' } }
   }
 
   use 'junegunn/fzf'

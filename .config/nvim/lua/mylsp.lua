@@ -29,7 +29,7 @@ end
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
-  local format_on_save_servers = { "rust_analyzer" }
+  local format_on_save_servers = { "rust_analyzer", "null-ls" }
   -- If formatting is supported and it is one of the known servers add format on save
   if client.resolved_capabilities.document_formatting and has_value(format_on_save_servers, client.name) then
     vim.api.nvim_command [[augroup Format]]
@@ -85,31 +85,75 @@ require('rust-tools').setup({
 -- Setup up python
 -- https://github.com/mattn/efm-langserver
 lspconfig.efm.setup {
-  filetypes = { "python", "javascript", "typescript", "javascriptreact", "javascript.jsx", "typescript",
-    "typescriptreact", "typescript.tsx" }, -- See `:Filetypes`
+  filetypes = { "python" }, -- See `:Filetypes`
+  -- filetypes = { "python", "javascript", "typescript", "javascriptreact", "javascript.jsx", "typescript",
+  --   "typescriptreact", "typescript.tsx" }, -- See `:Filetypes`
   init_options = { documentFormatting = true },
   settings = {
     rootMarkers = { ".git/" },
     languages = {
       python = {
         { formatCommand = "black --quiet -", formatStdin = true },
-        { formatCommand = "isort --quiet -", formatStdin = true }
+        { formatCommand = "isort --quiet -", formatStdin = true },
+        -- {
+        --   lintCommand = "pylint --output-format text --score no --msg-template {path}:{line}:{column}:{C}:{msg} --from-stdin ${INPUT} -",
+        --   lintStdin = false,
+        --   lintOffsetColumns = 1,
+        --   lintIgnoreExitCode = true,
+        --   -- lintCategoryMap = {
+        --   --   I = "H",
+        --   --   R = "I",
+        --   --   C = "I",
+        --   --   W = "W",
+        --   --   E = "E",
+        --   --   F = "E"
+        --   -- },
+        --   lintFormats = "%f:%l:%c:%t:%m"
+        -- }
       },
-      typescript = {
-        formatCommand = "node_modules/.bin/prettier --tab-width:Tabwidth --stdin-filepath " ..
-            vim.api.nvim_buf_get_name(0),
-        stdin = true
-      }
+      -- typescript = {
+      --   formatCommand = "node_modules/.bin/prettier --stdin-filepath" .. vim.api.nvim_buf_get_name(0),
+      --   formatStdin = true
+      -- }
     }
   }
 }
+
+-- Setup prettier
+local null_ls = require("null-ls")
+null_ls.setup({
+  on_attach = on_attach
+})
+local prettier = require("prettier")
+prettier.setup({
+  bin = 'prettier',
+  filetypes = {
+    "css",
+    "graphql",
+    "html",
+    "javascript",
+    "javascriptreact",
+    "json",
+    "less",
+    "markdown",
+    "scss",
+    "typescript",
+    "typescriptreact",
+    "yaml",
+  },
+})
 
 -- Basic setup
 local servers = { 'pyright', 'tsserver', 'sumneko_lua', 'eslint', 'ccls' }
 
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
-    on_attach = on_attach,
+    on_attach = function(client, bufnr)
+      if client.name == "tsserver" then -- disable formatting for tsserver
+        client.resolved_capabilities.document_formatting = false
+      end
+      on_attach(client, bufnr)
+    end,
     flags = lsp_flags,
     capabilities = capabilities,
   }

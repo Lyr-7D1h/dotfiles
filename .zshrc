@@ -41,8 +41,8 @@ ZSH_AUTOSUGGEST_STRATEGY=(history completion match_prev_cmd)
 ZSH_AUTOSUGGEST_USE_ASYNC=true
 
 # History options
-HISTSIZE="10000"
-SAVEHIST="10000"
+HISTSIZE="100000"
+SAVEHIST="100000"
 HISTFILE="$HOME/.zsh_history"
 mkdir -p "$(dirname "$HISTFILE")"
 setopt HIST_FCNTL_LOCK
@@ -97,9 +97,14 @@ bindkey '^N' autosuggest-accept
 
 # https://github.com/junegunn/fzf/blob/master/shell/key-bindings.zsh
 # ctrl + p - fzf for file path
+__fzfcmd() {
+  [ -n "$TMUX_PANE" ] && { [ "${FZF_TMUX:-0}" != 0 ] || [ -n "$FZF_TMUX_OPTS" ]; } &&
+    echo "fzf-tmux ${FZF_TMUX_OPTS:--d${FZF_TMUX_HEIGHT:-40%}} -- " || echo "fzf"
+}
 __fzfsel() {
-  local cmd="${FZF_CTRL_T_COMMAND:-"command find -L . -mindepth 1 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune \
-    -o -type b,c,f,l,p,s -print 2> /dev/null | cut -b3-"}"
+  local cmd="rg --files --hidden --no-ignore-vcs --max-depth 8"
+  # local cmd="${FZF_CTRL_T_COMMAND:-"command find -L . -mindepth 1 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune \
+  #   -o -type b,c,f,l,p,s -print 2> /dev/null | cut -b3-"}"
   setopt localoptions pipefail no_aliases 2> /dev/null
   local item
   eval "$cmd" | FZF_DEFAULT_OPTS="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --bind=ctrl-z:ignore $FZF_DEFAULT_OPTS $FZF_CTRL_T_OPTS" $(__fzfcmd) -m "$@" | while read item; do
@@ -119,10 +124,6 @@ zle -N fzf_get_file_path
 bindkey '^P' fzf_get_file_path
 
 # ctrl + o - cd into the selected directory
-__fzfcmd() {
-  [ -n "$TMUX_PANE" ] && { [ "${FZF_TMUX:-0}" != 0 ] || [ -n "$FZF_TMUX_OPTS" ]; } &&
-    echo "fzf-tmux ${FZF_TMUX_OPTS:--d${FZF_TMUX_HEIGHT:-40%}} -- " || echo "fzf"
-}
 fzf_find_directory() {
   local cmd="${FZF_ALT_C_COMMAND:-"command find -L . -mindepth 1 -maxdepth 4 \\( -path '*/\\.*' -o -fstype 'sysfs' -o -fstype 'devfs' -o -fstype 'devtmpfs' -o -fstype 'proc' \\) -prune \
     -o -type d -print 2> /dev/null | cut -b3-"}"
@@ -206,6 +207,7 @@ alias ssh='TERM=xterm ssh'
 alias tf='terraform'
 alias update='home-manager switch'
 alias vim='nvim'
+alias tvim="tmux new-session nvim"
 # Refresh sudo session
 alias sudo='sudo -v; sudo '
 # added by latest_cd
