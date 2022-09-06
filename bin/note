@@ -88,7 +88,7 @@ open() {
 
 if [[ "$1" == "sync" ]]; then
 	sync_down
-	# sync_up
+	sync_up
 	exit 0
 elif [[ "$1" == "rm" ]]; then
 	file=$(get_note)
@@ -110,4 +110,4 @@ else
 	id=`date '+%y%m%d'`
 	open "${id}_${@}.md"
 fi
-sync_up & || true
+sync_up &
