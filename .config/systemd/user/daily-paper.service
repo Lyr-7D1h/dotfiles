@@ -1,5 +1,11 @@
 [Unit]
 Description=Set your daily wallpaper
+; Maximum 5 retries
+StartLimitBurst=5 
+; Over a course of 200s
+StartLimitInterval=200
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=oneshot

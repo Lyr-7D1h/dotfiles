@@ -81,8 +81,15 @@ for_window [app_id="evince"] floating enable
 for_window [class="Bitwarden"] floating enable
 for_window [app_id="pulseUI"] floating enable
 for_window [app_id="org.gnome.Calculator"] floating enable
+for_window [app_id="pavucontrol"] floating enable
+# android studio
+for_window [title="Device Manager"] floating enable
+for_window [title="Welcome to Android Studio"] floating enable
+for_window [title="^Android Emulator.*"] floating enable
+
 # Set fullscreen for bin/remarkable stream
 for_window [title="reStream"] fullscreen
+
 # prevent idleness for fullscreen
 for_window [class=.*] inhibit_idle fullscreen
 for_window [title="Meet - .* -.*"] inhibit_idle fullscreen

@@ -10,6 +10,8 @@ if vim.g.vscode ~= 1 then
 	require('plugins')
 	require('mylsp')
 	require('autocmp')
+	require("treesitter")
+
 
 	-- Disable text after line cause we're using lsp_lines
 	-- vim.diagnostic.config({
@@ -58,15 +60,6 @@ if vim.g.vscode ~= 1 then
 	-- vim.keymap.set('n', '<C-e>', ':NvimTreeToggle<CR>')
 	vim.keymap.set('n', '<C-e>', ':Explore<CR>')
 
-	require "fidget".setup {}
 
-	-- nvim-treesitter
-	require('nvim-treesitter.configs').setup {
-		ensure_installed = { 'comment' },
-		auto_install = true,
-		highlight = {
-			enable = true,
-			additional_vim_regex_highlighting = false,
-		},
-	}
+	require "fidget".setup {}
 end
