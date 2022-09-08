@@ -138,7 +138,7 @@ set $second "HDMI-A-1"
 output $main resolution 2560x1440 position 1920,0
 output $second resolution 1920x1080 position 0,360
 #output $second resolution 2560x1440 position 0,0
-workspace 5 output $second
+workspace 10 output $second
 # output DP-3 resolution 1024x768 position 3840,148
 
 input "type:touchpad" {
