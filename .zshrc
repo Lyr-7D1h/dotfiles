@@ -180,6 +180,9 @@ bindkey '^[[3;5~' kill-word
 # alt + <- and alt + -> move a word
 bindkey "^[[1;3C" forward-word
 bindkey "^[[1;3D" backward-word
+# ctrl + <- and ctrl + -> move a word
+bindkey "^[[1;5C" forward-word
+bindkey "^[[1;5D" backward-word
 
 bindkey  "^[[H"   beginning-of-line
 bindkey  "^[[F"   end-of-line
