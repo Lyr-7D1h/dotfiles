@@ -10,6 +10,7 @@ set scrolloff=8
 set mouse=a
 set completeopt=menu,menuone,noselect
 set noswapfile
+set relativenumber
 
 " Always show the signcolumn, otherwise it would shift the text each time
 " diagnostics appear/become resolved.
