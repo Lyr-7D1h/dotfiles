@@ -29,23 +29,31 @@ return require('packer').startup(function()
   use 'tomasiser/vim-code-dark'
   use 'Mofiqul/vscode.nvim'
 
-  use 'kyazdani42/nvim-web-devicons'
+  -- Treesitter
+  use {
+    'kyazdani42/nvim-web-devicons',
+    config = function()
+      require('nvim-web-devicons').setup()
+    end
+
+  }
   use {
     'kyazdani42/nvim-tree.lua',
     requires = {
-      'kyazdani42/nvim-web-devicons', -- optional, for file icons
+      'kyazdani42/nvim-web-devicons', 
     },
     tag = 'nightly' -- optional, updated every week. (see issue #1193)
   }
-
-  use 'jose-elias-alvarez/null-ls.nvim'
-  use 'MunifTanjim/prettier.nvim'
-
   use {
     'nvim-treesitter/nvim-treesitter',
     run = function() require('nvim-treesitter.install').update({ with_sync = true }) end,
   }
   use 'nvim-treesitter/nvim-treesitter-context'
+
+  -- Lsp
+  use 'jose-elias-alvarez/null-ls.nvim'
+  use 'MunifTanjim/prettier.nvim'
+
 
   -- Show error lines
   -- use({
@@ -66,7 +74,13 @@ return require('packer').startup(function()
     "windwp/nvim-autopairs",
     config = function() require("nvim-autopairs").setup {} end
   }
-  use 'tpope/vim-commentary'
+  -- use 'tpope/vim-commentary'
+  use {
+    'numToStr/Comment.nvim',
+    config = function()
+      require('Comment').setup()
+    end
+  }
 
   -- Fuzzy finder
   use {
