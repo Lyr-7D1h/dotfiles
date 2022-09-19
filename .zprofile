@@ -1,5 +1,7 @@
 export LANG=en_US.UTF-8
 
+export BROWSER="firefox"
+
 #
 # Custom Executables
 #
@@ -31,6 +33,8 @@ export PATH="$HOME/.serverless/bin:$PATH"
 
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export PATH="$PATH:$HOME/.rvm/bin"
+
+export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
 
 
 if [[ $HOST == "home" || $HOST == "latitude" ]]; then
