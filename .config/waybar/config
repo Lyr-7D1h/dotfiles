@@ -69,7 +69,7 @@
 		"format-alt": "{desc} {volume}% {icon}",
 		"max-length": 20,
 		"format-alt-click": "click-right",
-		"format-muted": "",
+		"format-muted": "",
 		"format-icons": {
 			"phone": [" ", " ", " ", " "],
 			"default": ["", "", "", ""]
