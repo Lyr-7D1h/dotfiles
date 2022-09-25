@@ -7,6 +7,7 @@
 #   swaybg
 #   bemenu
 #   power_menu (custom script using bemenu)
+#   toggle_sound_profile (custom script for switching sound card codec)
 #   wl-clipboard
 #   brightnessctl (if on laptop)
 #   playerctl
@@ -31,6 +32,7 @@ set $right l
 set $screenshot grim ~/Pictures/screenshots/scrn-$(date +"%Y-%m-%d-%H-%M-%S").png
 set $screenclip export SCREENSHOT_FILENAME=$HOME/Pictures/screenshots/scrn-$(date +"%Y-%m-%d-%H-%M-%S").png && slurp | grim -g - $SCREENSHOT_FILENAME && cat $SCREENSHOT_FILENAME | wl-copy
 set $term alacritty
+set $togglesound toggle_sound_profile
 set $soundraise pactl set-sink-volume @DEFAULT_SINK@ +5%
 set $soundlower pactl set-sink-volume @DEFAULT_SINK@ -5%
 set $soundmute pactl set-sink-mute @DEFAULT_SINK@ toggle
@@ -84,6 +86,11 @@ for_window [title="Bitwarden"] floating enable
 for_window [app_id="pulseUI"] floating enable
 for_window [app_id="org.gnome.Calculator"] floating enable
 for_window [app_id="pavucontrol"] floating enable
+
+# Application development 
+for_window [app_id="julia_sets"] floating enable
+assign [app_id="julia_sets"] number 3
+
 # android studio
 for_window [title="Device Manager"] floating enable
 for_window [title="Welcome to Android Studio"] floating nable
@@ -189,9 +196,9 @@ input "type:touchpad" {
     bindsym XF86AudioMute exec $soundmute
     bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
     bindsym XF86MonBrightnessUp exec brightnessctl set 5%+
-    bindsym XF86AudioPlay exec playerctl play-pause
-    bindsym XF86AudioNext exec playerctl next
-    bindsym XF86AudioPrev exec playerctl previous
+    bindsym --locked XF86AudioPlay exec playerctl play-pause
+    bindsym --locked XF86AudioNext exec playerctl next
+    bindsym --locked XF86AudioPrev exec playerctl previous
     bindsym XF86Search exec $menu
 
     bindsym $mod+Shift+minus exec $suspend
@@ -200,6 +207,7 @@ input "type:touchpad" {
 
     bindsym $mod+Slash exec $disnotification
 
+    bindsym $mod+m exec $toggle_sound_profile
 
     # Moving around:
 

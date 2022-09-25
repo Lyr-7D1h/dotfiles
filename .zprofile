@@ -10,6 +10,11 @@ export BROWSER="firefox"
 export PATH=$PATH:/usr/local/go/bin
 export PATH=$PATH:$(go env GOPATH)/bin
 
+# Adding pyenv
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+
 ### Exports
 # Adding custom executables
 export PATH="$PATH:$HOME/.npm/bin"

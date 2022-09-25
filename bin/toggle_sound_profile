@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# Used to toggle bluetooth headset codec for bluetooth microphone input
+#
+
+ldac=`pactl list | grep Active | grep a2dp`
+card=`pactl list | grep "Name: bluez_card." | cut -d ' ' -f 2`
+
+if [ -n "$ldac" ]; then
+    echo "Switching $card to msbc..."
+    pactl set-card-profile $card headset-head-unit-msbc
+else
+    echo "Switching $card to ldac..."
+    pactl set-card-profile $card a2dp-sink
+fi
+
+echo "done"
