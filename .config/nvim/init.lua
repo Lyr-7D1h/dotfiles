@@ -1,6 +1,10 @@
 -- comma as leader
 vim.g.mapleader = " "
 
+-- Disable netwr file explorer
+vim.g.loaded = 1
+vim.g.loaded_netrwPlugin = 1
+
 vim.cmd([[
 	so ~/.config/nvim/legacy.vim
 ]])
@@ -32,7 +36,8 @@ if vim.g.vscode ~= 1 then
 		defaults = {
 			mappings = {
 				i = {
-					["<esc>"] = telescope_actions.close
+					["<esc>"] = telescope_actions.close,
+					["<C-u>"] = false
 				}
 			}
 		}
@@ -43,7 +48,7 @@ if vim.g.vscode ~= 1 then
 	-- vim.keymap.set('n', '<C-p>', ':Files<CR>')
 	-- vim.keymap.set('n', '<C-g>', ':Rg<CR>')
 	-- vim.keymap.set('n', '<C-t>', ':Buffers<CR>')
-	
+
 	-- This unsets the "last search pattern" register by hitting escape
 	vim.keymap.set('n', '<esc>', ':noh<CR><esc>')
 	vim.keymap.set('n', '<esc>^[', '<esc>^[')
@@ -59,10 +64,20 @@ if vim.g.vscode ~= 1 then
 	-- require('vscode').setup({})
 
 	-- TODO setup keybind
-	-- require 'nvim-web-devicons'.setup {}
-	-- require("nvim-tree").setup()
-	-- vim.keymap.set('n', '<C-e>', ':NvimTreeToggle<CR>')
-	vim.keymap.set('n', '<C-e>', ':Explore<CR>')
+	require 'nvim-web-devicons'.setup {}
+	require("nvim-tree").setup({
+		view = {
+			mappings = {
+				list = {
+					-- https://github.com/kyazdani42/nvim-tree.lua/blob/master/doc/nvim-tree-lua.txt#L1248
+					-- { key = "u", action = "dir_up" },
+					{ key = "<C-e>", action = "" }
+				},
+			},
+		},
+	})
+	vim.keymap.set('n', '<C-e>', ':NvimTreeToggle<CR>')
+	-- vim.keymap.set('n', '<C-e>', ':Explore<CR>')
 
 
 	require "fidget".setup {}
