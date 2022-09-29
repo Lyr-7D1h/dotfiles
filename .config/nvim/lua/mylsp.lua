@@ -146,7 +146,7 @@ prettier.setup({
 })
 
 -- Basic setup
-local servers = { 'pyright', 'tsserver', 'sumneko_lua', 'eslint', 'ccls' }
+local servers = { 'pyright', 'tsserver', 'sumneko_lua', 'eslint', 'ccls', 'wgsl_analyzer' }
 
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
