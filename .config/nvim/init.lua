@@ -63,20 +63,6 @@ if vim.g.vscode ~= 1 then
 	-- vim.o.background = 'dark'
 	-- require('vscode').setup({})
 
-	-- TODO setup keybind
-	require 'nvim-web-devicons'.setup {}
-	require("nvim-tree").setup({
-		view = {
-			mappings = {
-				list = {
-					-- https://github.com/kyazdani42/nvim-tree.lua/blob/master/doc/nvim-tree-lua.txt#L1248
-					-- { key = "u", action = "dir_up" },
-					{ key = "<C-e>", action = "" }
-				},
-			},
-		},
-	})
-	vim.keymap.set('n', '<C-e>', ':NvimTreeToggle<CR>')
 	-- vim.keymap.set('n', '<C-e>', ':Explore<CR>')
 
 
