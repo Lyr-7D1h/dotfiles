@@ -15,6 +15,10 @@ window {
   background: rgba(35, 39, 42, 1);
 }
 
+.modules-right button:hover {
+  background: rgba(20, 20, 20, 1);
+}
+
 window#waybar.top {
   color: rgba(217, 216, 216, 1);
   border-bottom: 1px solid rgba(56, 56, 56, 0.7);
@@ -51,6 +55,8 @@ window#waybar.bottom {
 #mode,
 #battery,
 #disk,
+#bluetooth,
+#clock,
 #temperature,
 #cpu,
 #memory,
@@ -60,18 +66,10 @@ window#waybar.bottom {
 #custom-storage,
 #custom-spotify,
 #custom-weather,
+#tray,
 #custom-mail {
   margin: 0px 10px 0px 10px;
   min-width: 25px;
-}
-
-#tray {
-  margin-right: 10px;
-}
-
-#clock {
-  margin: 0px 16px 0px 10px;
-  min-width: 140px;
 }
 
 #battery.warning {
