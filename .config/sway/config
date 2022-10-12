@@ -149,6 +149,7 @@ exec swayidle -w \
 exec bitwarden-desktop
 exec blueman-applet
 exec rclone mount drive:/ ~/s/drive &> /tmp/rclone.log
+# exec /usr/lib/goa-daemon --replace &> /tmp/goa-daemon.log
 
 output * bg ~/.wallpaper fill
 

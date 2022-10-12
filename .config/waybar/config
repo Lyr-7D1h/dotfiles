@@ -3,7 +3,7 @@
 	"layer": "bottom",
 	"position": "top",
 	"height": 27,
-	"modules-left": ["sway/workspaces", "sway/mode"],
+	"modules-left": ["sway/workspaces", "sway/mode", "custom/gcalcli"],
 	"modules-center": ["sway/window"],
 	"modules-right": ["network", "bluetooth", "pulseaudio", "pulseaudio#microphone", "battery", "clock", "tray"],
 	"sway/mode": {
@@ -18,14 +18,14 @@
 		"max-length": 80,
 		"tooltip": false
 	},
-	"custom/gnma": {
+	"custom/gcalcli": {
 		"format": " {} ",
-		"interval": 5,
-		"exec": "gnome-next-meeting-applet dbus get_event",
-		"exec-if": "pgrep -f gnome-next-meeting-applet",
+		"interval": 30,
+		"exec": "google_calendar_next_event",
+		"exec-if": "command -v gcalcli",
 		"max-length": 50,
 		"min-length": 1,
-		"on-click": "gnome-next-meeting-applet dbus open_event_url",
+		"on-click": "xdg-open https://calendar.google.com/calendar/u/0/r/week",
 	},
 	"clock": {
 		"interval": 1,
