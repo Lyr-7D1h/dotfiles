@@ -135,7 +135,7 @@ exec /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 # exec qbittorrent
 # exec protonmail-bridge --no-window
 exec mako 
-# exec wlsunset -l 52.379189 -L 4.899431 -t 5000 -T 5700 -g 0.9 &> /tmp/wlsunset.log
+exec wlsunset -l 52.379189 -L 4.899431 -t 5000 -T 5700 -g 0.9 &> /tmp/wlsunset.log
 exec sworkstyle -d --log-level debug &> /tmp/sworkstyle.log
 exec nm-applet --indicator
 # exec blueman-applet
