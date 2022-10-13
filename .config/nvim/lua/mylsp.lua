@@ -31,10 +31,10 @@ end
 local on_attach = function(client, bufnr)
   local format_on_save_servers = { "rust_analyzer", "null-ls" }
   -- If formatting is supported and it is one of the known servers add format on save
-  if client.resolved_capabilities.document_formatting and has_value(format_on_save_servers, client.name) then
+  if client.server_capabilities.documentFormattingProvider and has_value(format_on_save_servers, client.name) then
     vim.api.nvim_command [[augroup Format]]
     vim.api.nvim_command [[autocmd! * <buffer>]]
-    vim.api.nvim_command [[autocmd BufWritePost <buffer> lua vim.lsp.buf.formatting()]]
+    vim.api.nvim_command [[autocmd BufWritePost <buffer> lua vim.lsp.buf.format { async = true }]]
     vim.api.nvim_command [[augroup END]]
   end
 
@@ -152,7 +152,7 @@ for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
     on_attach = function(client, bufnr)
       if client.name == "tsserver" then -- disable formatting for tsserver
-        client.resolved_capabilities.document_formatting = false
+        client.server_capabilities.document_formatting = false
       end
       on_attach(client, bufnr)
     end,

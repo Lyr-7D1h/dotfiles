@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#
+# Show next calendar event for waybar
+#
+
+set -e 
+
+if ! command -v gcalcli &>/dev/null; then
+	echo "Please install gcalcli (https://github.com/insanum/gcalcli)"
+	exit 1
+fi
+
+events_today=$(gcalcli agenda --military --nodeclined --details end --tsv $(date +%H:%M))
+
+start_time=$(echo -e "$events_today" | head -n 1 | cut -d$'\t' -f 2)
+end_time=$(echo -e "$events_today" | head -n 1 | cut -d$'\t' -f 4)
+
+echo $start_time
+echo $end_time
+
+# TODO return type https://man.archlinux.org/man/community/waybar/waybar-custom.5.en#RETURN-TYPE
+# gcalcli agenda --military --nodeclined --details end 

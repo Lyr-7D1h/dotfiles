@@ -69,3 +69,17 @@ require 'treesitter-context'.setup {
   mode = 'cursor', -- Line used to calculate context. Choices: 'cursor', 'topline'
   separator = nil, -- Separator between context and content. Should be a single character string, like '-'.
 }
+
+require 'nvim-web-devicons'.setup {}
+require("nvim-tree").setup({
+  view = {
+    mappings = {
+      list = {
+        -- https://github.com/kyazdani42/nvim-tree.lua/blob/master/doc/nvim-tree-lua.txt#L1248
+        -- { key = "u", action = "dir_up" },
+        { key = "<C-e>", action = "" }
+      },
+    },
+  },
+})
+vim.keymap.set('n', '<C-e>', ':NvimTreeToggle<CR>')
