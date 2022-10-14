@@ -10,13 +10,23 @@ if ! command -v gcalcli &>/dev/null; then
 	exit 1
 fi
 
-events_today=$(gcalcli agenda --military --nodeclined --details end --tsv $(date +%H:%M))
+events=$(gcalcli agenda --military --nodeclined --details end --tsv $(date +%H:%M))
 
-start_time=$(echo -e "$events_today" | head -n 1 | cut -d$'\t' -f 2)
-end_time=$(echo -e "$events_today" | head -n 1 | cut -d$'\t' -f 4)
+start_date=$(date +"%s" -d "$(echo -e "$events" | head -n 1 | cut -d$'\t' -f 1-2 | sed 's/\t/ /g')")
+end_date=$(date +"%s" -d "$(echo -e "$events" | head -n 1 | cut -d$'\t' -f 3-4 | sed 's/\t/ /g')")
+event=$(echo -e "$events" | head -n 1 | cut -d$'\t' -f 5)
+current_date=$(date +"%s")
 
-echo $start_time
-echo $end_time
+if [[ $((start_date - current_date)) -gt 0 ]]; then
+	hours=$((($current_date - $start_date) / 60/ 60))
+	minutes=$((($current_date - $start_date) / 60 - ($hours * 60)))
+	echo "$event starts in $hours hours and $minutes minutes"
+	exit 0
+fi
+
+hours=$((($end_date - $current_date) / 60/ 60))
+minutes=$((($end_date - $current_date) / 60 - ($hours * 60)))
+echo "$event ends in $hours hours and $minutes minutes"
 
 # TODO return type https://man.archlinux.org/man/community/waybar/waybar-custom.5.en#RETURN-TYPE
 # gcalcli agenda --military --nodeclined --details end 
