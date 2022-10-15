@@ -5,7 +5,7 @@
 	"height": 27,
 	"modules-left": ["sway/workspaces", "sway/mode", "custom/gcalcli"],
 	"modules-center": ["sway/window"],
-	"modules-right": ["network", "bluetooth", "pulseaudio", "pulseaudio#microphone", "battery", "clock", "tray"],
+	"modules-right": ["custom/ghnotify", "network", "bluetooth", "pulseaudio", "pulseaudio#microphone", "battery", "clock", "tray"],
 	"sway/mode": {
 		"format": " {}"
 	},
@@ -17,6 +17,15 @@
 	"sway/window": {
 		"max-length": 80,
 		"tooltip": false
+	},
+	"custom/ghnotify": {
+		"format": " {} ",
+		"interval": 300,
+		"exec": "github_notifications",
+		"exec-if": "command -v github_notifications",
+		"max-length": 50,
+		"min-length": 1,
+		"on-click": "xdg-open https://github.com/notifications",
 	},
 	"custom/gcalcli": {
 		"format": " {} ",
