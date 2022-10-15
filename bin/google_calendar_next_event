@@ -10,6 +10,7 @@ if ! command -v gcalcli &>/dev/null; then
 	exit 1
 fi
 
+# TODO only use events that are not whole days
 events=$(gcalcli agenda --military --nodeclined --details end --tsv $(date +%H:%M))
 
 start_date=$(date +"%s" -d "$(echo -e "$events" | head -n 1 | cut -d$'\t' -f 1-2 | sed 's/\t/ /g')")
