@@ -25,13 +25,11 @@ set -eo pipefail
 REMARKABLE_HOST=$1
 REMARKABLE_XOCHITL_DIR=${REMARKABLE_XOCHITL_DIR:-.local/share/remarkable/xochitl/}
 
+SSH_OPTIONS="-o ConnectTimeout=1 -o PasswordAuthentication=no -o PubkeyAcceptedKeyTypes=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa"
+
 ssh_cmd() {
     echo "[SSH]" "$@" >&2
-    ssh -o ConnectTimeout=1 \
-        -o PasswordAuthentication=no \
-        -o PubkeyAcceptedKeyTypes=+ssh-rsa \
-        -o HostKeyAlgorithms=+ssh-rsa \
-        "$REMARKABLE_HOST" "$@"
+    ssh $SSH_OPTIONS "$REMARKABLE_HOST" "$@"
 }
 
 get_ip() {
@@ -148,7 +146,7 @@ EOF
 
         # Transfer files
         echo "Transferring $filename as $uuid"
-        scp -r ${tmpdir}/* "${TARGET_DIR}"
+        scp $SSH_OPTIONS -r ${tmpdir}/* "${TARGET_DIR}"
         rm -rf ${tmpdir}/*
     done
 
