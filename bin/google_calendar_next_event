@@ -19,8 +19,8 @@ event=$(echo -e "$events" | head -n 1 | cut -d$'\t' -f 5)
 current_date=$(date +"%s")
 
 if [[ $((start_date - current_date)) -gt 0 ]]; then
-	hours=$((($current_date - $start_date) / 60/ 60))
-	minutes=$((($current_date - $start_date) / 60 - ($hours * 60)))
+	hours=$((($start_date - $current_date) / 60/ 60))
+	minutes=$((($start_date - $current_date) / 60 - ($hours * 60)))
 	echo "$event starts in $hours hours and $minutes minutes"
 	exit 0
 fi
