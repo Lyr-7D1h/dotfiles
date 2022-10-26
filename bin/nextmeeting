@@ -13,29 +13,48 @@ fi
 # TODO only use events that are not whole days
 events=$(gcalcli agenda --military --nodeclined --details end --tsv $(date +%H:%M))
 
+
 start_date=$(date +"%s" -d "$(echo -e "$events" | head -n 1 | cut -d$'\t' -f 1-2 | sed 's/\t/ /g')")
 end_date=$(date +"%s" -d "$(echo -e "$events" | head -n 1 | cut -d$'\t' -f 3-4 | sed 's/\t/ /g')")
 event=$(echo -e "$events" | head -n 1 | cut -d$'\t' -f 5)
+
 current_date=$(date +"%s")
+text=""
 
 if [[ $((start_date - current_date)) -gt 0 ]]; then
 	hours=$((($start_date - $current_date) / 60/ 60))
 	minutes=$((($start_date - $current_date) / 60 - ($hours * 60)))
 	if [[ $hours -eq 0 ]]; then
-		echo "$event starts in $minutes minutes"
+		text="$event starts in $minutes minutes"
 	else
-		echo "$event starts in $hours hours and $minutes minutes"
+		text="$event starts in $hours hours and $minutes minutes"
 	fi
-	exit 0
+else
+	hours=$((($end_date - $current_date) / 60/ 60))
+	minutes=$((($end_date - $current_date) / 60 - ($hours * 60)))
+	if [[ $hours -eq 0 ]]; then
+		text="$event ends in $minutes minutes"
+	else
+		text="$event ends in $hours hours and $minutes minutes"
+	fi
 fi
 
-hours=$((($end_date - $current_date) / 60/ 60))
-minutes=$((($end_date - $current_date) / 60 - ($hours * 60)))
-if [[ $hours -eq 0 ]]; then
-	echo "$event ends in $minutes minutes"
-else
-	echo "$event ends in $hours hours and $minutes minutes"
-fi
+
+case $1 in
+"open")
+	default_browser=$(xdg-settings get default-web-browser | cut -d '.' -f1)
+	xdg-open https://calendar.google.com/calendar/u/0/r/week
+	swaymsg "[app_id=$default_browser] focus"
+;;
+"waybar")
+	cat <<EOF 
+	{"text": "$text", "tooltip": "$(echo $events | sed 's/\\n/\n/g')"}
+EOF
+;;
+*)
+	echo $text
+;;
+esac
 
 # TODO return type https://man.archlinux.org/man/community/waybar/waybar-custom.5.en#RETURN-TYPE
 # gcalcli agenda --military --nodeclined --details end 

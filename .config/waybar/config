@@ -3,7 +3,7 @@
 	"layer": "bottom",
 	"position": "top",
 	"height": 27,
-	"modules-left": ["sway/workspaces", "sway/mode", "custom/gcalcli"],
+	"modules-left": ["sway/workspaces", "sway/mode", "custom/nextmeeting"],
 	"modules-center": ["sway/window"],
 	"modules-right": ["custom/ghnotify", "network", "bluetooth", "pulseaudio", "pulseaudio#microphone", "battery", "clock", "tray"],
 	"sway/mode": {
@@ -27,14 +27,15 @@
 		"min-length": 1,
 		"on-click": "xdg-open https://github.com/notifications",
 	},
-	"custom/gcalcli": {
+	"custom/nextmeeting": {
+		"return-type": "json",
 		"format": " {} ",
 		"interval": 30,
-		"exec": "google_calendar_next_event",
+		"exec": "nextmeeting waybar",
 		"exec-if": "command -v gcalcli",
 		"max-length": 50,
 		"min-length": 1,
-		"on-click": "xdg-open https://calendar.google.com/calendar/u/0/r/week",
+		"on-click": "nextmeeting open",
 	},
 	"clock": {
 		"interval": 1,

@@ -409,32 +409,46 @@ stream() {
         )
 }
 
-if [[ $1 == "ip" ]]; then
-    get_ip ${@:2}
-    exit 0
-fi
+interactive_ssh() {
+    ssh $SSH_OPTIONS $REMARKABLE_HOST
+}
 
-if [[ $1 == "stream" ]]; then
-    REMARKABLE_HOST=root@$(get_ip)
-    stream ${@:2}
-    exit 0
-fi
 
-if [[ $1 == "upload" ]]; then
-    REMARKABLE_HOST=root@$(get_ip)
-    upload ${@:2}
-    exit 0
-fi
+case $1 in
+    "ip")
+        get_ip ${@:2}
+        exit 0
+        ;;
+    "ssh")
+        REMARKABLE_HOST=root@$(get_ip)
+        interactive_ssh
+        exit 0
+        ;;
+    "stream")
+        REMARKABLE_HOST=root@$(get_ip)
+        stream ${@:2}
+        exit 0
+        ;;
+    "upload")
+        REMARKABLE_HOST=root@$(get_ip)
+        upload ${@:2}
+        ;;
+esac
 
-if [[ $2 == "upload" ]]; then
-    upload ${@:3}
-    exit 0
-fi
-
-if [[ $2 == "stream" ]]; then
-    stream ${@:3}
-    exit 0
-fi
+case $2 in 
+    "ssh")
+        interactive_ssh
+        exit 0
+        ;;
+    "stream")
+        stream ${@:3}
+        exit 0
+        ;;
+    "upload")
+        upload ${@:3}
+        exit 0
+        ;;
+esac
 
 echo "$(basename $0) {host|ip|upload|stream} {upload|stream} [OPTIONS]
 
