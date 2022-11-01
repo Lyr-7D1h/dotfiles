@@ -1,6 +1,7 @@
 [Unit]
 Description=Set your daily wallpaper
 After=network-online.target
+Wants=network-online.target
 
 [Timer]
 OnCalendar=daily
