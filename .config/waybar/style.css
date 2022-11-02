@@ -20,8 +20,10 @@ box {
   color: rgba(217, 216, 216, 1);
 }
 
+.modules-left button:hover,
+.modules-center button:hover,
 .modules-right button:hover {
-  background: rgba(20, 20, 20, 1);
+  background: rgba(20, 20, 20, 0.2);
 }
 
 window#waybar.top {
@@ -32,6 +34,10 @@ window#waybar.top {
 window#waybar.bottom {
   color: rgba(217, 216, 216, 1);
   border-top: 1px solid rgba(56, 56, 56, 0.7);
+}
+
+#workspaces button:hover {
+  background: rgba(217, 216, 216, 0.4);
 }
 
 #workspaces button {
@@ -69,6 +75,7 @@ window#waybar.bottom {
 #custom-weather,
 #custom-nextmeeting,
 #custom-ghnotify,
+#custom-weather,
 #tray,
 #custom-mail {
   color: rgba(217, 216, 216, 1);

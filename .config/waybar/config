@@ -5,7 +5,7 @@
 	"height": 27,
 	"modules-left": ["sway/workspaces", "sway/mode", "custom/nextmeeting"],
 	"modules-center": ["sway/window"],
-	"modules-right": ["custom/ghnotify", "network", "bluetooth", "pulseaudio", "pulseaudio#microphone", "battery", "clock", "tray"],
+	"modules-right": ["custom/ghnotify", "network", "bluetooth", "pulseaudio", "pulseaudio#microphone", "battery", "custom/weather", "clock", "tray"],
 	"sway/mode": {
 		"format": " {}"
 	},
@@ -18,6 +18,12 @@
 		"max-length": 80,
 		"tooltip": false
 	},
+	"custom/weather": {
+		"format": "{}",
+		"exec": "curl -s \"wttr.in/ams?format=%22+%c+%t\\n%22\" | sed 's/\"//g'",
+		"interval": 6000,
+		"on-click": "xdg-open https://wttr.in/"
+	},
 	"custom/ghnotify": {
 		"format": " {} ",
 		"interval": 30,
@@ -25,7 +31,7 @@
 		"exec-if": "command -v github_notifications",
 		"max-length": 50,
 		"min-length": 1,
-		"on-click": "xdg-open https://github.com/notifications",
+		"on-click": "xdg-open https://github.com/notifications"
 	},
 	"custom/nextmeeting": {
 		"return-type": "json",
@@ -35,7 +41,7 @@
 		"exec-if": "command -v gcalcli",
 		"max-length": 50,
 		"min-length": 1,
-		"on-click": "nextmeeting open",
+		"on-click": "nextmeeting open"
 	},
 	"clock": {
 		"interval": 1,
