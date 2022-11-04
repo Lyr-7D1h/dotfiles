@@ -4,7 +4,7 @@
 	"position": "top",
 	"height": 27,
 	"modules-left": ["sway/workspaces", "sway/mode", "custom/nextmeeting"],
-	"modules-center": ["sway/window"],
+	"modules-center": [],
 	"modules-right": ["custom/ghnotify", "custom/ip", "network", "bluetooth", "pulseaudio", "pulseaudio#microphone", "battery", "custom/weather", "clock", "tray"],
 	"sway/mode": {
 		"format": " {}"
@@ -15,7 +15,7 @@
 		"enable-bar-scroll": false
 	},
 	"sway/window": {
-		"max-length": 80,
+		"max-length": 35,
 		"tooltip": false
 	},
 	"custom/ip": {

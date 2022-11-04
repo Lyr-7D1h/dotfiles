@@ -59,6 +59,9 @@ client.focused_inactive $cl_back $cl_back $cl_fore $cl_back $cl_back
 client.unfocused        $cl_back $cl_back $cl_fore $cl_back $cl_back
 client.urgent           $cl_urge $cl_urge $cl_fore $cl_urge $cl_urge
 
+# font pango:UbuntuMono Medium 11
+font pango:UbuntuMono 10
+
 # Disable title bar
 default_border pixel
 default_floating_border pixel
@@ -119,8 +122,6 @@ exec_always {
     gsettings set $gnome-schema font-name 'Ubuntu'
 }
 
-# font pango:UbuntuMono Medium 11
-font pango: UbuntuMono 10
 
 ### Autostart apps
 
