@@ -5,7 +5,7 @@
 	"height": 27,
 	"modules-left": ["sway/workspaces", "sway/mode", "custom/nextmeeting"],
 	"modules-center": ["sway/window"],
-	"modules-right": ["custom/ghnotify", "network", "bluetooth", "pulseaudio", "pulseaudio#microphone", "battery", "custom/weather", "clock", "tray"],
+	"modules-right": ["custom/ghnotify", "custom/ip", "network", "bluetooth", "pulseaudio", "pulseaudio#microphone", "battery", "custom/weather", "clock", "tray"],
 	"sway/mode": {
 		"format": " {}"
 	},
@@ -17,6 +17,11 @@
 	"sway/window": {
 		"max-length": 80,
 		"tooltip": false
+	},
+	"custom/ip": {
+		"format": " {}",
+		"exec": "curl -s ifconfig.me",
+		"interval": 300
 	},
 	"custom/weather": {
 		"format": "{}",
