@@ -4,7 +4,6 @@
 	"position": "top",
 	"height": 27,
 	"modules-left": ["sway/workspaces", "sway/mode", "custom/nextmeeting"],
-	"modules-center": [],
 	"modules-right": ["custom/ghnotify", "custom/ip", "network", "bluetooth", "pulseaudio", "pulseaudio#microphone", "battery", "custom/weather", "clock", "tray"],
 	"sway/mode": {
 		"format": " {}"
@@ -34,7 +33,6 @@
 		"interval": 30,
 		"exec": "github_notifications",
 		"exec-if": "command -v github_notifications",
-		"max-length": 50,
 		"min-length": 1,
 		"on-click": "xdg-open https://github.com/notifications"
 	},
@@ -87,7 +85,6 @@
 	},
 	"pulseaudio": {
 		"format": "{icon} {volume}%",
-		"max-length": 20,
 		"format-muted": "",
 		"format-icons": {
 			"phone": [" ", " ", " ", " "],
@@ -101,7 +98,6 @@
 		"format": "{icon} {format_source}",
 		"format-source": " {volume}%",
 		"format-source-muted": "",
-		"max-length": 20,
 		"scroll-step": 1,
 		"on-click": "pavucontrol -t 4",
 		"on-scroll-up": "pactl set-source-volume @DEFAULT_SOURCE@ +1%",
