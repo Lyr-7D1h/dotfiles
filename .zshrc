@@ -164,6 +164,27 @@ zle -N fzf_history
 bindkey '^R' fzf_history 
 # bindkey '^R' history-incremental-search-backward
 
+tmux_inserter() {
+  name=( $(basename `pwd`) )
+
+  if [[ $(tmux ls | grep "$name" ) ]]; then
+    zle push-line 
+    BUFFER="tmux attach-session -t $name"
+    zle accept-line
+
+    return
+  fi
+
+  zle push-line # Clear buffer. Auto-restored on next prompt.
+  BUFFER="tmux new-session -s "$name""
+  zle accept-line
+
+  zle reset-prompt
+  return
+}
+zle -N tmux_inserter 
+bindkey '^T' tmux_inserter
+
 autoload -Uz select-word-style
 select-word-style bash
 

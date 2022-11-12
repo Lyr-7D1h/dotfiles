@@ -60,7 +60,7 @@ local on_attach = function(client, bufnr)
   -- Replaces with telescope
   -- vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
 
-  vim.keymap.set('n', '<space>f', vim.lsp.buf.formatting, bufopts)
+  vim.keymap.set('n', '<space>f', vim.lsp.buf.format, bufopts)
 end
 
 local lsp_flags = {
@@ -69,8 +69,9 @@ local lsp_flags = {
 }
 
 -- Add additional capabilities supported by nvim-cmp
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+-- local capabilities = vim.lsp.protocol.make_client_capabilities()
+-- capabilities = require('cmp_nvim_lsp').cmp_nvim_lsp.default_capabilities(capabilities)
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 -- sets up rust_analyzer lsp server
 require('rust-tools').setup({
