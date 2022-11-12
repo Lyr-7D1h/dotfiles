@@ -10,6 +10,10 @@ set scrolloff=8
 set mouse=a
 set completeopt=menu,menuone,noselect
 set noswapfile
+
+" Disable automatically wrapping newline 
+set formatoptions-=t
+
 set relativenumber
 
 " Always show the signcolumn, otherwise it would shift the text each time

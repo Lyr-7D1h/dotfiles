@@ -54,8 +54,8 @@
 	"battery": {
 		"format": "{icon} {capacity}%",
 		"format-alt": "{icon} {time}",
-		"format-icons": ["", "", "", "", ""],
-		"format-charging": "{capacity}% *",
+		"format-icons": ["", "", "", "", ""],
+		"format-charging": " {capacity}%",
 		"interval": 20,
 		"states": {
 			"warning": 25,
@@ -111,7 +111,7 @@
 		"format-disabled": " DISABLED",
 		"format-connected": " {device_alias}",
 		"format-connected-battery": " {device_alias} {device_battery_percentage}%",
-		// "format-device-preference": [ "device1", "device2" ], // preference list deciding the displayed device
+		"format-device-preference": [ "WH-1000XM3", "Bluetooth" ], // preference list deciding the displayed device
 		"tooltip-format": "{controller_alias}\t{controller_address}\n\n{num_connections} connected",
 		"tooltip-format-connected": "{controller_alias}\t{controller_address}\n\n{num_connections} connected\n\n{device_enumerate}",
 		"tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
