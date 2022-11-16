@@ -91,28 +91,45 @@ lspconfig.efm.setup {
   filetypes = { "python" }, -- See `:Filetypes`
   -- filetypes = { "python", "javascript", "typescript", "javascriptreact", "javascript.jsx", "typescript",
   --   "typescriptreact", "typescript.tsx" }, -- See `:Filetypes`
+
+  -- Allows for pyproject usage
+  root_dir = function()
+    return vim.fs.dirname(vim.fs.find({ '.git', 'pyproject.toml' }, { upward = true })[1])
+  end,
+
   init_options = { documentFormatting = true },
   settings = {
-    rootMarkers = { ".git/" },
+    rootMarkers = { ".git/", "pyproject.toml" },
     languages = {
       python = {
         { formatCommand = "black --quiet -", formatStdin = true },
         { formatCommand = "isort --quiet -", formatStdin = true },
-        -- {
-        --   lintCommand = "pylint --output-format text --score no --msg-template {path}:{line}:{column}:{C}:{msg} --from-stdin ${INPUT} -",
-        --   lintStdin = false,
-        --   lintOffsetColumns = 1,
-        --   lintIgnoreExitCode = true,
-        --   -- lintCategoryMap = {
-        --   --   I = "H",
-        --   --   R = "I",
-        --   --   C = "I",
-        --   --   W = "W",
-        --   --   E = "E",
-        --   --   F = "E"
-        --   -- },
-        --   lintFormats = "%f:%l:%c:%t:%m"
-        -- }
+        {
+          lintCommand = "mypy --show-column-numbers --ignore-missing-imports --show-error-codes --strict",
+          lintIgnoreExitCode = true,
+          lintFormats = {
+            '%f:%l:%c: %trror: %m',
+            '%f:%l:%c: %tarning: %m',
+            '%f:%l:%c: %tote: %m'
+          },
+          lintSource = "mypy",
+        },
+        {
+          lintCommand = "pylint --output-format text --score no --msg-template {path}:{line}:{column}:{C}:{msg} ${INPUT}",
+          lintStdin = false,
+          lintOffsetColumns = 1,
+          lintIgnoreExitCode = true,
+          lintCategoryMap = {
+            I = "H",
+            R = "I",
+            C = "I",
+            W = "W",
+            E = "E",
+            F = "E"
+          },
+          lintFormats = { "%f:%l:%c:%t:%m" }
+
+        }
       },
       -- typescript = {
       --   formatCommand = "node_modules/.bin/prettier --stdin-filepath" .. vim.api.nvim_buf_get_name(0),
@@ -146,15 +163,35 @@ prettier.setup({
   },
 })
 
+-- lspconfig["pylsp"].setup {
+--   on_attach = on_attach,
+--   capabilities = capabilities,
+--   plugins = {
+--     black = {
+--       enabled = true
+--     },
+--     mypy = {
+--       enabled = true,
+--       live_mode = true,
+--       strict = true
+--     },
+--     isort = {
+--       enabled = true
+--     }
+--   }
+-- }
+
 -- Basic setup
-local servers = { 'pyright', 'tsserver', 'sumneko_lua', 'eslint', 'ccls', 'wgsl_analyzer' }
+local servers = { 'pyright', 'tsserver', 'sumneko_lua', 'eslint', 'ccls', 'wgsl_analyzer', "taplo" }
 
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
     on_attach = function(client, bufnr)
+
       if client.name == "tsserver" then -- disable formatting for tsserver
         client.server_capabilities.document_formatting = false
       end
+
       on_attach(client, bufnr)
     end,
     flags = lsp_flags,
