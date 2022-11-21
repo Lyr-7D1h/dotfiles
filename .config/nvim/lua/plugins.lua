@@ -12,13 +12,16 @@ return require('packer').startup(function()
   use 'neovim/nvim-lspconfig'
 
   -- Snipets
+  -- Auto complete framework
+  use 'hrsh7th/nvim-cmp'
+  -- Lsp Completion Sources
   use 'hrsh7th/cmp-nvim-lsp'
+  -- Completion sources
   use 'hrsh7th/cmp-buffer'
+  use 'hrsh7th/cmp-nvim-lua'
+  use 'hrsh7th/cmp-nvim-lsp-signature-help'
   use 'hrsh7th/cmp-path'
   use 'hrsh7th/cmp-cmdline'
-  use 'hrsh7th/nvim-cmp'
-
-
   use 'hrsh7th/cmp-vsnip'
   use 'hrsh7th/vim-vsnip'
   use 'hrsh7th/vim-vsnip-integ'
@@ -28,6 +31,8 @@ return require('packer').startup(function()
   use 'morhetz/gruvbox'
   use 'tomasiser/vim-code-dark'
   use 'Mofiqul/vscode.nvim'
+  use 'tanvirtin/monokai.nvim'
+  use 'navarasu/onedark.nvim'
 
   -- Treesitter
   use {
@@ -40,7 +45,7 @@ return require('packer').startup(function()
   use {
     'kyazdani42/nvim-tree.lua',
     requires = {
-      'kyazdani42/nvim-web-devicons', 
+      'kyazdani42/nvim-web-devicons',
     },
     tag = 'nightly' -- optional, updated every week. (see issue #1193)
   }

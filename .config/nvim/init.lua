@@ -9,11 +9,32 @@ vim.cmd([[
 	so ~/.config/nvim/legacy.vim
 ]])
 
+--Set completeopt to have a better completion experience
+-- :help completeopt
+-- menuone: popup even when there's only one match
+-- noinsert: Do not insert text until a selection is made
+-- noselect: Do not select, force to select one from the menu
+-- shortness: avoid showing extra messages when using completion
+-- updatetime: set updatetime for CursorHold
+vim.opt.completeopt = { 'menuone', 'noselect', 'noinsert' }
+vim.opt.shortmess = vim.opt.shortmess + { c = true }
+vim.api.nvim_set_option('updatetime', 300)
+
+-- Fixed column for diagnostics to appear
+-- Show autodiagnostic popup on cursor hover_range
+-- Goto previous / next diagnostic warning / error
+-- Show inlay_hints more frequently
+vim.cmd([[
+set signcolumn=yes
+" autocmd CursorHold * lua vim.diagnostic.open_float(nil, { focusable = false })
+]])
+
 if vim.g.vscode ~= 1 then
 	-- Load all plugins when not in vscode
 	require('plugins')
 	require('mylsp')
 	require('autocmp')
+	require('mydap')
 	require("treesitter")
 
 
@@ -61,6 +82,10 @@ if vim.g.vscode ~= 1 then
 	-- vim.cmd("colorscheme tender")
 	-- vim.cmd("autocmd vimenter * ++nested colorscheme gruvbox")
 	vim.cmd("colorscheme codedark")
+	-- require('onedark').setup {
+	-- 	style = 'warm'
+	-- }
+	-- require('monokai').setup {}
 	-- vim.o.background = 'dark'
 	-- require('vscode').setup({})
 
