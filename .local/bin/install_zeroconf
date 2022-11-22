@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+# Automatically install a sound server or client on device
+# Docs used:
+# https://wiki.archlinux.org/title/PipeWire#Sharing_audio_devices_with_computers_on_the_network
+# https://wiki.archlinux.org/title/Avahi#Installation
+
+set -e
+
+if [[ $EUID == 0 ]]; then
+    echo "Please run as non-root user"
+    exit 1
+fi 
+
+if [[ $0 != "$HOME/.local/bin/install_zeroconf" ]]; then
+    cp -f $0 "$HOME/.local/bin/install_zeroconf"
+    echo "Replacing .local/bin/install_zeroconf"
+    install_zeroconf $@
+    exit 0
+fi
+
+if [[ "$1" != "setup_client" ]] && [[ "$1" != "setup_server" ]] && [[ "$1" != "start_client" ]] && [[ "$1" != "start_server" ]]; then
+    echo "$0 setup_client|setup_server|start_client|start_server"
+    exit 1
+fi
+
+CLIENT_SERVICE="
+[Unit]
+Description=Setup zeroconf audio client
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/install_zeroconf start_client
+
+[Install]
+WantedBy=default.target
+"
+
+SERVER_SERVICE="
+[Unit]
+Description=Setup zeroconf audio server
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/install_zeroconf start_server
+
+[Install]
+WantedBy=default.target
+"
+
+get_local_ip() {
+    local interfaces=$(ip link show up | grep -P "(?<=^[0-9]: )((enp)|(wlo)|(eth))[^:]*" -o)
+    local routes=$(ip route show | grep -E '^default')
+    for interface in $interfaces; do
+        ip=$(ip route show | grep -E '^default' | grep -P "(?<=src )([0-9]|[.])*" -o)
+        if [[ "$ip" != "" ]]; then
+            break
+        fi
+    done
+    echo $ip
+}
+
+os() {
+    VERSION=`cat /proc/version`
+    if echo "$VERSION" | grep "archlinux" &>/dev/null ; then
+        echo "arch"
+    else
+        echo "unknown version: $VERSION"
+    fi
+}
+
+install() {
+    if os == "arch" &>/dev/null; then
+        if pacman -Q | grep $1 &>/dev/null ; then 
+            echo "$1 already installed"
+        else
+            yes | sudo pacman -S $1
+        fi
+    fi
+}
+
+install_avahi() {
+    if systemctl --user list-units | grep pipewire | grep active &>/dev/null ; then
+        install pipewire-zeroconf 
+    elif systemctl --user list-units | grep pulseaudio | grep active &>/dev/null ; then
+        install pulseaudio-zeroconf 
+    fi
+
+    install avahi
+    sudo systemctl disable --now systemd-resolved.service
+    sudo systemctl enable --now avahi-daemon.service
+    sudo systemctl enable --now avahi-daemon.service
+}
+
+setup_client() {
+    install_avahi
+    echo "$SERVER_SERVICE" > $HOME/.config/systemd/user/zeroconf-client.service
+    echo "Installed service at $HOME/.config/systemd/user/zeroconf-server.service"
+    systemctl --user daemon-reload
+    systemctl enable --now --user zeroconf-client.service
+    echo "Enabled user service zeroconfig-server.service"
+}
+
+setup_server() {
+    install_avahi
+    echo "$SERVER_SERVICE" > $HOME/.config/systemd/user/zeroconf-server.service
+    echo "Installed service at $HOME/.config/systemd/user/zeroconf-server.service"
+    systemctl --user daemon-reload
+    systemctl enable --now --user zeroconf-server.service 
+    echo "Enabled user service zeroconfig-server.service"
+
+}
+
+start_server() {
+    pactl load-module module-native-protocol-tcp listen=`get_local_ip`
+    pactl load-module module-zeroconf-publish
+    echo "Server listening on $(get_local_ip)"
+}
+
+start_client() {
+    pactl load-module module-zeroconf-discover
+}
+
+$1
