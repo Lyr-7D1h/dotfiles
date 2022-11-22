@@ -184,8 +184,8 @@ input "type:touchpad" {
 
     bindsym $mod+f exec $menu
 
-    bindsym $mod+Print exec $screenshot
-    bindsym $mod+Shift+Print exec $screenclip
+    bindsym $mod+Print exec $screenclip
+    bindsym $mod+Shift+Print exec $screenshot
 
     # Allow resizing with $mod + mouse
     floating_modifier $mod normal
