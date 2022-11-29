@@ -46,6 +46,7 @@ local on_attach = function(client, bufnr)
   local bufopts = { noremap = true, silent = true, buffer = bufnr }
   vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
   vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
+  vim.keymap.set('n', 'gt', vim.lsp.buf.type_definition, bufopts)
   vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
   vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
   vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
@@ -54,7 +55,6 @@ local on_attach = function(client, bufnr)
   vim.keymap.set('n', '<space>wl', function()
     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
   end, bufopts)
-  vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
   vim.keymap.set('n', '<F2>', vim.lsp.buf.rename, bufopts)
   vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
   -- Replaces with telescope
@@ -105,7 +105,7 @@ lspconfig.efm.setup {
         { formatCommand = "black --quiet -", formatStdin = true },
         { formatCommand = "isort --quiet -", formatStdin = true },
         {
-          lintCommand = "mypy --show-column-numbers --ignore-missing-imports --show-error-codes --strict",
+          lintCommand = "mypy --show-column-numbers --ignore-missing-imports --show-error-codes",
           lintIgnoreExitCode = true,
           lintFormats = {
             '%f:%l:%c: %trror: %m',

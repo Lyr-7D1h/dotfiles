@@ -25,27 +25,27 @@ cmp.setup({
   }),
   sources = cmp.config.sources({
     { name = 'path' },
-    { name = 'nvim_lsp', keyword_length = 2 },
+    { name = 'nvim_lsp' },
     { name = 'nvim_lsp_signature_help' }, -- display function signatures with current parameter emphasized
-    { name = 'nvim_lua', keyword_length = 2 }, -- complete neovim's Lua runtime API such vim.lsp.*
+    { name = 'nvim_lua' }, -- complete neovim's Lua runtime API such vim.lsp.*
     { name = 'vsnip' },
     { name = "crates" },
-    { name = 'buffer', keyword_length = 2 }, -- source current buffer
+    { name = 'buffer' }, -- source current buffer
     { name = 'calc' }, -- source for math calculation
   }),
-  formatting = {
-    fields = { 'menu', 'abbr', 'kind' },
-    format = function(entry, item)
-      local menu_icon = {
-        nvim_lsp = 'ﬦ',
-        vsnip = '⋗',
-        buffer = '',
-        path = '',
-      }
-      item.menu = menu_icon[entry.source.name]
-      return item
-    end,
-  },
+  -- formatting = {
+  --   fields = { 'menu', 'abbr', 'kind' },
+  --   format = function(entry, item)
+  --     local menu_icon = {
+  --       nvim_lsp = 'ﬦ',
+  --       vsnip = '⋗',
+  --       buffer = '',
+  --       path = '',
+  --     }
+  --     item.menu = menu_icon[entry.source.name]
+  --     return item
+  --   end,
+  -- },
 })
 
 -- Set configuration for specific filetype.
