@@ -53,6 +53,23 @@ setopt SHARE_HISTORY
 unsetopt EXTENDED_HISTORY
 setopt autocd
 
+# ZStyle
+# Do menu-driven completion.
+zstyle ':completion:*' menu select
+
+# Color completion for some things.
+# http://linuxshellaccount.blogspot.com/2008/12/color-completion-using-zsh-modules-on.html
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+
+# formatting and messages
+# http://www.masterzen.fr/2009/04/19/in-love-with-zsh-part-one/
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*:descriptions' format "$fg[yellow]%B--- %d%b"
+zstyle ':completion:*:messages' format '%d'
+zstyle ':completion:*:warnings' format "$fg[red]No matches for:$reset_color %d"
+zstyle ':completion:*:corrections' format '%B%d (errors: %e)%b'
+zstyle ':completion:*' group-name ''
+
 
 # Preferred editor for local and remote sessions
 if [[ -n $SSH_CONNECTION ]]; then
@@ -167,7 +184,7 @@ bindkey '^R' fzf_history
 tmux_inserter() {
   name=( $(basename `pwd`) )
 
-  if [[ $(tmux ls | grep "$name" ) ]]; then
+  if [[ $(tmux ls -F "#S" | grep "$name" ) ]]; then
     zle push-line 
     BUFFER="tmux attach-session -t $name"
     zle accept-line
