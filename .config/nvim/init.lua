@@ -9,6 +9,9 @@ vim.cmd([[
 	so ~/.config/nvim/legacy.vim
 ]])
 
+vim.opt.splitbelow = true
+vim.opt.splitright = true
+
 --Set completeopt to have a better completion experience
 -- :help completeopt
 -- menuone: popup even when there's only one match
@@ -20,14 +23,17 @@ vim.opt.completeopt = { 'menuone', 'noselect', 'noinsert' }
 vim.opt.shortmess = vim.opt.shortmess + { c = true }
 vim.api.nvim_set_option('updatetime', 300)
 
+-- Lsp folding (https://github.com/kevinhwang91/nvim-ufo#quickstart)
+-- vim.opt.foldcolumn = "1"
+vim.opt.foldlevel = 99
+vim.opt.foldlevelstart = -1
+vim.opt.foldenable = true
+
 -- Fixed column for diagnostics to appear
 -- Show autodiagnostic popup on cursor hover_range
 -- Goto previous / next diagnostic warning / error
 -- Show inlay_hints more frequently
-vim.cmd([[
-set signcolumn=yes
-" autocmd CursorHold * lua vim.diagnostic.open_float(nil, { focusable = false })
-]])
+vim.opt.signcolumn = 'yes'
 
 if vim.g.vscode ~= 1 then
 	-- Load all plugins when not in vscode
