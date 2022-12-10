@@ -11,6 +11,25 @@ return require('packer').startup(function()
   use "williamboman/nvim-lsp-installer"
   use 'neovim/nvim-lspconfig'
 
+  -- Fold functions based on lsp and treesitter
+  use {
+    "kevinhwang91/nvim-ufo",
+    opt = true,
+    event = { "BufReadPre" },
+    wants = { "promise-async" },
+    requires = "kevinhwang91/promise-async",
+    config = function()
+      require("ufo").setup {
+        provider_selector = function(bufnr, filetype)
+          return { "lsp", "indent" }
+        end,
+      }
+      vim.keymap.set("n", "zR", require("ufo").openAllFolds)
+      vim.keymap.set("n", "zM", require("ufo").closeAllFolds)
+    end,
+  }
+
+
   -- Snipets
   -- Auto complete framework
   use 'hrsh7th/nvim-cmp'
@@ -94,8 +113,8 @@ return require('packer').startup(function()
     requires = { { 'nvim-lua/plenary.nvim' } }
   }
 
-  use 'junegunn/fzf'
-  use 'junegunn/fzf.vim'
+  -- use 'junegunn/fzf'
+  -- use 'junegunn/fzf.vim'
 
   -- Nix
   use 'lnl7/vim-nix'
@@ -109,6 +128,7 @@ return require('packer').startup(function()
   -- Debugging
   use 'nvim-lua/plenary.nvim'
   use 'mfussenegger/nvim-dap'
+  use { "rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap"} }
   -- use 'roxma/nvim-cm-racer'
   -- use {
   --   'saecki/crates.nvim',

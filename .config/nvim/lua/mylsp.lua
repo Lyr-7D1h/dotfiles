@@ -72,6 +72,12 @@ local lsp_flags = {
 -- local capabilities = vim.lsp.protocol.make_client_capabilities()
 -- capabilities = require('cmp_nvim_lsp').cmp_nvim_lsp.default_capabilities(capabilities)
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
+-- Lsp based folding
+capabilities.textDocument.completion.completionItem.snippetSupport = true
+capabilities.textDocument.foldingRange = {
+  dynamicRegistration = false,
+  lineFoldingOnly = true,
+}
 
 -- sets up rust_analyzer lsp server
 require('rust-tools').setup({
@@ -82,6 +88,16 @@ require('rust-tools').setup({
     on_attach = on_attach,
     flags = lsp_flags,
     capabilities = capabilities,
+  },
+  -- dap = {
+  --   adapter = require('dap').adapters.lldb
+  -- },
+  dap = {
+    adapter = {
+      type = "executable",
+      command = "lldb-vscode",
+      name = "rt_lldb",
+    }
   }
 })
 
@@ -182,7 +198,7 @@ prettier.setup({
 -- }
 
 -- Basic setup
-local servers = { 'pyright', 'tsserver', 'sumneko_lua', 'eslint', 'ccls', 'wgsl_analyzer', "taplo" }
+local servers = { 'pyright', 'tsserver', 'sumneko_lua', 'eslint', 'ccls', "taplo" }
 
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
