@@ -48,7 +48,7 @@ if vim.g.vscode ~= 1 then
 	-- vim.diagnostic.config({
 	-- 	virtual_text = false,
 	-- })
-
+	
 	-- vim.keymap.set('n', '<leader>w', ':w!<CR>')
 	vim.keymap.set('n', '<leader>sv', ':source $MYVIMRC<CR>')
 	vim.keymap.set('x', '<leader>p', '"_dp')
