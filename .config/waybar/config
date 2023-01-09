@@ -24,7 +24,7 @@
 	},
 	"custom/weather": {
 		"format": "{}",
-		"exec": "curl -s \"wttr.in/ams?format=%22+%c+%t\\n%22\" | sed 's/\"//g'",
+		"exec": "curl -s \"wttr.in/amsterdam?format=%c+%t+%w\"",
 		"interval": 6000,
 		"on-click": "xdg-open https://wttr.in/"
 	},
