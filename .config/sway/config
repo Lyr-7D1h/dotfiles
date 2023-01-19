@@ -1,4 +1,5 @@
 # Requirements:
+#	waybar
 #   xdg-desktop-portal-wlr
 #   libalsa
 #   slurp
