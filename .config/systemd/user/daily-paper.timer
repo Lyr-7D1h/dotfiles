@@ -4,7 +4,8 @@ After=network-online.target
 
 [Timer]
 OnCalendar=daily
-RandomizedDelaySec=3m
+RandomizedDelaySec=5m
+FixedRandomDelay=1
 Persistent=true
 
 [Install]
