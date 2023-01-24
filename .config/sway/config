@@ -1,5 +1,6 @@
 # Requirements:
-#	waybar
+#   waybar
+#   ttf-fon
 #   xdg-desktop-portal-wlr
 #   libalsa
 #   slurp
