@@ -5,18 +5,19 @@
 # output makes sense before approving a release.
 #
 
-from abc import ABCMeta, abstractmethod
-from genericpath import exists
 import json
-from os import chdir
 import os
 import re
-from shutil import rmtree
 import subprocess
 import sys
+from abc import ABCMeta, abstractmethod
+from os import chdir
+from shutil import rmtree
 from tempfile import mkdtemp
 from typing import Dict, List, NoReturn, Optional
 from urllib.request import Request, urlopen
+
+from genericpath import exists
 
 
 def error(*args) -> NoReturn:
@@ -109,17 +110,18 @@ class Aur(Module):
         git_username = exec("git config --get user.name")
         repo_name = repo_name.split("/")[-1].split(".")[0]
 
+        # https://aur.archlinux.org/rpc/swagger
         data = request(
-            f"https://aur.archlinux.org/rpc/?v=5&type=search&arg={repo_name}"
+            f"https://aur.archlinux.org/rpc/v5/search/{git_username}?by=maintainer"
         )
 
         data = json.loads(data)
 
-        results = data["results"]
         filtered_results = []
-        for res in results:
-            if res["Maintainer"].lower() == git_username.lower():
+        for res in data["results"]:
+            if repo_name in res["URL"]:
                 filtered_results.append(res)
+
         # Sort by popularity
         filtered_results.sort(key=lambda r: r["Popularity"])
 
