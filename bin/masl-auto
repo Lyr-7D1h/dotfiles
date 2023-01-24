@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-set -e
-
-BW_SESSION=`bw unlock --raw` 
-
-bw sync --session $BW_SESSION
-
-PASSWORD=$(bw get password onelogin --session $BW_SESSION) OTP=$(bw get totp onelogin --session $BW_SESSION) masl
