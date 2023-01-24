@@ -89,6 +89,7 @@ for_window [title="Bitwarden"] floating enable
 for_window [app_id="pulseUI"] floating enable
 for_window [app_id="org.gnome.Calculator"] floating enable
 for_window [app_id="pavucontrol"] floating enable
+for_window [app_id="eog"] floating enable
 for_window [app_id="gthumb"] floating enable
 
 # Application development 
