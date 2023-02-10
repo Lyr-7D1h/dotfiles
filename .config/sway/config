@@ -75,11 +75,13 @@ assign [class="^Steam$"] number 8
 for_window [urgent="latest"] focus
 
 # Rules for floating windows
-for_window [app_id="org.gnome.Nautilus"] floating enable
-for_window [app_id="blueman-manager"] floating enable
 for_window [title="Firefox — Sharing Indicator"] kill
 for_window [title="Firefox — Sharing Indicator"] floating enable
 for_window [title="Firefox — Sharing Indicator"] nofocus
+for_window [app_id="ch.proton.proton-bridge"] floating enable
+for_window [app_id="gnome-disks"] floating enable
+for_window [app_id="org.gnome.Nautilus"] floating enable
+for_window [app_id="blueman-manager"] floating enable
 for_window [app_id="seahorse"] floating enable
 for_window [class="Steam"] floating enable
 for_window [class="Steam" title="^Steam$"] floating disable
@@ -89,6 +91,7 @@ for_window [app_id="evince"] floating enable
 for_window [class="Bitwarden"] floating enable
 for_window [title="Bitwarden"] floating enable
 for_window [app_id="pulseUI"] floating enable
+for_window [app_id="org.qbittorrent.qBittorrent"] floating enable
 for_window [app_id="org.gnome.Calculator"] floating enable
 for_window [app_id="pavucontrol"] floating enable
 for_window [app_id="eog"] floating enable

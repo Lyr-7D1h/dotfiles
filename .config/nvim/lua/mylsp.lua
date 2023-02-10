@@ -197,8 +197,21 @@ prettier.setup({
 --   }
 -- }
 
+require("typescript").setup({
+    disable_commands = false, -- prevent the plugin from creating Vim commands
+    debug = false, -- enable debug logging for commands
+    go_to_source_definition = {
+        fallback = true, -- fall back to standard LSP definition on failure
+    },
+    server = { -- pass options to lspconfig's setup method
+        on_attach = on_attach,
+        flags = lsp_flags,
+        capabilities = capabilities
+    },
+})
+
 -- Basic setup
-local servers = { 'pyright', 'tsserver', 'sumneko_lua', 'eslint', 'ccls', "taplo", "bashls" }
+local servers = { 'pyright', 'sumneko_lua', 'eslint', 'ccls', "taplo", "bashls" }
 
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
