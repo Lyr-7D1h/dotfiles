@@ -1,9 +1,9 @@
 -- Install packer if not installed
 local ensure_packer = function()
   local fn = vim.fn
-  local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
+  local install_path = fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
   if fn.empty(fn.glob(install_path)) > 0 then
-    fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
+    fn.system({ 'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path })
     vim.cmd [[packadd packer.nvim]]
     return true
   end
@@ -41,6 +41,29 @@ return require('packer').startup(function()
       vim.keymap.set("n", "zM", require("ufo").closeAllFolds)
     end,
   }
+
+  -- Packer
+  use({
+    "jackMort/ChatGPT.nvim",
+    config = function()
+      require("chatgpt").setup({
+        keymaps = {
+          close = { "<C-c>", "<Esc>" },
+          yank_last = "<C-y>",
+          scroll_up = "<C-u>",
+          scroll_down = "<C-d>",
+          toggle_settings = "<C-o>",
+          new_session = "<C-n>",
+          cycle_windows = "<Tab>",
+        },
+      })
+    end,
+    requires = {
+      "MunifTanjim/nui.nvim",
+      "nvim-lua/plenary.nvim",
+      "nvim-telescope/telescope.nvim"
+    }
+  })
 
 
   -- Snipets
@@ -135,13 +158,15 @@ return require('packer').startup(function()
   -- Toml
   use 'cespare/vim-toml'
 
+  use 'jose-elias-alvarez/typescript.nvim'
+
   -- Rust
   -- https://github.com/neovim/nvim-lspconfig/wiki/Language-specific-plugins
   use 'simrat39/rust-tools.nvim'
   -- Debugging
   use 'nvim-lua/plenary.nvim'
   use 'mfussenegger/nvim-dap'
-  use { "rcarriga/nvim-dap-ui", requires = {"mfussenegger/nvim-dap"} }
+  use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
   -- use 'roxma/nvim-cm-racer'
   -- use {
   --   'saecki/crates.nvim',

@@ -2,6 +2,13 @@ export LANG=en_US.UTF-8
 
 export BROWSER="firefox"
 
+# Source any secret environment variables
+if [[ -f ~/.secrets ]]; then
+	set -a
+	source ~/.secrets
+	set +a
+fi
+
 #
 # Custom Executables
 #
@@ -45,6 +52,10 @@ export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
 
 
 if [[ $HOST == "home" || $HOST == "latitude" ]]; then
+	if command -v lxsession; then
+		lxsession &
+	fi
+
 	# Wayland specific env variable
 	export MOZ_ENABLE_WAYLAND=1
 	export MOZ_DBUS_REMOTE=1 # Testing out

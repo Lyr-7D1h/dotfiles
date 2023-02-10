@@ -35,8 +35,8 @@ vim.opt.foldenable = true
 -- Show inlay_hints more frequently
 vim.opt.signcolumn = 'yes'
 
+-- Load all plugins when not in vscode
 if vim.g.vscode ~= 1 then
-	-- Load all plugins when not in vscode
 	require('plugins')
 	require('mylsp')
 	require('autocmp')
@@ -52,6 +52,8 @@ if vim.g.vscode ~= 1 then
 	-- vim.keymap.set('n', '<leader>w', ':w!<CR>')
 	vim.keymap.set('n', '<leader>sv', ':source $MYVIMRC<CR>')
 	vim.keymap.set('x', '<leader>p', '"_dp')
+
+	vim.keymap.set('n', 'gs', ':ChatGPT<CR>')
 
 	local telescope = require('telescope.builtin')
 	local telescope_actions = require('telescope.actions')
