@@ -59,8 +59,11 @@ function fetchImage(url, path) {
 async function execWallpaper(path) {
   return new Promise((resolve, reject) => {
     // Safe wallpaper as ~/.wallpaper
-    fs.rmSync(`${HOME_FOLDER}/.wallpaper`);
-    fs.symlinkSync(path, `${HOME_FOLDER}/.wallpaper`);
+    const wallpaper = `${HOME_FOLDER}/.wallpaper`
+    if (fs.existsSync(wallpaper)) {
+      fs.rmSync(wallpaper);
+    }
+    fs.symlinkSync(path, wallpaper);
 
     const execOutput = (e, stdout, stderr) => {
       if (e) reject(e);

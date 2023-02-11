@@ -44,7 +44,7 @@ export PATH="$PATH:$HOME/.rvm/bin"
 export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
 
 
-if [[ $HOST == "home" || $HOST == "latitude" || $HOST == "erazer" ]]; then
+if [[ $HOST == "home" || $HOST == "latitude" || $HOST == "erazer" || $HOST == "ideapad" ]]; then
 	# Wayland specific env variable
 	export MOZ_ENABLE_WAYLAND=1
 	export MOZ_DBUS_REMOTE=1 # Testing out

@@ -10,9 +10,9 @@ Install the following packages
 ```
 alacritty
 waybar
-ttffontawesome
-ttfubuntumononerd
-xdgdesktopportalwlr
+ttf-font-awesome
+ttf-ubuntu-mono-nerd
+xdg-desktop-portal-wlr
 libalsa
 slurp
 grim
@@ -22,6 +22,16 @@ bemenu
 wl-clipboard
 brightnessctl (if on laptop)
 playerctl
+swaylock
+swayidle
+swaybg
+NetworkManager
+network-manager-applet
+fzf
+sworkstyle
+bluez blueman
+firefox
+lxsession
 ```
 
 And the following are some custom scripts used
