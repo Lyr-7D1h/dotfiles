@@ -55,7 +55,7 @@
 		"format": "{icon} {capacity}%",
 		"format-alt": "{icon} {time}",
 		"format-icons": ["", "", "", "", ""],
-		"format-charging": " {capacity}%",
+		"format-charging": " {capacity}%",
 		"interval": 20,
 		"states": {
 			"warning": 25,
