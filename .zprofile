@@ -18,7 +18,7 @@ export PATH=$PATH:/usr/local/go/bin
 export PATH=$PATH:$(go env GOPATH)/bin
 
 # Adding pyenv
-if command -v pyenv ; then
+if command -v pyenv &>/dev/null ; then
 	export PYENV_ROOT="$HOME/.pyenv"
 	command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
 	eval "$(pyenv init -)"
@@ -52,7 +52,7 @@ export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
 
 
 if [[ $HOST == "home" || $HOST == "latitude" || $HOST == "erazer" || $HOST == "lenovo" ]]; then
-	if command -v lxsession; then
+	if command -v lxsession &>/dev/null ; then
 		lxsession &
 	fi
 
