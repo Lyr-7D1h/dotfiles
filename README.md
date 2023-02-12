@@ -31,7 +31,7 @@ fzf
 sworkstyle
 bluez blueman
 firefox
-lxsession
+polkit-gnome
 ```
 
 And the following are some custom scripts used
