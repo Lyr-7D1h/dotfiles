@@ -1,8 +1,9 @@
 * {
   border: none;
   border-radius: 0;
+  font-family: "UbuntuMono Nerd Font";
   /* font-family: "Ubuntu Nerd Font 12"; */
-  font-family: "UbuntuMono";
+  /* font-family: "UbuntuMono"; */
   /* letter-spacing: 1px; */
   font-size: 14px;
   min-height: 0;
