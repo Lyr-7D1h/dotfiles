@@ -51,7 +51,7 @@ export PATH="$PATH:$HOME/.rvm/bin"
 export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
 
 
-if [[ $HOST == "home" || $HOST == "latitude" || $HOST == "erazer" || $HOST == "lenovo" ]]; then
+if [[ $HOST == "home" || $HOST == "latitude" || $HOST == "erazer" || $HOST == "ideapad" ]]; then
 	if command -v lxsession &>/dev/null ; then
 		lxsession &
 	fi

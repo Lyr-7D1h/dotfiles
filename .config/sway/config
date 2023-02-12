@@ -1,20 +1,3 @@
-# Requirements:
-#   waybar
-#   ttf-fon
-#   xdg-desktop-portal-wlr
-#   libalsa
-#   slurp
-#   grim
-#   alacritty
-#   swaybg
-#   bemenu
-#   power_menu (custom script using bemenu)
-#   toggle_sound_profile (custom script for switching sound card codec)
-#   wl-clipboard
-#   brightnessctl (if on laptop)
-#   playerctl
-#
-
 ### Variables
 # Theme
 set $cl_high #7289da
