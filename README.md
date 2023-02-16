@@ -28,6 +28,8 @@ swaybg
 NetworkManager
 network-manager-applet
 fzf
+ripgrep
+noto-fonts-emoji
 sworkstyle
 bluez blueman
 firefox
