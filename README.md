@@ -34,6 +34,7 @@ sworkstyle
 bluez blueman
 firefox
 polkit-gnome
+nautilus
 ```
 
 And the following are some custom scripts used

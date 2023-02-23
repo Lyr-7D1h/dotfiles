@@ -23,7 +23,7 @@ set -eo pipefail
 
 # This is where ssh will try to copy the files associated with the document
 REMARKABLE_HOST=$1
-REMARKABLE_XOCHITL_DIR=${REMARKABLE_XOCHITL_DIR:-.local/share/remarkable/xochitl/}
+REMARKABLE_XOCHITL_DIR=".local/share/remarkable/xochitl/"
 
 SSH_OPTIONS="-o ConnectTimeout=1 -o PasswordAuthentication=no -o PubkeyAcceptedKeyTypes=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa"
 
@@ -45,7 +45,14 @@ get_ip() {
             break
         fi
     done
-    echo $(sudo nmap -sn -n $gateway/24 | grep "Ampak Technology" -B 2 | grep -P "(?<=Nmap scan report for )([0-9]|[.]){3,12}" -o)
+
+    echo $(sudo nmap -sn -n $gateway/24 | grep "Ampak Technology" -B 2 | grep -P "(?<=Nmap scan report for )([0-9]|[.]){3,16}" -o)
+}
+
+sync() {
+    TARGET_DIR="${REMARKABLE_HOST}:${REMARKABLE_XOCHITL_DIR}*"
+    echo "Syncing files from $TARGET_DIR"
+    scp $SSH_OPTIONS -r "$TARGET_DIR" .
 }
 
 # https://github.com/adaerr/reMarkableScripts/blob/master/pdf2remarkable.sh
@@ -419,6 +426,11 @@ case $1 in
         get_ip ${@:2}
         exit 0
         ;;
+    "sync")
+        REMARKABLE_HOST=root@$(get_ip)
+        sync
+        exit 0
+        ;;
     "ssh")
         REMARKABLE_HOST=root@$(get_ip)
         interactive_ssh
@@ -450,9 +462,9 @@ case $2 in
         ;;
 esac
 
-echo "$(basename $0) {host|ip|upload|stream} {upload|stream} [OPTIONS]
+echo "$(basename $0) {sync|HOST|ip|upload|stream} {upload|stream} [OPTIONS]
 
-host is your ssh host (eg. root@192.168.1.5)
+HOST is your ssh host (eg. root@192.168.1.5)
 
 EXAMPLES
 
