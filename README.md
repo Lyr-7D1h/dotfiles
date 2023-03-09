@@ -35,6 +35,8 @@ bluez blueman
 firefox
 polkit-gnome
 nautilus
+evince
+eog
 ```
 
 And the following are some custom scripts used
