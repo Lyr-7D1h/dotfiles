@@ -37,6 +37,7 @@ polkit-gnome
 nautilus
 evince
 eog
+github-cli
 ```
 
 And the following are some custom scripts used
