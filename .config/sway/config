@@ -52,7 +52,7 @@ default_border pixel
 default_floating_border pixel
 
 # Assign apps to workspaces
-assign [class="^Steam$"] number 8
+assign [class="^Steam$"] number 7
 
 # Focus to urgent window (only works for xwayland)
 for_window [urgent="latest"] focus
@@ -80,8 +80,7 @@ for_window [app_id="eog"] floating enable
 for_window [app_id="gthumb"] floating enable
 
 # Application development 
-for_window [app_id="rm_client"] floating enable
-assign [app_id="rm_client"] number 3
+for_window [class="Rmclient"] floating enable
 for_window [app_id="julia_sets"] floating enable
 assign [app_id="julia_sets"] number 3
 for_window [app_id="rmviewer"] floating enable
