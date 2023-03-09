@@ -81,6 +81,7 @@ for_window [app_id="gthumb"] floating enable
 
 # Application development 
 for_window [class="Rmclient"] floating enable
+assign [class="Rmclient"] number 2
 for_window [app_id="julia_sets"] floating enable
 assign [app_id="julia_sets"] number 3
 for_window [app_id="rmviewer"] floating enable
