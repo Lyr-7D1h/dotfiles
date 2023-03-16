@@ -15,14 +15,14 @@ set $down j
 set $up k
 set $right l
 set $screenshot grim ~/Pictures/screenshots/scrn-$(date +"%Y-%m-%d-%H-%M-%S").png
-set $screenclip export SCREENSHOT_FILENAME=$HOME/Pictures/screenshots/scrn-$(date +"%Y-%m-%d-%H-%M-%S").png && slurp | grim -g - $SCREENSHOT_FILENAME && cat $SCREENSHOT_FILENAME | wl-copy
+set $screenclip screenclip
 set $term alacritty
 set $togglesound toggle_sound_profile
 set $soundraise pactl set-sink-volume @DEFAULT_SINK@ +5%
 set $soundlower pactl set-sink-volume @DEFAULT_SINK@ -5%
 set $soundmute pactl set-sink-mute @DEFAULT_SINK@ toggle
 # set $menu dmenu_path | dmenu | xargs swaymsg exec --
-set $menu bemenu-run --no-exec -i \
+set $menu PATH="$PATH:/home/lyr/bin" bemenu-run --no-exec -i \
     -H 27 \
     --tb "$cl_back" \
     --tf "$cl_fore" \
