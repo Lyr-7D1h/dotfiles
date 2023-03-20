@@ -211,7 +211,7 @@ require("typescript").setup({
 })
 
 -- Basic setup
-local servers = { 'pyright', 'lua_ls', 'eslint', 'ccls', "taplo", "bashls" }
+local servers = { 'pyright', 'sumneko_lua', 'eslint', 'ccls', "taplo", "bashls" }
 
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
