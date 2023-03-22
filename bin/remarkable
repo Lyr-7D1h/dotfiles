@@ -469,5 +469,8 @@ HOST is your ssh host (eg. root@192.168.1.5)
 EXAMPLES
 
 Search host and use that to stream in portrait mode
-$(basename $0) stream -p"
+$(basename $0) stream -p
+
+Download all files
+$(basename $0) sync"
 exit 1
