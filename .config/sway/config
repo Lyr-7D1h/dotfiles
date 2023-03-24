@@ -98,8 +98,9 @@ for_window [title="Device Manager"] floating enable
 for_window [title="Welcome to Android Studio"] floating nable
 for_window [title="^Android Emulator.*"] floating enable
 
-# Set fullscreen for bin/remarkable stream
+# Set fullscreen
 for_window [title="reStream"] fullscreen
+for_window [app_id="org.freecadweb.FreeCAD"] fullscreen
 
 # prevent idleness for fullscreen
 for_window [class=.*] inhibit_idle fullscreen
