@@ -86,8 +86,8 @@ for_window [title="VirtualBox - Preferences" class="VirtualBox"] floating enable
 for_window [title=".*Settings$" class="VirtualBox"] floating enable
 
 # Application development 
-for_window [class="Rmclient"] floating enable
-assign [class="Rmclient"] number 2
+for_window [app_id="remarkable-client"] floating enable
+assign [app_id="remarkable-client"] number 2
 for_window [app_id="julia_sets"] floating enable
 assign [app_id="julia_sets"] number 3
 for_window [app_id="rmviewer"] floating enable
