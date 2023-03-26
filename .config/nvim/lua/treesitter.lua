@@ -78,7 +78,8 @@ require("nvim-tree").setup({
       list = {
         -- https://github.com/kyazdani42/nvim-tree.lua/blob/master/doc/nvim-tree-lua.txt#L1248
         -- { key = "u", action = "dir_up" },
-        { key = "<C-e>", action = "" }
+        { key = "<C-e>", action = "" },
+        { key = "<F2>", action = "rename" }
       },
     },
   },
