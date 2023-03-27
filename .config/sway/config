@@ -85,6 +85,7 @@ for_window [app_id="gthumb"] floating enable
 for_window [app_id="lutris"] floating enable
 for_window [title="VirtualBox - Preferences" class="VirtualBox"] floating enable
 for_window [title=".*Settings$" class="VirtualBox"] floating enable
+for_window [app_id="org.freecadweb.FreeCAD" title="Preferences"] floating enable
 
 # Application development 
 for_window [app_id="remarkable-client"] floating enable
@@ -99,7 +100,7 @@ for_window [title="Device Manager"] floating enable
 for_window [title="Welcome to Android Studio"] floating nable
 for_window [title="^Android Emulator.*"] floating enable
 
-# Set fullscreen for bin/remarkable stream
+# Set fullscreen
 for_window [title="reStream"] fullscreen
 
 # prevent idleness for fullscreen
