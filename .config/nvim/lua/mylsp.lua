@@ -88,6 +88,13 @@ require('rust-tools').setup({
     on_attach = on_attach,
     flags = lsp_flags,
     capabilities = capabilities,
+    settings = {
+        ['rust-analyzer'] = {
+          diagnostics = {
+            disabled = {"unresolved-proc-macro"} -- Prevent random error messages for proc macro's
+          }
+        }
+    }
   },
   -- dap = {
   --   adapter = require('dap').adapters.lldb
@@ -211,7 +218,7 @@ require("typescript").setup({
 })
 
 -- Basic setup
-local servers = { 'pyright', 'sumneko_lua', 'eslint', 'ccls', "taplo", "bashls" }
+local servers = { 'pyright', 'luau_lsp', 'eslint', 'ccls', "taplo", "bashls", "cssls" }
 
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
