@@ -38,6 +38,7 @@ nautilus
 evince
 eog
 github-cli
+gnome-keyring
 ```
 
 And the following are some custom scripts used
