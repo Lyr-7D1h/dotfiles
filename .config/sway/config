@@ -88,12 +88,12 @@ for_window [title=".*Settings$" class="VirtualBox"] floating enable
 for_window [app_id="org.freecadweb.FreeCAD" title="Preferences"] floating enable
 
 # Application development 
-for_window [app_id="remarkable-client"] floating enable
-assign [app_id="remarkable-client"] number 2
+for_window [class="Remarkhub"] floating enable
+assign [class="Remarkhub"] number 2
+for_window [app_id="remarkhub"] floating enable
+assign [app_id="remarkhub"] number 2
 for_window [app_id="julia_sets"] floating enable
 assign [app_id="julia_sets"] number 3
-for_window [app_id="rmviewer"] floating enable
-assign [app_id="rmviewer"] number 3
 
 # android studio
 for_window [title="Device Manager"] floating enable
