@@ -253,6 +253,9 @@ alias tf='terraform'
 alias update='home-manager switch'
 alias vim='nvim'
 alias tvim="tmux new-session nvim"
+if command -v bat &>/dev/null ; then
+  alias cat="bat -p"
+fi
 # Refresh sudo session
 alias sudo='sudo -v; sudo '
 # added by latest_cd
