@@ -24,6 +24,13 @@ return require('packer').startup(function()
   use "williamboman/nvim-lsp-installer"
   use 'neovim/nvim-lspconfig'
 
+  -- Undo tree
+  use { 
+    'mbbill/undotree',
+    config = function()
+      vim.keymap.set('n', '<leader>u', vim.cmd.UndotreeToggle)
+    end 
+  }
   -- Fold functions based on lsp and treesitter
   use {
     "kevinhwang91/nvim-ufo",
@@ -32,13 +39,14 @@ return require('packer').startup(function()
     wants = { "promise-async" },
     requires = "kevinhwang91/promise-async",
     config = function()
-      require("ufo").setup {
+      ufo = require("ufo")
+      ufo.setup {
         provider_selector = function(bufnr, filetype)
           return { "lsp", "indent" }
         end,
       }
-      vim.keymap.set("n", "zR", require("ufo").openAllFolds)
-      vim.keymap.set("n", "zM", require("ufo").closeAllFolds)
+      vim.keymap.set("n", "zR", ufo.openAllFolds)
+      vim.keymap.set("n", "zM", ufo.closeAllFolds)
     end,
   }
 
