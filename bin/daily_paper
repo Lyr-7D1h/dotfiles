@@ -8,7 +8,11 @@ const https = require("https");
 
 const HOME_FOLDER = `/home/${process.env.USER}`;
 const WALLPAPERS_PATH = HOME_FOLDER + "/Pictures/daily_paper";
+// timeout for each ping with increase exponentionally starting with 2
+const NETWORK_RETRY_POLICY = 10
 
+
+// ensire WALLPAPERS_PATH exists
 fs.mkdirSync(WALLPAPERS_PATH, { recursive: true });
 
 function fetchWallpaperPosts() {
@@ -86,7 +90,40 @@ async function execWallpaper(path) {
   });
 }
 
+function ping() {
+  return new Promise(((res) => {
+    https
+      .request("https://1.1.1.1", (response) => {
+        if (response.statusCode >= 400) {
+          console.error(
+            new Error(
+              `Invalid status code "${response.statusCode}"`
+            ))
+          return res(false);
+        }
+
+        res(true);
+      })
+      .on("error", () => res(false))
+      .end();
+  }))
+}
+
+
 async function setWallpaper() {
+  // check for internet connection
+  let retries = 0
+  let connected = await ping()
+  while (connected === false && retries <= NETWORK_RETRY_POLICY) {
+    retries += 1
+    if (retries === NETWORK_RETRY_POLICY) throw Error("Failed to connect to network")
+    console.error(`No internet connection, retrying in ${2 ** retries}s`)
+    await new Promise((resolve) => {
+      setTimeout(resolve, 2 ** retries * 1000);
+    });
+    connected = await ping()
+  }
+
   const posts = await fetchWallpaperPosts();
 
   const files = await readdir(WALLPAPERS_PATH);
