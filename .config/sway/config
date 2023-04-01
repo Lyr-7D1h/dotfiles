@@ -57,6 +57,7 @@ assign [class="Element"] number 9
 assign [class="WebCord"] number 9
 assign [class="Spotify"] number 9
 assign [class="Signal"] number 9
+assign [app_id="org.freecadweb.FreeCAD"] number 4
 
 # Focus to urgent window (only works for xwayland)
 for_window [urgent="latest"] focus
