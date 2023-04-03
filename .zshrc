@@ -254,7 +254,7 @@ alias update='home-manager switch'
 alias vim='nvim'
 alias tvim="tmux new-session nvim"
 if command -v bat &>/dev/null ; then
-  alias cat="bat -p"
+  alias cat="bat -P -p"
 fi
 # Refresh sudo session
 alias sudo='sudo -v; sudo '
