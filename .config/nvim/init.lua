@@ -52,6 +52,11 @@ if vim.g.vscode ~= 1 then
 	-- vim.keymap.set('n', '<leader>w', ':w!<CR>')
 	vim.keymap.set('n', '<leader>sv', ':source $MYVIMRC<CR>')
 	vim.keymap.set('x', '<leader>p', '"_dp')
+	-- -- Save leader removal
+	-- vim.keymap.set('v', '<leader>d', '"0d')
+	-- vim.keymap.set('v', '<leader>d', '"0d')
+	-- vim.keymap.set('v', '<leader>y', '"0y')
+	-- vim.keymap.set('v', '<leader>p', '"0p')
 
 	vim.keymap.set('n', 'gs', ':ChatGPT<CR>')
 
