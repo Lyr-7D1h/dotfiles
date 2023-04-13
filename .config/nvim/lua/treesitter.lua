@@ -1,19 +1,19 @@
 vim.cmd('au BufRead,BufNewFile *.wgsl	set filetype=wgsl')
 
-local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
-parser_config.wgsl = {
-  install_info = {
-    url = "https://github.com/szebniok/tree-sitter-wgsl",
-    files = { "src/parser.c" }
-  },
-}
+-- local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
+-- parser_config.wgsl = {
+--   install_info = {
+--     url = "https://github.com/szebniok/tree-sitter-wgsl",
+--     files = { "src/parser.c" }
+--   },
+-- }
 
 -- Default comment string
 vim.bo.commentstring = '//%s'
 
 -- nvim-treesitter
 require('nvim-treesitter.configs').setup {
-  ensure_installed = { 'comment', 'wgsl' },
+  ensure_installed = { 'comment' },
   auto_install = true,
   highlight = {
     enable = true,
