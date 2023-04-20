@@ -15,7 +15,7 @@ set -e
 if [[ ! -d ~/notes  ]]; then
 	echo "Making notes directory..."
 	mkdir ~/notes
-	chmod -R 644 ~/notes/*
+	chmod -R 644 ~/notes
 fi
 
 if [[ -z $@ ]]; then
