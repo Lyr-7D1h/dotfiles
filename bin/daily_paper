@@ -18,7 +18,7 @@ fs.mkdirSync(WALLPAPERS_PATH, { recursive: true });
 function fetchWallpaperPosts() {
   return new Promise((res, rej) => {
     https
-      .request("https://www.reddit.com/r/wallpaper/.json?", (response) => {
+      .request("https://www.reddit.com/r/wallpaper/.json?", { headers: { 'user-agent': 'daily_paper' } }, (response) => {
         if (response.statusCode !== 200)
           return rej(
             new Error(
