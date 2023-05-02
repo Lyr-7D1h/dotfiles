@@ -4,6 +4,7 @@
 	"position": "top",
 	"height": 27,
 	"modules-left": ["sway/workspaces", "sway/mode", "custom/nextmeeting"],
+	"modules-center": ["sway/window"],
 	"modules-right": ["custom/ghnotify", "custom/ip", "network", "bluetooth", "pulseaudio", "pulseaudio#microphone", "battery", "custom/weather", "clock", "tray"],
 	"sway/mode": {
 		"format": " {}"
