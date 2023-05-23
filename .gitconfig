@@ -6,6 +6,8 @@
 	defaultBranch = master
 [pull]
 	rebase = false
+[push]
+	autoSetupRemote = true
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
