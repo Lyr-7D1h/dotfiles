@@ -444,6 +444,7 @@ case $1 in
     "upload")
         REMARKABLE_HOST=root@$(get_ip)
         upload ${@:2}
+        exit 0
         ;;
 esac
 
