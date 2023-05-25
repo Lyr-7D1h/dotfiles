@@ -52,7 +52,7 @@ export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
 
 
 if [ -z $DISPLAY ] && [ "$(tty)" = "/dev/tty1" ]; then
-	if [[ $HOST == "latitude" || $HOST == "erazer" || $HOST == "ideapad" ]]; then
+	if [[ $HOST == "latitude" || $HOST == "erazer" ]]; then
 		# Wayland specific env variable
 		export MOZ_ENABLE_WAYLAND=1
 		export MOZ_DBUS_REMOTE=1 # Testing out
