@@ -3,11 +3,11 @@ Description=Set your daily wallpaper
 After=network-online.target
 
 [Timer]
-#OnCalendar=daily
 OnCalendar=*-*-* 00:00:00
-RandomizedDelaySec=5m
-FixedRandomDelay=1
+OnUnitActiveSec=24h
 Persistent=true
+#RandomizedDelaySec=2m
+#FixedRandomDelay=1
 
 [Install]
 WantedBy=timers.target
