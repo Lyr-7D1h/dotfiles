@@ -135,7 +135,7 @@ return require('packer').startup(function()
   use 'tveskag/nvim-blame-line'
 
   -- Show lsp progress
-  use 'j-hui/fidget.nvim'
+  use {'j-hui/fidget.nvim', tag = 'legacy'}
 
   -- Autocomplete pairs
   use {
