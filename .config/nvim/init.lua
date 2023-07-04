@@ -58,7 +58,7 @@ if vim.g.vscode ~= 1 then
 	-- vim.keymap.set('v', '<leader>y', '"0y')
 	-- vim.keymap.set('v', '<leader>p', '"0p')
 
-	vim.keymap.set('n', 'gs', ':ChatGPT<CR>')
+	-- vim.keymap.set('n', 'gs', ':ChatGPT<CR>')
 
 	local telescope = require('telescope.builtin')
 	local telescope_actions = require('telescope.actions')
@@ -97,6 +97,8 @@ if vim.g.vscode ~= 1 then
 	-- vim.cmd("set termguicolors")
 	-- vim.cmd("colorscheme tender")
 	-- vim.cmd("autocmd vimenter * ++nested colorscheme gruvbox")
+	vim.cmd("set t_Co=256")
+	vim.cmd("set t_ut=")
 	vim.cmd("colorscheme codedark")
 	-- require('onedark').setup {
 	-- 	style = 'warm'
