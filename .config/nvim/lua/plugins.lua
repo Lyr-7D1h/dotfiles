@@ -138,10 +138,10 @@ return require('packer').startup(function()
   use {'j-hui/fidget.nvim', tag = 'legacy'}
 
   -- Autocomplete pairs
-  -- use {
-  --   "windwp/nvim-autopairs",
-  --   config = function() require("nvim-autopairs").setup {} end
-  -- }
+  use {
+    "windwp/nvim-autopairs",
+    config = function() require("nvim-autopairs").setup {} end
+  }
   -- use 'tpope/vim-commentary'
   use {
     'numToStr/Comment.nvim',
