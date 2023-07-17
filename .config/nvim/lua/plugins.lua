@@ -50,30 +50,6 @@ return require('packer').startup(function()
     end,
   }
 
-  -- Packer
-  use({
-    "jackMort/ChatGPT.nvim",
-    config = function()
-      require("chatgpt").setup({
-        keymaps = {
-          close = { "<C-c>", "<Esc>" },
-          yank_last = "<C-y>",
-          scroll_up = "<C-u>",
-          scroll_down = "<C-d>",
-          toggle_settings = "<C-o>",
-          new_session = "<C-n>",
-          cycle_windows = "<Tab>",
-        },
-      })
-    end,
-    requires = {
-      "MunifTanjim/nui.nvim",
-      "nvim-lua/plenary.nvim",
-      "nvim-telescope/telescope.nvim"
-    }
-  })
-
-
   -- Snipets
   -- Auto complete framework
   use 'hrsh7th/nvim-cmp'
@@ -138,10 +114,10 @@ return require('packer').startup(function()
   use {'j-hui/fidget.nvim', tag = 'legacy'}
 
   -- Autocomplete pairs
-  -- use {
-  --   "windwp/nvim-autopairs",
-  --   config = function() require("nvim-autopairs").setup {} end
-  -- }
+  use {
+    "windwp/nvim-autopairs",
+    config = function() require("nvim-autopairs").setup {} end
+  }
   -- use 'tpope/vim-commentary'
   use {
     'numToStr/Comment.nvim',
