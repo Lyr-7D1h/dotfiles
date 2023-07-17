@@ -248,7 +248,6 @@ alias gp="git push"
 alias gf="git fetch"
 alias ls='ls --color=auto'
 # Fix screen coloring since most remote clients don't support alacritty
-alias ssh='TERM=xterm ssh'
 alias tf='terraform'
 alias update='home-manager switch'
 alias vim='nvim'
