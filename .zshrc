@@ -249,6 +249,7 @@ alias gf="git fetch"
 alias ls='ls --color=auto'
 # Fix screen coloring since most remote clients don't support alacritty
 alias tf='terraform'
+alias ssh='TERM=xterm ssh'
 alias update='home-manager switch'
 alias vim='nvim'
 alias tvim="tmux new-session nvim"
@@ -280,9 +281,6 @@ ktx() {
   fi
 }
 
-### Exports
-export DOCKER_BUILDKIT=1
-export FZF_DEFAULT_COMMAND='rg --files'
 
 ### Autoloads
 # Asdf
@@ -320,4 +318,52 @@ else
 fi
 unset __conda_setup
 # <<< conda initialize <<<
+
+# Source any secret environment variables
+if [[ -f ~/.secrets ]]; then
+	set -a
+	source ~/.secrets
+	set +a
+fi
+
+### Exports
+export DOCKER_BUILDKIT=1
+export FZF_DEFAULT_COMMAND='rg --files'
+export LANG=en_US.UTF-8
+export BROWSER="firefox"
+export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
+
+# Adding go
+export PATH=$PATH:/usr/local/go/bin
+export PATH=$PATH:$(go env GOPATH)/bin
+
+# Adding pyenv
+if command -v pyenv &>/dev/null ; then
+	export PYENV_ROOT="$HOME/.pyenv"
+	command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+	eval "$(pyenv init -)"
+fi
+
+# Adding custom executables
+export PATH="$PATH:$HOME/.npm/bin"
+# Adding custom executables
+export PATH="$HOME/bin:$PATH"
+# Adding local bin to path
+export PATH="$HOME/.local/bin:$PATH"
+# Cargo executables
+export PATH="$HOME/.cargo/bin:$PATH"
+
+
+# Add Deno Install
+export DENO_INSTALL="/home/lyr/.deno"
+export PATH="$DENO_INSTALL/bin:$PATH"
+
+# Add gem executables
+export PATH="$PATH:$HOME/.gem/ruby/2.7.0/bin"
+
+# Added by serverless binary installer
+export PATH="$HOME/.serverless/bin:$PATH"
+
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rvm/bin"
 
