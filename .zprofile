@@ -75,3 +75,9 @@ if [ -z $DISPLAY ] && [ "$(tty)" = "/dev/tty1" ]; then
 		exec sway &> /tmp/sway.log
 	fi
 fi
+
+export MOZ_ENABLE_WAYLAND=1
+export XDG_SESSION_TYPE=wayland
+export _JAVA_AWT_WM_NONREPARENTING=1
+# Needed for obs on wayland
+export QT_QPA_PLATFORM=wayland
