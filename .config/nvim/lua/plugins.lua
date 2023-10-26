@@ -111,7 +111,15 @@ return require('packer').startup(function()
   use 'tveskag/nvim-blame-line'
 
   -- Show lsp progress
-  use {'j-hui/fidget.nvim', tag = 'legacy'}
+  -- use {
+  --   'j-hui/fidget.nvim',
+  --   tag = 'legacy',
+  --   config = function()
+  --     require("fidget").setup {
+  --       -- options
+  --     }
+  --   end,
+  -- }
 
   -- Autocomplete pairs
   use {
@@ -128,7 +136,7 @@ return require('packer').startup(function()
 
   -- Fuzzy finder
   use {
-    'nvim-telescope/telescope.nvim', tag = '0.1.0',
+    'nvim-telescope/telescope.nvim', tag = '0.1.4',
     -- or                            , branch = '0.1.x',
     requires = { { 'nvim-lua/plenary.nvim' } }
   }

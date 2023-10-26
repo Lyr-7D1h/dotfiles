@@ -108,12 +108,35 @@ if vim.g.vscode ~= 1 then
 	-- require('vscode').setup({})
 
 	-- vim.keymap.set('n', '<C-e>', ':Explore<CR>')
-
-
-	require "fidget".setup {}
 else
+	-- VSCODE
 	vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
 	vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
 	vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
 	vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
+	vim.keymap.set('n', '<C-w>a', function() 
+		vim.cmd("call VSCodeNotify('workbench.action.closeOtherEditors')")
+	end)
+
+	-- add folding
+	vim.cmd[[
+	nnoremap zM :call VSCodeNotify('editor.foldAll')<CR>
+	nnoremap zR :call VSCodeNotify('editor.unfoldAll')<CR>
+	nnoremap zc :call VSCodeNotify('editor.fold')<CR>
+	nnoremap zC :call VSCodeNotify('editor.foldRecursively')<CR>
+	nnoremap zo :call VSCodeNotify('editor.unfold')<CR>
+	nnoremap zO :call VSCodeNotify('editor.unfoldRecursively')<CR>
+	nnoremap za :call VSCodeNotify('editor.toggleFold')<CR>
+	
+	" function! MoveCursor(direction) abort
+	" 	if(reg_recording() == '' && reg_executing() == '')
+	" 		return 'g'.a:direction
+	" 	else
+	" 		return a:direction
+	" 	endif
+	" endfunction
+	" 
+	" nmap <expr> j MoveCursor('j')
+	" nmap <expr> k MoveCursor('k')
+	]]
 end
