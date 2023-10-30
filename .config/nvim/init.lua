@@ -117,6 +117,9 @@ else
 	vim.keymap.set('n', '<C-w>a', function() 
 		vim.cmd("call VSCodeNotify('workbench.action.closeOtherEditors')")
 	end)
+	vim.keymap.set('n', 'gt', function() 
+		vim.cmd("call VSCodeNotify('editor.action.goToTypeDefinition')")
+	end)
 
 	-- add folding
 	vim.cmd[[
