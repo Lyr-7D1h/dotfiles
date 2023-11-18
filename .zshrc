@@ -9,6 +9,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+
 # Performance testing using 'zprof'
 # zmodload zsh/zprof
 
@@ -43,6 +44,8 @@ zplug load
 # https://github.com/zsh-users/zsh-autosuggestions
 ZSH_AUTOSUGGEST_STRATEGY=(history completion match_prev_cmd)
 ZSH_AUTOSUGGEST_USE_ASYNC=true
+
+CASE_SENSITIVE="true"
 
 # History options
 HISTSIZE="100000"
