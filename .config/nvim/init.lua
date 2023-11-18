@@ -93,6 +93,19 @@ if vim.g.vscode ~= 1 then
 
 	vim.keymap.set('n', '<leader>b', ':ToggleBlameLine<CR>')
 
+	-- Remove all buffers not in a window
+	vim.keymap.set('n', '<C-w>a', function() 
+		for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+			if vim.api.nvim_buf_is_valid(buf) then
+				if vim.fn.buflisted(buf) == 1 and vim.fn.bufwinnr(buf) == -1 then
+					vim.api.nvim_command('bdelete ' .. buf)
+				end
+			end
+		end
+		-- vim.cmd("call VSCodeNotify(':bufdo if buflisted() && bufwinnr('%') == -1 | bd | endif')")
+	end)
+
+
 	-- Theming
 	-- vim.cmd("set termguicolors")
 	-- vim.cmd("colorscheme tender")
