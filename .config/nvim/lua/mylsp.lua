@@ -26,10 +26,10 @@ local function has_value(tab, val)
   return false
 end
 
+local format_on_save_servers = { "rust_analyzer", "null-ls" }
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
-  local format_on_save_servers = { "rust_analyzer", "null-ls" }
   -- If formatting is supported and it is one of the known servers add format on save
   if client.server_capabilities.documentFormattingProvider and has_value(format_on_save_servers, client.name) then
     vim.api.nvim_command [[augroup Format]]
@@ -111,7 +111,7 @@ require('rust-tools').setup({
 -- Setup up python
 -- https://github.com/mattn/efm-langserver
 lspconfig.efm.setup {
-  filetypes = { "python" }, -- See `:Filetypes`
+  filetypes = { "python", "css", "scss", "less" }, -- See `:Filetypes`
   -- filetypes = { "python", "javascript", "typescript", "javascriptreact", "javascript.jsx", "typescript",
   --   "typescriptreact", "typescript.tsx" }, -- See `:Filetypes`
 
@@ -154,6 +154,9 @@ lspconfig.efm.setup {
 
         }
       },
+      css = { { formatCommand = 'prettier --stdin-filepath ${INPUT}', formatStdin = true } },
+      scss = { { formatCommand = 'prettier --stdin-filepath ${INPUT}', formatStdin = true } },
+      less = { { formatCommand = 'prettier --stdin-filepath ${INPUT}', formatStdin = true } },
       -- typescript = {
       --   formatCommand = "node_modules/.bin/prettier --stdin-filepath" .. vim.api.nvim_buf_get_name(0),
       --   formatStdin = true
@@ -163,28 +166,28 @@ lspconfig.efm.setup {
 }
 
 -- Setup prettier
-local null_ls = require("null-ls")
-null_ls.setup({
-  on_attach = on_attach
-})
-local prettier = require("prettier")
-prettier.setup({
-  bin = 'prettier',
-  filetypes = {
-    "css",
-    "graphql",
-    "html",
-    "javascript",
-    "javascriptreact",
-    "json",
-    "less",
-    "markdown",
-    "scss",
-    "typescript",
-    "typescriptreact",
-    "yaml",
-  },
-})
+-- local null_ls = require("null-ls")
+-- null_ls.setup({
+--   on_attach = on_attach
+-- })
+-- local prettier = require("prettier")
+-- prettier.setup({
+--   bin = 'prettierd',
+--   filetypes = {
+--     "css",
+--     "graphql",
+--     "html",
+--     "javascript",
+--     "javascriptreact",
+--     "json",
+--     "less",
+--     "markdown",
+--     "scss",
+--     "typescript",
+--     "typescriptreact",
+--     "yaml",
+--   },
+-- })
 
 -- lspconfig["pylsp"].setup {
 --   on_attach = on_attach,
