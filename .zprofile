@@ -28,6 +28,6 @@ fi
 export MOZ_ENABLE_WAYLAND=1
 export XDG_SESSION_TYPE=wayland
 export _JAVA_AWT_WM_NONREPARENTING=1
-export WAYLAND_DISPLAY=wayland-0
+# export WAYLAND_DISPLAY=wayland-0
 # Needed for obs on wayland
 export QT_QPA_PLATFORM=wayland
