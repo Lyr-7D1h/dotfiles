@@ -26,7 +26,7 @@ local function has_value(tab, val)
   return false
 end
 
-local format_on_save_servers = { "rust_analyzer", "null-ls" }
+local format_on_save_servers = { "rust_analyzer", "null-ls", "tsserver" }
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
