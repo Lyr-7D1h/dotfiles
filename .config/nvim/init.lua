@@ -66,11 +66,11 @@ if vim.g.vscode ~= 1 then
 	vim.keymap.set('n', '<C-g>', telescope.live_grep)
 	vim.keymap.set('n', '<C-t>', telescope.buffers)
 	vim.keymap.set('n', 'fh', telescope.help_tags)
-	vim.keymap.set('n', 'gr', function() telescope.lsp_references({ includeDeclaration = false }) end)
+	vim.keymap.set('n', 'gr', function() telescope.lsp_references({ include_declaration = false }) end)
 	vim.keymap.set('n', 'gt', telescope.lsp_type_definitions)
 	vim.keymap.set('n', 'gd', telescope.lsp_definitions)
 	vim.keymap.set('n', 'gi', telescope.lsp_implementations)
-	require("telescope").setup({
+	require('telescope').setup({
 		defaults = {
 			mappings = {
 				i = {
@@ -78,7 +78,7 @@ if vim.g.vscode ~= 1 then
 					["<C-u>"] = false
 				}
 			}
-		}
+		},
 	})
 
 
