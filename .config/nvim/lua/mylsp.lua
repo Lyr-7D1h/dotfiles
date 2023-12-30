@@ -216,13 +216,13 @@ require("typescript").setup({
     server = { -- pass options to lspconfig's setup method
         on_attach = on_attach,
         flags = lsp_flags,
-        capabilities = capabilities
+        capabilities = capabilities,
     },
 })
 
 -- LSP Servers: https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
 -- Basic setup
-local servers = { 'pyright', 'luau_lsp', 'eslint', 'ccls', "taplo", "bashls", "cssls", "jsonls", "html" }
+local servers = { 'pyright', 'luau_lsp', 'eslint', 'ccls', "taplo", "bashls", "cssls", "jsonls", "html", "lua_ls" }
 
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
