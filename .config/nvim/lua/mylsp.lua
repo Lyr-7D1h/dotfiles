@@ -164,6 +164,17 @@ lspconfig.efm.setup {
     }
   }
 }
+  lspconfig.ltex.setup {
+    on_attach = on_attach,
+    flags = lsp_flags,
+    capabilities = capabilities,
+    settings = 
+    {
+      ltex = {
+			language = "en-GB",
+      },
+    }
+  }
 
 -- Setup prettier
 -- local null_ls = require("null-ls")
