@@ -62,7 +62,8 @@ if vim.g.vscode ~= 1 then
 
 	local telescope = require('telescope.builtin')
 	local telescope_actions = require('telescope.actions')
-	vim.keymap.set('n', '<C-p>', telescope.find_files)
+	-- vim.keymap.set('n', '<C-p>', telescope.find_files)
+	vim.api.nvim_set_keymap('n', '<C-p>', '<cmd>Telescope find_files find_command=rg,--ignore,--hidden,--files<CR>', { noremap = true, silent = true })
 	vim.keymap.set('n', '<C-g>', telescope.live_grep)
 	vim.keymap.set('n', '<C-t>', telescope.buffers)
 	vim.keymap.set('n', 'fh', telescope.help_tags)
