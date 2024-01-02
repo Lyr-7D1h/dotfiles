@@ -1,0 +1,12 @@
+[font]
+size = 13.0
+
+[font.normal]
+family = "Ubuntu Mono Nerd Font"
+
+[window]
+opacity = 1.0
+
+[window.padding]
+x = 10
+y = 10
