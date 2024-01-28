@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+#
+# Build a given repository for arm v7 on kubernetes
+#
+
+set -e
+
+KUBE_NAMESPACE="docker"
+KUBE_CONTEXT="lyrx"
+
+help() {
+    echo "Image Builder cli tool using docker and kubernetes to build multi arch images
+$0 [-h] {IMAGE_NAME} {PLATFORMS}
+
+eg. $0 lyr7d1h/test arm64 amd64"
+}
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--help)
+      EXTENSION="$2"
+      shift # past argument
+      shift # past value
+      ;;
+    -*|--*)
+      echo "Unknown option $1"
+      exit 1
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1") # save positional arg
+      shift # past argument
+      ;;
+  esac
+done
+set -- "${POSITIONAL_ARGS[@]}" # restore positional parameters
+
+if [ -z "$1" ] || [ -z "$2" ]; then
+  help
+  exit 1
+fi
+
+IMAGE=$1
+# PLATFORMS="linux/arm/v7,linux/amd64,linux/arm/v8"
+PLATFORMS=${@:2}
+for i in "$PLATFORMS"; do
+  echo $i
+  echo A
+done
+
+# kubectl config use-context $KUBE_CONTEXT
+#
+# if ! docker buildx ls | cut -d ' ' -f1 | grep kubernetes ; then
+#   echo "Creating '$KUBE_NAMESPACE' namespace"
+#   kubectl create namespace $KUBE_NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+#   echo "Creating kubernetes builder"
+#   docker buildx create \
+#     --bootstrap \
+#     --name=kubernetes \
+#     --driver=kubernetes \
+#     --platform=linux/amd64 \
+#     --driver-opt=namespace=$KUBE_NAMESPACE,nodeselector="kubernetes.io/arch=amd64"
+#   docker buildx create \
+#     --append \
+#     --bootstrap \
+#     --name=kubernetes \
+#     --driver=kubernetes \
+#     --platform=linux/armv7 \
+#     --driver-opt=namespace=$KUBE_NAMESPACE,nodeselector="kubernetes.io/arch=arm"
+# fi
+#
+# echo "Building image"
+# docker buildx build \
+#   --platform $PLATFORMS \
+#   --builder kubernetes \
+#   -t $IMAGE \
+#   --push .

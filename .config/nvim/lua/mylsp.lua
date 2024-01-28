@@ -26,7 +26,7 @@ local function has_value(tab, val)
   return false
 end
 
-local format_on_save_servers = { "rust_analyzer", "null-ls", "tsserver" }
+local format_on_save_servers = { "rust_analyzer", "null-ls" }
 -- Use an on_attach function to only map the following keys
 -- after the language server attaches to the current buffer
 local on_attach = function(client, bufnr)
@@ -157,10 +157,10 @@ lspconfig.efm.setup {
       css = { { formatCommand = 'prettier --stdin-filepath ${INPUT}', formatStdin = true } },
       scss = { { formatCommand = 'prettier --stdin-filepath ${INPUT}', formatStdin = true } },
       less = { { formatCommand = 'prettier --stdin-filepath ${INPUT}', formatStdin = true } },
-      -- typescript = {
-      --   formatCommand = "node_modules/.bin/prettier --stdin-filepath" .. vim.api.nvim_buf_get_name(0),
+      -- typescript = { {
+      --   formatCommand = "prettier --stdin-filepath ${INPUT}",
       --   formatStdin = true
-      -- }
+      -- } }
     }
   }
 }
@@ -177,9 +177,31 @@ lspconfig.ltex.setup {
 }
 
 -- Setup prettier
--- local null_ls = require("null-ls")
--- null_ls.setup({
---   on_attach = on_attach
+-- require("null-ls").setup({
+--   on_attach = function(client, bufnr)
+--     if client.supports_method("textDocument/formatting") then
+--       vim.keymap.set("n", "<Leader>f", function()
+--         vim.lsp.buf.format({ bufnr = vim.api.nvim_get_current_buf() })
+--       end, { buffer = bufnr, desc = "[lsp] format" })
+--
+--       -- format on save
+--       vim.api.nvim_clear_autocmds({ buffer = bufnr, group = group })
+--       vim.api.nvim_create_autocmd(event, {
+--         buffer = bufnr,
+--         group = group,
+--         callback = function()
+--           vim.lsp.buf.format({ bufnr = bufnr, async = async })
+--         end,
+--         desc = "[lsp] format on save",
+--       })
+--     end
+--
+--     if client.supports_method("textDocument/rangeFormatting") then
+--       vim.keymap.set("x", "<Leader>f", function()
+--         vim.lsp.buf.format({ bufnr = vim.api.nvim_get_current_buf() })
+--       end, { buffer = bufnr, desc = "[lsp] format" })
+--     end
+--   end,
 -- })
 -- local prettier = require("prettier")
 -- prettier.setup({
@@ -199,7 +221,7 @@ lspconfig.ltex.setup {
 --     "yaml",
 --   },
 -- })
-
+--
 -- lspconfig["pylsp"].setup {
 --   on_attach = on_attach,
 --   capabilities = capabilities,
@@ -219,13 +241,17 @@ lspconfig.ltex.setup {
 -- }
 
 require("typescript").setup({
-  disable_commands = false,   -- prevent the plugin from creating Vim commands
-  debug = false,              -- enable debug logging for commands
+  disable_commands = false, -- prevent the plugin from creating Vim commands
+  debug = false,            -- enable debug logging for commands
   go_to_source_definition = {
-    fallback = true,          -- fall back to standard LSP definition on failure
+    fallback = true,        -- fall back to standard LSP definition on failure
   },
-  server = {                  -- pass options to lspconfig's setup method
-    on_attach = on_attach,
+  server = {                -- pass options to lspconfig's setup method
+    on_attach = function(client, bufnr)
+      -- client.server_capabilities.document_formatting = false
+      client.server_capabilities.documentFormattingProvider = false
+      on_attach(client, bufnr)
+    end,
     flags = lsp_flags,
     capabilities = capabilities,
   },
@@ -234,17 +260,11 @@ require("typescript").setup({
 -- LSP Servers: https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
 -- Basic setup
 local servers = { 'pyright', 'luau_lsp', 'eslint', 'ccls', "taplo", "bashls", "cssls", "jsonls", "html", "lua_ls",
-  "julials", "terraformls" }
+  "terraformls" }
 
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
-    on_attach = function(client, bufnr)
-      if client.name == "tsserver" then -- disable formatting for tsserver
-        client.server_capabilities.document_formatting = false
-      end
-
-      on_attach(client, bufnr)
-    end,
+    on_attach = on_attach,
     flags = lsp_flags,
     capabilities = capabilities,
   }
