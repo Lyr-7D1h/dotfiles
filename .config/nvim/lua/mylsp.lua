@@ -89,11 +89,11 @@ require('rust-tools').setup({
     flags = lsp_flags,
     capabilities = capabilities,
     settings = {
-        ['rust-analyzer'] = {
-          diagnostics = {
-            disabled = {"unresolved-proc-macro"} -- Prevent random error messages for proc macro's
-          }
+      ['rust-analyzer'] = {
+        diagnostics = {
+          disabled = { "unresolved-proc-macro" } -- Prevent random error messages for proc macro's
         }
+      }
     }
   },
   -- dap = {
@@ -164,17 +164,17 @@ lspconfig.efm.setup {
     }
   }
 }
-  lspconfig.ltex.setup {
-    on_attach = on_attach,
-    flags = lsp_flags,
-    capabilities = capabilities,
-    settings = 
-    {
-      ltex = {
-			language = "en-GB",
-      },
-    }
+lspconfig.ltex.setup {
+  on_attach = on_attach,
+  flags = lsp_flags,
+  capabilities = capabilities,
+  settings =
+  {
+    ltex = {
+      language = "en-GB",
+    },
   }
+}
 
 -- Setup prettier
 -- local null_ls = require("null-ls")
@@ -219,26 +219,26 @@ lspconfig.efm.setup {
 -- }
 
 require("typescript").setup({
-    disable_commands = false, -- prevent the plugin from creating Vim commands
-    debug = false, -- enable debug logging for commands
-    go_to_source_definition = {
-        fallback = true, -- fall back to standard LSP definition on failure
-    },
-    server = { -- pass options to lspconfig's setup method
-        on_attach = on_attach,
-        flags = lsp_flags,
-        capabilities = capabilities,
-    },
+  disable_commands = false,   -- prevent the plugin from creating Vim commands
+  debug = false,              -- enable debug logging for commands
+  go_to_source_definition = {
+    fallback = true,          -- fall back to standard LSP definition on failure
+  },
+  server = {                  -- pass options to lspconfig's setup method
+    on_attach = on_attach,
+    flags = lsp_flags,
+    capabilities = capabilities,
+  },
 })
 
 -- LSP Servers: https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
 -- Basic setup
-local servers = { 'pyright', 'luau_lsp', 'eslint', 'ccls', "taplo", "bashls", "cssls", "jsonls", "html", "lua_ls", "terraformls" }
+local servers = { 'pyright', 'luau_lsp', 'eslint', 'ccls', "taplo", "bashls", "cssls", "jsonls", "html", "lua_ls",
+  "julials", "terraformls" }
 
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
     on_attach = function(client, bufnr)
-
       if client.name == "tsserver" then -- disable formatting for tsserver
         client.server_capabilities.document_formatting = false
       end
