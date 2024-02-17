@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 #
-# Build a given repository for arm v7 on kubernetes
+# Build a given repository on kubernetes and locally depending on best performance
+# ./build_image lyr7d1h/test linux/arm64 linux/amd64
 #
 
 set -e
 
+# Which platforms do you want to run locally?
+DOCKER_LOCAL_PLATFORM="amd64"
+DOCKER_KUBE_BUILDER_NAME="build_image_builder"
 KUBE_NAMESPACE="docker"
 KUBE_CONTEXT="lyrx"
 
@@ -40,37 +44,71 @@ if [ -z "$1" ] || [ -z "$2" ]; then
 fi
 
 IMAGE=$1
-# PLATFORMS="linux/arm/v7,linux/amd64,linux/arm/v8"
 PLATFORMS=${@:2}
-for i in "$PLATFORMS"; do
-  echo $i
-  echo A
+
+
+# Build on kubernetes
+kube() {
+  platforms=$@
+  echo "using $KUBE_CONTEXT kube context"
+  kubectl config use-context $KUBE_CONTEXT
+  kubectl create namespace $KUBE_NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+
+  if ! docker buildx ls | cut -d ' ' -f1 | grep $DOCKER_KUBE_BUILDER_NAME ; then
+    echo "Creating $DOCKER_KUBE_BUILDER_NAME buildx builder"
+    selectors=""
+    for platform in $platforms; do
+      cpu_arch=`echo $platform | cut -d "/" -f2`
+      if [[ -z "$selectors" ]]; then
+        selectors+="kubernetes.io/arch=$cpu_arch"
+      else
+        selectors+=",kubernetes.io/arch=$cpu_arch"
+      fi
+    done
+    docker buildx create \
+      --name=$DOCKER_KUBE_BUILDER_NAME \
+      --driver=kubernetes \
+      --driver-opt=namespace=$KUBE_NAMESPACE,nodeselector="$selectors" \
+      --platform=$platforms
+  fi
+
+  docker buildx build \
+    --platform $platforms \
+    --builder $DOCKER_KUBE_BUILDER_NAME \
+    -t $IMAGE \
+    --push .
+}
+
+# Get all platforms that are supported for kube
+kube_platforms() {
+  local arr=("$@")
+  local result=()
+
+  for item in "${arr[@]}"; do
+      if ! echo "$item" | grep $DOCKER_LOCAL_PLATFORM > /dev/null; then
+          result+=("$item")
+      fi
+  done
+
+  echo "${result[@]}"
+}
+
+kube_plat=$(kube_platforms $PLATFORMS)
+
+for platform in $PLATFORMS; do
+  cpu_arch=`echo $platform | cut -d "/" -f2`
+  if echo $cpu_arch | grep $DOCKER_LOCAL_PLATFORM; then
+    background="&"
+    if [[ "$kube_plat" == "" ]]; then
+      background=""
+    fi
+
+    # docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+    echo "Building $cpu_arch locally ($background)"
+    docker buildx build --builder default --platform $platform -t $IMAGE --push . ${background}
+  fi
 done
 
-# kubectl config use-context $KUBE_CONTEXT
-#
-# if ! docker buildx ls | cut -d ' ' -f1 | grep kubernetes ; then
-#   echo "Creating '$KUBE_NAMESPACE' namespace"
-#   kubectl create namespace $KUBE_NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
-#   echo "Creating kubernetes builder"
-#   docker buildx create \
-#     --bootstrap \
-#     --name=kubernetes \
-#     --driver=kubernetes \
-#     --platform=linux/amd64 \
-#     --driver-opt=namespace=$KUBE_NAMESPACE,nodeselector="kubernetes.io/arch=amd64"
-#   docker buildx create \
-#     --append \
-#     --bootstrap \
-#     --name=kubernetes \
-#     --driver=kubernetes \
-#     --platform=linux/armv7 \
-#     --driver-opt=namespace=$KUBE_NAMESPACE,nodeselector="kubernetes.io/arch=arm"
-# fi
-#
-# echo "Building image"
-# docker buildx build \
-#   --platform $PLATFORMS \
-#   --builder kubernetes \
-#   -t $IMAGE \
-#   --push .
+if [[ "$kube_plat" != "" ]]; then
+  kube $kube_plat
+fi

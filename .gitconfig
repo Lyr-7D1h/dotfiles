@@ -15,3 +15,14 @@
 	required = true
 [core]
 	editor = nvim
+[alias]
+	staash = stash --all
+# when merge conflict fixed before apply again
+[rerere]
+	enabled = true
+[branch]
+	sort = --committerdate
+[column]
+	ui = auto
+[maintenance]
+	repo = /home/lyr/p/rrs
