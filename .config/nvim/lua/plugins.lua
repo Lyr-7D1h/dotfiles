@@ -1,11 +1,11 @@
 -- Install packer if not installed
-local install_path = vim.fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
+local install_path = vim.fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
 if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
-    vim.api.nvim_command('!git clone https://github.com/wbthomason/packer.nvim ' .. install_path)
+  vim.api.nvim_command('!git clone https://github.com/wbthomason/packer.nvim ' .. install_path)
 end
 
 if vim.fn.exists('g:packer_loaded') == 1 then
-    vim.cmd [[packadd packer.nvim]]
+  vim.cmd [[packadd packer.nvim]]
 end
 
 -- Auto update packages on saving this file
@@ -22,11 +22,11 @@ return require('packer').startup(function()
   use 'neovim/nvim-lspconfig'
 
   -- Undo tree
-  use { 
+  use {
     'mbbill/undotree',
     config = function()
       vim.keymap.set('n', '<leader>u', vim.cmd.UndotreeToggle)
-    end 
+    end
   }
   -- Fold functions based on lsp and treesitter
   use {
@@ -133,7 +133,8 @@ return require('packer').startup(function()
 
   -- Fuzzy finder
   use {
-    'nvim-telescope/telescope.nvim', { branch = 'master' },
+    'nvim-telescope/telescope.nvim',
+    branch = 'master',
     -- or                            , branch = '0.1.x',
     requires = { { 'nvim-lua/plenary.nvim' } }
   }
