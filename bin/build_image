@@ -7,18 +7,20 @@
 set -e
 
 # Which platforms do you want to run locally?
-DOCKER_LOCAL_PLATFORM="amd64"
+DOCKER_LOCAL_PLATFORM="amd64|arm64"
 DOCKER_KUBE_BUILDER_NAME="build_image_builder"
 KUBE_NAMESPACE="docker"
 KUBE_CONTEXT="lyrx"
 
 help() {
     echo "Image Builder cli tool using docker and kubernetes to build multi arch images
-$0 [-h] {IMAGE_NAME} {PLATFORMS}
+$0 [-h][--push][--run] {IMAGE_NAME} {PLATFORMS}
 
 eg. $0 lyr7d1h/test arm64 amd64"
 }
 
+RUN_ENABLED=0
+PUSH_ENABLED=0
 while [[ $# -gt 0 ]]; do
   case $1 in
     -h|--help)
@@ -26,6 +28,13 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift # past value
       ;;
+    --push)
+      PUSH_ENABLED=1
+      shift
+      ;;
+    --run)
+      RUN_ENABLED=1
+      shift;;
     -*|--*)
       echo "Unknown option $1"
       exit 1
@@ -43,7 +52,11 @@ if [ -z "$1" ] || [ -z "$2" ]; then
   exit 1
 fi
 
-IMAGE=$1
+IMAGE_TAG=`echo $1 | cut -d ":" -f2 -s`
+if [[ -z "$IMAGE_TAG" ]]; then
+  IMAGE_TAG="latest"
+fi
+IMAGE=`echo $1 | cut -d ":" -f1`
 PLATFORMS=${@:2}
 
 
@@ -54,6 +67,8 @@ kube() {
   kubectl config use-context $KUBE_CONTEXT
   kubectl create namespace $KUBE_NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
 
+  # TODO: remove builder if does not have all platforms needed
+  
   if ! docker buildx ls | cut -d ' ' -f1 | grep $DOCKER_KUBE_BUILDER_NAME ; then
     echo "Creating $DOCKER_KUBE_BUILDER_NAME buildx builder"
     selectors=""
@@ -68,15 +83,18 @@ kube() {
     docker buildx create \
       --name=$DOCKER_KUBE_BUILDER_NAME \
       --driver=kubernetes \
-      --driver-opt=namespace=$KUBE_NAMESPACE,nodeselector="$selectors" \
-      --platform=$platforms
+      --driver-opt=namespace=$KUBE_NAMESPACE,nodeselector=$selectors \
+      --platform="$(echo $platforms | sed "s/ /,/g")"
   fi
 
+  echo "Building '$platforms' on kubernetes"
   docker buildx build \
-    --platform $platforms \
+    --progress plain \
+    --platform "$(echo $platforms | sed "s/ /,/g")" \
     --builder $DOCKER_KUBE_BUILDER_NAME \
-    -t $IMAGE \
-    --push .
+    --push \
+    -t $IMAGE:$IMAGE_TAG \
+    .
 }
 
 # Get all platforms that are supported for kube
@@ -85,30 +103,81 @@ kube_platforms() {
   local result=()
 
   for item in "${arr[@]}"; do
-      if ! echo "$item" | grep $DOCKER_LOCAL_PLATFORM > /dev/null; then
+      if ! echo "$item" | grep -E "$DOCKER_LOCAL_PLATFORM" > /dev/null; then
           result+=("$item")
       fi
   done
 
   echo "${result[@]}"
 }
+local_platforms() {
+  local arr=("$@")
+  local result=()
+
+  for item in "${arr[@]}"; do
+      if echo "$item" | grep -E "$DOCKER_LOCAL_PLATFORM" > /dev/null; then
+          result+=("$item")
+      fi
+  done
+
+  echo "${result[@]}"
+
+}
 
 kube_plat=$(kube_platforms $PLATFORMS)
+local_plat=$(local_platforms $PLATFORMS)
 
-for platform in $PLATFORMS; do
-  cpu_arch=`echo $platform | cut -d "/" -f2`
-  if echo $cpu_arch | grep $DOCKER_LOCAL_PLATFORM; then
-    background="&"
-    if [[ "$kube_plat" == "" ]]; then
-      background=""
-    fi
+local_images=""
 
-    # docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    echo "Building $cpu_arch locally ($background)"
-    docker buildx build --builder default --platform $platform -t $IMAGE --push . ${background}
+for platform in $local_plat; do
+  cpu_arch=$(echo $platform | cut -d "/" -f2)
+  echo "Building $cpu_arch locally"
+  if [[ "$kube_plat" == "" ]]; then
+    docker buildx build \
+      --progress plain \
+      --platform "$platform" \
+      --builder default \
+      --push \
+      -t $IMAGE:build_image_$cpu_arch .
+  else 
+    docker buildx build \
+      --progress plain \
+      --platform "$platform" \
+      --builder default \
+      --push \
+      -t $IMAGE:build_image_$cpu_arch . &
   fi
+  if [[ "$local_images" == "" ]]; then
+    local_images+="$IMAGE:build_image_$cpu_arch"
+  else
+    local_images+=" $IMAGE:build_image_$cpu_arch"
+  fi
+  docker pull $IMAGE:build_image_$cpu_arch --platform $platform
 done
 
 if [[ "$kube_plat" != "" ]]; then
   kube $kube_plat
+  if [[ "$(docker image ls -q $IMAGE:$IMAGE_TAG)" != "" ]]; then
+    echo "Remove possibly cached manifest" docker manifest rm $IMAGE:$IMAGE_TAG 
+    docker manifest rm "$IMAGE:$IMAGE_TAG" || true # Sometimes doesn't work, possibly due to caching
+  fi
+  for platform in $kube_plat; do 
+    docker pull "$IMAGE:$IMAGE_TAG" --platform $platform
+  done
+fi
+
+# If kube made image does not exist create a new local one
+if [[ "$kube_plat" == "" ]]; then
+  echo "Creating $IMAGE:$IMAGE_TAG manifest"
+  docker manifest create "$IMAGE:$IMAGE_TAG"
+fi
+
+echo "Adding locally build images to shared manifest '$IMAGE:$IMAGE_TAG'"
+for image in $local_images; do
+  docker manifest annotate "$IMAGE:$IMAGE_TAG" "$image"
+done
+docker manifest push "$IMAGE:$IMAGE_TAG"
+
+if [[ $RUN_ENABLED == 1 ]]; then
+  docker run --rm --interactive "$IMAGE"
 fi
