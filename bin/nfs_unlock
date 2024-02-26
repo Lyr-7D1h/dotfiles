@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+#
+# Unlock the nfs server
+#
+
+set -eu
+
+HOST=$1
+IP=`echo "$HOST" | cut -d'@' -f2`
+PASS=`bw get password "$IP"`
+
+ssh $HOST "bash -s " <<EOF
+for d in \`ls /dev/sd*\`
+do
+	rand=\$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 15)
+	echo "Decrypting \$d to \$rand"
+	echo "$PASS" | cryptsetup luksOpen \$d \$rand - 
+done
+echo "Mounting encrypted disks"
+sleep 2
+mount /dev/shared/shared /srv/share
+echo re-exporting all nfs folders
+exportfs -ua
+exportfs -a
+EOF
+
