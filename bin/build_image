@@ -93,7 +93,7 @@ kube() {
     --platform "$(echo $platforms | sed "s/ /,/g")" \
     --builder $DOCKER_KUBE_BUILDER_NAME \
     --push \
-    -t $IMAGE:$IMAGE_TAG \
+    -t $IMAGE:build_image_kube \
     .
 }
 
@@ -155,6 +155,10 @@ for platform in $local_plat; do
   docker pull $IMAGE:build_image_$cpu_arch --platform $platform
 done
 
+# TODO: iterate over all platforms use kubernetes or local depending on type
+# kubernetes push and pull from seperate temp image holder
+# TODO: create a new manifest and add all temp ones
+
 if [[ "$kube_plat" != "" ]]; then
   kube $kube_plat
   if [[ "$(docker image ls -q $IMAGE:$IMAGE_TAG)" != "" ]]; then
@@ -162,20 +166,20 @@ if [[ "$kube_plat" != "" ]]; then
     docker manifest rm "$IMAGE:$IMAGE_TAG" || true # Sometimes doesn't work, possibly due to caching
   fi
   for platform in $kube_plat; do 
-    docker pull "$IMAGE:$IMAGE_TAG" --platform $platform
+    docker pull "$IMAGE:build_image_kube" --platform $platform
   done
+    local_images+=" $IMAGE:build_image_kube"
 fi
 
-# If kube made image does not exist create a new local one
-if [[ "$kube_plat" == "" ]]; then
-  echo "Creating $IMAGE:$IMAGE_TAG manifest"
-  docker manifest create "$IMAGE:$IMAGE_TAG"
-fi
+echo "Creating $IMAGE:$IMAGE_TAG manifest"
+ammend=""
+for image in $local_images; do
+  ammend+=" --amend $image"
+done
+echo docker manifest create "$IMAGE:$IMAGE_TAG" "$ammend"
+docker manifest create "$IMAGE:$IMAGE_TAG" "$ammend"
 
 echo "Adding locally build images to shared manifest '$IMAGE:$IMAGE_TAG'"
-for image in $local_images; do
-  docker manifest annotate "$IMAGE:$IMAGE_TAG" "$image"
-done
 docker manifest push "$IMAGE:$IMAGE_TAG"
 
 if [[ $RUN_ENABLED == 1 ]]; then
