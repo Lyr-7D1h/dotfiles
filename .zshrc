@@ -23,6 +23,7 @@ export ZPLUG_HOME=/home/lyr/.zplug
 # zplug "plugins/kubectl", from:oh-my-zsh
 # zplug "plugins/git", from:oh-my-zsh
 # zplug "plugins/aws", from:oh-my-zsh
+zplug "plugins/git-auto-fetch", from:oh-my-zsh
 zplug "plugins/terraform", from:oh-my-zsh
 zplug "plugins/npm", from:oh-my-zsh
 zplug "plugins/poetry", from:oh-my-zsh
@@ -39,6 +40,7 @@ fi
 
 zplug load 
 
+GIT_AUTO_FETCH_INTERVAL=1200 # in seconds
 
 # ZSH-AUTOSUGGESTIONS
 # https://github.com/zsh-users/zsh-autosuggestions
@@ -339,6 +341,10 @@ export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
 # Adding go
 export PATH=$PATH:/usr/local/go/bin
 export PATH=$PATH:$(go env GOPATH)/bin
+
+# Adding espup
+export LIBCLANG_PATH="/home/lyr/.rustup/toolchains/esp/xtensa-esp32-elf-clang/esp-16.0.4-20231113/esp-clang/lib"
+export PATH="/home/lyr/.rustup/toolchains/esp/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:$PATH"
 
 # Adding pyenv
 if command -v pyenv &>/dev/null ; then
