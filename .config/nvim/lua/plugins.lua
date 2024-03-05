@@ -110,13 +110,16 @@ return require('packer').startup(function()
   -- Show lsp progress
   use {
     'j-hui/fidget.nvim',
-    tag = 'legacy',
     config = function()
-      require("fidget").setup {
-        -- options
-      }
+      require("fidget").setup {}
     end,
   }
+
+  -- Markdown preview
+  use({
+    "iamcco/markdown-preview.nvim",
+    run = function() vim.fn["mkdp#util#install"]() end,
+  })
 
   -- Autocomplete pairs
   use {
