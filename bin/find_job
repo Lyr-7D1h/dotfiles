@@ -1,45 +1,108 @@
 #!/usr/bin/env python3
 
+from typing import Any, Dict, List, TypedDict
+import grequests
 import string
 import random
 import os
 import subprocess
 import argparse
 
-parser = argparse.ArgumentParser(
-    description='Find a job by using opensource repositories')
+PREFERED_COUNTRY = "nl"
 
-parser.add_argument('repository')
+parser = argparse.ArgumentParser(
+    description="Find a job by using opensource repositories"
+)
+
+parser.add_argument("repository")
 
 args = vars(parser.parse_args())
 
-repo = args['repository']
+repo = args["repository"]
 
-blacklist = ["gmail.com", "users.noreply.github.com",
-             "protonmail.com", "localhost.localdomain", "outlook.com", "pm.me", "hotmail.com", "protonmail.ch"]
+blacklist = [
+    "gmail.com",
+    "users.noreply.github.com",
+    "protonmail.com",
+    "localhost.localdomain",
+    "outlook.com",
+    "pm.me",
+    "hotmail.com",
+    "protonmail.ch",
+    "live.com",
+    "email.cz"
+]
 
 path = "/tmp/" + "".join(random.choices(string.ascii_lowercase, k=10))
 os.mkdir(path)
 os.chdir(path)
 
 
-os.system(f"git clone {repo} {path}")
+def urls_exists(urls: List[str]):
+    responses = grequests.map(
+        (grequests.get(u, timeout=2, allow_redirects=True) for u in urls),
+        exception_handler=lambda _e, _b: None,
+        size=100,
+    )
+    return [
+        r is not None and r.status_code >= 200 and r.status_code < 300
+        for r in responses
+    ]
+
+
+# if not os.path.exists(path):
+os.system(f"git clone --bare --filter=blob:none {repo} {path}")
+
 output = subprocess.check_output(f"git --no-pager shortlog -sne", shell=True)
 
 users = output.decode("utf-8")
 
-ranking = {}
+
+class Company(TypedDict):
+    url: str
+    users: List[str]
+    ranking: int
+
+
+# companies accessed by domain
+companies: Dict[str, Company] = {}
 for user in users.splitlines():
     domain = user.split("@")[1].replace(">", "")
+    extension = domain.split(".")[-1]
 
     user = "".join(user.split("\t")[1].split("<")[0])
     if domain not in blacklist:
-        if domain in ranking:
-            ranking[domain].append(user)
-        else:
-            ranking[domain] = [user]
+        if domain not in companies:
+            companies[domain] = {"url": f"http://{domain}", "users": [], "ranking": 0}
 
-for company in ranking:
-    print(company)
-    for user in ranking[company]:
-        print("\t", user)
+        # put higher if in prefered country
+        if extension == PREFERED_COUNTRY:
+            companies[domain]["ranking"] += 1
+
+        if users in domain and domain in companies:
+            companies[domain]["users"].append(user)
+        else:
+            companies[domain]["users"] = [user]
+
+# add higher of more than one user
+for c in companies.values():
+    if len(c["users"]) > 1:
+        c["ranking"] += 1
+
+domains = list(companies.keys())
+urls = list([c["url"] for c in companies.values()])
+found = urls_exists(urls)
+for i, b in enumerate(found):
+    if b:
+        companies[domains[i]]["ranking"] += 1
+found_carreers = urls_exists(list([f"{c['url']}/careers" for c in companies.values()]))
+for i,b in enumerate(found_carreers):
+    if b:
+        companies[domains[i]]["ranking"] += 1
+        companies[domains[i]]["url"] += "/careers"
+
+
+for d in sorted(companies, key=lambda d: companies[d]["ranking"]):
+    company = companies[d]
+    print(f"{company['url']} ({company['ranking']})")
+    print("\t" + ",\t".join(company["users"]))
