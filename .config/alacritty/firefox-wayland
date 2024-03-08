@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+WAYLAND_DISPLAY=wayland-0 firefox >/tmp/firefox-wayland "${@}" 2>&1
