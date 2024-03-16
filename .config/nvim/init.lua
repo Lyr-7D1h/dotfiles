@@ -48,7 +48,7 @@ if vim.g.vscode ~= 1 then
 	-- vim.diagnostic.config({
 	-- 	virtual_text = false,
 	-- })
-	
+
 	-- vim.keymap.set('n', '<leader>w', ':w!<CR>')
 	vim.keymap.set('n', '<leader>sv', ':source $MYVIMRC<CR>')
 	vim.keymap.set('x', '<leader>p', '"_dp')
@@ -63,7 +63,8 @@ if vim.g.vscode ~= 1 then
 	local telescope = require('telescope.builtin')
 	local telescope_actions = require('telescope.actions')
 	-- vim.keymap.set('n', '<C-p>', telescope.find_files)
-	vim.api.nvim_set_keymap('n', '<C-p>', '<cmd>Telescope find_files find_command=rg,--ignore,--hidden,--files<CR>', { noremap = true, silent = true })
+	vim.api.nvim_set_keymap('n', '<C-p>', '<cmd>Telescope find_files find_command=rg,--ignore,--hidden,--files<CR>',
+		{ noremap = true, silent = true })
 	vim.keymap.set('n', '<C-g>', telescope.live_grep)
 	vim.keymap.set('n', '<C-t>', telescope.buffers)
 	vim.keymap.set('n', 'fh', telescope.help_tags)
@@ -82,6 +83,39 @@ if vim.g.vscode ~= 1 then
 		},
 	})
 
+	vim.keymap.set('n', '<C-S-N>', ':bnext<CR>')
+	vim.keymap.set('n', '<C-S-P>', ':bprevious<CR>')
+
+	-- HARPOON
+	-- local harpoon = require('harpoon')
+	-- harpoon:setup({})
+	-- local conf = require("telescope.config").values
+	-- local function toggle_telescope(harpoon_files)
+	-- 	local file_paths = {}
+	-- 	for _, item in ipairs(harpoon_files.items) do
+	-- 		table.insert(file_paths, item.value)
+	-- 	end
+	--
+	-- 	require("telescope.pickers").new({}, {
+	-- 		prompt_title = "Harpoon",
+	-- 		finder = require("telescope.finders").new_table({
+	-- 			results = file_paths,
+	-- 		}),
+	-- 		previewer = conf.file_previewer({}),
+	-- 		sorter = conf.generic_sorter({}),
+	-- 	}):find()
+	-- end
+	-- vim.keymap.set("n", "<C-e>", function() toggle_telescope(harpoon:list()) end,
+	-- 	{ desc = "Open harpoon window" })
+	-- vim.keymap.set("n", "<leader>a", function() harpoon:list():append() end)
+	-- -- Toggle previous & next buffers stored within Harpoon list
+	-- vim.keymap.set("n", "<C-S-P>", function() harpoon:list():prev() end)
+	-- vim.keymap.set("n", "<C-S-N>", function() harpoon:list():next() end)
+	-- -- vim.keymap.set("n", "<C-h>", function() harpoon:list():select(1) end)
+	-- -- vim.keymap.set("n", "<C-t>", function() harpoon:list():select(2) end)
+	-- -- vim.keymap.set("n", "<C-n>", function() harpoon:list():select(3) end)
+	-- -- vim.keymap.set("n", "<C-s>", function() harpoon:list():select(4) end)
+
 
 	-- fzf
 	-- vim.keymap.set('n', '<C-p>', ':Files<CR>')
@@ -95,7 +129,7 @@ if vim.g.vscode ~= 1 then
 	vim.keymap.set('n', '<leader>b', ':ToggleBlameLine<CR>')
 
 	-- Remove all buffers not in a window
-	vim.keymap.set('n', '<C-w>a', function() 
+	vim.keymap.set('n', '<C-w>a', function()
 		for _, buf in ipairs(vim.api.nvim_list_bufs()) do
 			if vim.api.nvim_buf_is_valid(buf) then
 				if vim.fn.buflisted(buf) == 1 and vim.fn.bufwinnr(buf) == -1 then
@@ -128,15 +162,15 @@ else
 	vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
 	vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
 	vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
-	vim.keymap.set('n', '<C-w>a', function() 
+	vim.keymap.set('n', '<C-w>a', function()
 		vim.cmd("call VSCodeNotify('workbench.action.closeOtherEditors')")
 	end)
-	vim.keymap.set('n', 'gt', function() 
+	vim.keymap.set('n', 'gt', function()
 		vim.cmd("call VSCodeNotify('editor.action.goToTypeDefinition')")
 	end)
 
 	-- add folding
-	vim.cmd[[
+	vim.cmd [[
 	nnoremap zM :call VSCodeNotify('editor.foldAll')<CR>
 	nnoremap zR :call VSCodeNotify('editor.unfoldAll')<CR>
 	nnoremap zc :call VSCodeNotify('editor.fold')<CR>
@@ -152,7 +186,7 @@ else
 	" 		return a:direction
 	" 	endif
 	" endfunction
-	" 
+	"
 	" nmap <expr> j MoveCursor('j')
 	" nmap <expr> k MoveCursor('k')
 	]]
