@@ -40,7 +40,7 @@ if vim.g.vscode ~= 1 then
 	require('plugins')
 	require('mylsp')
 	require('autocmp')
-	require('mydap')
+	-- require('mydap')
 	require("treesitter")
 
 
@@ -83,8 +83,8 @@ if vim.g.vscode ~= 1 then
 		},
 	})
 
-	vim.keymap.set('n', '<C-S-N>', ':bnext<CR>')
-	vim.keymap.set('n', '<C-S-P>', ':bprevious<CR>')
+	vim.keymap.set('n', '^^N', ':bnext<CR>')
+	vim.keymap.set('n', '^^p', ':bprevious<CR>')
 
 	-- HARPOON
 	-- local harpoon = require('harpoon')

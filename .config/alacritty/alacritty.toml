@@ -22,8 +22,10 @@ bindings = [
 	# https://en.wikipedia.org/wiki/List_of_Unicode_characters
 	# To make a key ctrl+key you have to subtract 0x40?
 	# not sure how this works but allows ctrl+shift+{key} keybinds in neovim
-	{ key = "N", mods = "Control|Shift", chars = "\u001e\u0024" },
-	{ key = "P", mods = "Control|Shift", chars = "\u001e\u0030" },
+	# { key = "N", mods = "Control|Shift", chars = "\u001e\u0024" },
+	# { key = "N", mods = "Control|Shift", chars = "\u001e\u0024" },
+	# { key = "P", mods = "Control|Shift", chars = "\u001e\u0030" },
+	# { key = "P", mods = "Control|Shift", chars = "\u001e" },
 ]
 
 [env]

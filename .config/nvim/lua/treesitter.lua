@@ -73,16 +73,16 @@ require 'treesitter-context'.setup {
 
 require 'nvim-web-devicons'.setup {}
 require("nvim-tree").setup({
-  view = {
-    mappings = {
-      list = {
-        -- https://github.com/kyazdani42/nvim-tree.lua/blob/master/doc/nvim-tree-lua.txt#L1248
-        -- { key = "u", action = "dir_up" },
-        { key = "<C-e>", action = "" },
-        { key = "<F2>", action = "rename" }
-      },
-    },
-  },
+  -- view = {
+  --   mappings = {
+  --     list = {
+  --       -- https://github.com/kyazdani42/nvim-tree.lua/blob/master/doc/nvim-tree-lua.txt#L1248
+  --       -- { key = "u", action = "dir_up" },
+  --       { key = "<C-e>", action = "" },
+  --       { key = "<F2>", action = "rename" }
+  --     },
+  --   },
+  -- },
   update_focused_file = {
     enable = true,
     update_cwd = false,

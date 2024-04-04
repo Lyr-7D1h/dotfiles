@@ -83,7 +83,7 @@ return require('packer').startup(function()
     requires = {
       'kyazdani42/nvim-web-devicons',
     },
-    tag = 'nightly' -- optional, updated every week. (see issue #1193)
+    -- tag = 'nightly' -- optional, updated every week. (see issue #1193)
   }
   use {
     'nvim-treesitter/nvim-treesitter',
@@ -158,8 +158,8 @@ return require('packer').startup(function()
   use 'simrat39/rust-tools.nvim'
   -- Debugging
   use 'nvim-lua/plenary.nvim'
-  use 'mfussenegger/nvim-dap'
-  use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
+  -- use 'mfussenegger/nvim-dap'
+  -- use { "rcarriga/nvim-dap-ui", requires = { "mfussenegger/nvim-dap" } }
   -- use 'roxma/nvim-cm-racer'
   -- use {
   --   'saecki/crates.nvim',
