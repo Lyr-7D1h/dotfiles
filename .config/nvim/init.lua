@@ -168,6 +168,9 @@ else
 	vim.keymap.set('n', 'gt', function()
 		vim.cmd("call VSCodeNotify('editor.action.goToTypeDefinition')")
 	end)
+	vim.keymap.set('n', 'gr', function()
+		vim.cmd("call VSCodeNotify('editor.action.showReferences')")
+	end)
 
 	-- add folding
 	vim.cmd [[
