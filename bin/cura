@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-
-export QT_QPA_PLATFORMTHEME=gtk3
-~/.local/share/cura/cura/UltiMaker-Cura
