@@ -1,0 +1,34 @@
+#!/bin/bash
+# switch gnome theme from dark to light depending on args or time of day
+# theme_switcher [dark|light]
+
+currenttime=$(date +%H:%M)
+
+
+dark() {
+  echo "Setting dark"
+  gnome-extensions disable light-style@gnome-shell-extensions.gcampax.github.com
+  gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+}
+
+light() {
+  echo "Setting light"
+  gnome-extensions enable light-style@gnome-shell-extensions.gcampax.github.com
+  gsettings set org.gnome.desktop.interface color-scheme default
+}
+
+if [[ "$1" == "dark" ]]; then
+  dark
+  exit 0
+elif [[ "$1" == "light" ]]; then
+  light
+  exit 0
+fi
+
+
+if [[ "$currenttime" > "20:00" ]] || [[ "$currenttime" < "06:00" ]]; then
+  dark
+else
+  light
+fi
+
