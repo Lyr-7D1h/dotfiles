@@ -1,5 +1,9 @@
 # https://alacritty.org/config-alacritty.html
 
+# import = [
+#     "~/.config/alacritty/themes/themes/atom_one_light.toml"
+# ]
+
 [mouse]
 hide_when_typing = true
 
