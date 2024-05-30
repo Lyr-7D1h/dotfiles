@@ -46,7 +46,9 @@ get_ip() {
         fi
     done
 
-    echo $(sudo nmap -sn -n $gateway/24 | grep "Ampak Technology" -B 2 | grep -P "(?<=Nmap scan report for )([0-9]|[.]){3,16}" -o)
+    local ips=$(sudo nmap -sn -n $gateway/24 | grep "Ampak Technology" -B 2 | grep -P "(?<=Nmap scan report for )([0-9]|[.]){3,16}" -o)
+
+    echo $(echo $ips | cut -d ' ' -f1)
 }
 
 sync() {
