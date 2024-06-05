@@ -17,12 +17,14 @@
 	editor = nvim
 [alias]
 	staash = stash --all
+	lgb = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset%n' --abbrev-commit --date=relative --branches
 # when merge conflict fixed before apply again
 [rerere]
 	enabled = true
-[branch]
-	sort = --committerdate
 [column]
 	ui = auto
 [maintenance]
 	repo = /home/lyr/p/rrs
+
+[includeIf "gitdir:~/bit/"]
+  path = .gitconfig-bit
