@@ -53,6 +53,6 @@ toggle_sound_profile (custom script for switching sound card codec)
 ```bash
 cd ~
 git init
-git remote add origin https://github.com/Lyr-7D1h/dotfiles.git
+git remote add origin git@github.com:Lyr-7D1h/dotfiles.git
 git pull origin master
 ```
