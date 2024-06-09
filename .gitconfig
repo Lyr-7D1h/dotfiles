@@ -23,8 +23,5 @@
 	enabled = true
 [column]
 	ui = auto
-[maintenance]
-	repo = /home/lyr/p/rrs
-
-[includeIf "gitdir:~/bit/"]
-  path = .gitconfig-bit
+; [includeIf "gitdir:~/b/"]
+;   path = .gitconfig-bit

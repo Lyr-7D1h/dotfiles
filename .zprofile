@@ -27,7 +27,7 @@ export MOZ_ENABLE_WAYLAND=1
 export XDG_SESSION_TYPE=wayland
 export _JAVA_AWT_WM_NONREPARENTING=1
 # Needed for obs on wayland
-export QT_QPA_PLATFORM=wayland
+# export QT_QPA_PLATFORM=wayland
 
 # NOTE: if not set by system might be because of /usr/lib/systemd/user/org.gnome.Shell@wayland.service in ExecStopPost
 # export WAYLAND_DISPLAY=wayland-0
