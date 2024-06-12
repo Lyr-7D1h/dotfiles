@@ -1,4 +1,4 @@
-bluez_monitor.enabled = true
+-- bluez_monitor.enabled = true
 -- bluez_monitor.properties = {
 --   ["bluez5.enable-sbc-xq"] = true,
 --   ["bluez5.enable-msbc"] = true,

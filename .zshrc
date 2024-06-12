@@ -371,4 +371,3 @@ export PATH="$PATH:$HOME/.rvm/bin"
 
 # HACK: something overwrites this in zprofile
 # export WAYLAND_DISPLAY=wayland-0
-

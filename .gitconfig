@@ -23,5 +23,5 @@
 	enabled = true
 [column]
 	ui = auto
-; [includeIf "gitdir:~/b/"]
-;   path = .gitconfig-bit
+[includeIf "gitdir:~/b/"]
+  path = .gitconfig-bit
