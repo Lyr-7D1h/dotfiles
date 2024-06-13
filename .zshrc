@@ -2,6 +2,7 @@ if [ ! -d ~/.zplug ]; then
 	echo "Installing zplug"
 	curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh &
 fi
+
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
 # confirmations, etc.) must go above this block; everything else may go below.
@@ -9,9 +10,8 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-
-# Performance testing using 'zprof'
-# zmodload zsh/zprof
+export NVM_LAZY_LOAD=true
+export NVM_COMPLETION=true
 
 # Powerlevel10k config
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
@@ -20,8 +20,8 @@ fi
 ### Plugins
 source ~/.zplug/init.zsh
 export ZPLUG_HOME=/home/lyr/.zplug
-# zplug "plugins/kubectl", from:oh-my-zsh
-# zplug "plugins/git", from:oh-my-zsh
+zplug "plugins/kubectl", from:oh-my-zsh
+zplug "plugins/git", from:oh-my-zsh
 # zplug "plugins/aws", from:oh-my-zsh
 zplug "plugins/git-auto-fetch", from:oh-my-zsh
 zplug "plugins/terraform", from:oh-my-zsh
@@ -80,12 +80,6 @@ zstyle ':completion:*:corrections' format '%B%d (errors: %e)%b'
 zstyle ':completion:*' group-name ''
 
 
-# Preferred editor for local and remote sessions
-if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='vim'
-else
-  export EDITOR='nvim'
-fi
 
 ### Autocompletions
 autoload bashcompinit && bashcompinit
@@ -93,11 +87,6 @@ autoload -U compinit && compinit
 
 if command -v aws_compiler &> /dev/null; then
   complete -C `which aws_completer` aws
-fi
-
-# Kubectl autocompletion
-if command -v kubectl &> /dev/null; then
-  # source <(kubectl completion zsh)
 fi
 
 # dotnet autocompletion
@@ -190,6 +179,7 @@ zle -N fzf_history
 bindkey '^R' fzf_history 
 # bindkey '^R' history-incremental-search-backward
 
+# CTRL-T - create new tmux session with directory name, or attach to existing one
 tmux_inserter() {
   name=( $(basename `pwd`) )
 
@@ -263,13 +253,12 @@ if command -v bat &>/dev/null ; then
 fi
 # Refresh sudo session
 alias sudo='sudo -v; sudo '
-# added by latest_cd
 alias csway="vim ~/.config/sway/config"
 alias clsp="vim ~/.config/nvim/lua/lsp.lua"
 alias cplugin="vim ~/.config/nvim/lua/plugins.lua"
 alias cvim="vim ~/.config/nvim/init.lua"
 
-alias clip="export SCREENSHOT_FILENAME=$HOME/Pictures/screenshots/scrn-$(date +"%Y-%m-%d-%H-%M-%S").png && slurp | grim -g - $SCREENSHOT_FILENAME && cat $SCREENSHOT_FILENAME | wl-copy"
+# alias clip="export SCREENSHOT_FILENAME=$HOME/Pictures/screenshots/scrn-$(date +"%Y-%m-%d-%H-%M-%S").png && slurp | grim -g - $SCREENSHOT_FILENAME && cat $SCREENSHOT_FILENAME | wl-copy"
 
 
 ### Functions
@@ -297,10 +286,6 @@ fi
 if [[ "$GNOME_TERMINAL_SCREEN" != "" ]]; then
   . /etc/profile.d/vte.sh
 fi
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # Adding Pyenv
 if command -v pyenv &> /dev/null; then
@@ -337,6 +322,13 @@ export FZF_DEFAULT_COMMAND='rg --files'
 export LANG=en_US.UTF-8
 export BROWSER="firefox"
 export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
+# Preferred editor for local and remote sessions
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='vim'
+else
+  export EDITOR='nvim'
+fi
+
 
 # Adding go
 export PATH=$PATH:/usr/local/go/bin
