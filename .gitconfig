@@ -2,6 +2,8 @@
 	email = lyr-7d1h@pm.me
 	name = Lyr
 	signingkey = F0E576DC4C752710F168C87C650AC1B95E7FEE6E
+[interactive]
+	diffFilter = delta --color-only --features=interactive
 [init]
 	defaultBranch = master
 [pull]
@@ -15,6 +17,7 @@
 	required = true
 [core]
 	editor = nvim
+	pager = delta
 [alias]
 	staash = stash --all
 	lgb = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset%n' --abbrev-commit --date=relative --branches
@@ -25,3 +28,10 @@
 	ui = auto
 [includeIf "gitdir:~/b/"]
   path = .gitconfig-bit
+
+[delta]
+	navigate = true
+[merge]
+	conflictstyle = diff3
+[diff]
+	colorMoved = default
