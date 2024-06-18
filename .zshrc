@@ -1,3 +1,4 @@
+zmodload zsh/zprof
 if [ ! -d ~/.zplug ]; then 
 	echo "Installing zplug"
 	curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh &
@@ -10,9 +11,6 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-export NVM_LAZY_LOAD=true
-export NVM_COMPLETION=true
-
 # Powerlevel10k config
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 # typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
@@ -22,7 +20,7 @@ source ~/.zplug/init.zsh
 export ZPLUG_HOME=/home/lyr/.zplug
 zplug "plugins/kubectl", from:oh-my-zsh
 zplug "plugins/git", from:oh-my-zsh
-# zplug "plugins/aws", from:oh-my-zsh
+zplug "plugins/aws", from:oh-my-zsh
 zplug "plugins/git-auto-fetch", from:oh-my-zsh
 zplug "plugins/terraform", from:oh-my-zsh
 zplug "plugins/npm", from:oh-my-zsh
@@ -266,6 +264,14 @@ kaws() {
   selected=$(aws configure list-profiles | fzf)
   export AWS_PROFILE=$selected
 }
+# lazy load kubectl autocomplete
+function kubectl() {
+    if ! type __start_kubectl >/dev/null 2>&1; then
+        source <(command kubectl completion zsh)
+    fi
+
+    command kubectl "$@"
+}
 ktx() {
   # current="$(kubectl config current-context)"
   selected="$(kubectl config get-contexts -o name | fzf)"
@@ -363,3 +369,4 @@ export PATH="$PATH:$HOME/.rvm/bin"
 
 # HACK: something overwrites this in zprofile
 # export WAYLAND_DISPLAY=wayland-0
+zprof
