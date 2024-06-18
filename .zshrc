@@ -1,4 +1,4 @@
-zmodload zsh/zprof
+# zmodload zsh/zprof
 if [ ! -d ~/.zplug ]; then 
 	echo "Installing zplug"
 	curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh &
@@ -369,4 +369,4 @@ export PATH="$PATH:$HOME/.rvm/bin"
 
 # HACK: something overwrites this in zprofile
 # export WAYLAND_DISPLAY=wayland-0
-zprof
+# zprof
