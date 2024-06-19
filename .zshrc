@@ -1,7 +1,7 @@
 # zmodload zsh/zprof
 if [ ! -d ~/.zplug ]; then 
 	echo "Installing zplug"
-	curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh &
+	curl -sL --proto-redir -all,https https://raw.githubusercontent.com/zplug/installer/master/installer.zsh | zsh
 fi
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
@@ -18,19 +18,19 @@ fi
 ### Plugins
 source ~/.zplug/init.zsh
 export ZPLUG_HOME=/home/lyr/.zplug
-zplug "plugins/kubectl", from:oh-my-zsh
+# zplug "plugins/kubectl", from:oh-my-zsh
 zplug "plugins/git", from:oh-my-zsh
-zplug "plugins/aws", from:oh-my-zsh
+# zplug "plugins/aws", from:oh-my-zsh
 zplug "plugins/git-auto-fetch", from:oh-my-zsh
 zplug "plugins/terraform", from:oh-my-zsh
-zplug "plugins/npm", from:oh-my-zsh
+# zplug "plugins/npm", from:oh-my-zsh
 zplug "plugins/poetry", from:oh-my-zsh
 zplug "plugins/docker", from:oh-my-zsh
 zplug "plugins/docker-compose", from:oh-my-zsh
 zplug "plugins/tmux", from:oh-my-zsh
 zplug "zsh-users/zsh-autosuggestions"
 zplug "romkatv/powerlevel10k", as:theme, depth:1
-zplug "zplug/zplug", hook-build: 'zplug --self-manage'
+# zplug "zplug/zplug" #, hook-build: 'zplug --self-manage'
 
 if ! zplug check ; then
       zplug install
@@ -83,9 +83,9 @@ zstyle ':completion:*' group-name ''
 autoload bashcompinit && bashcompinit
 autoload -U compinit && compinit
 
-if command -v aws_compiler &> /dev/null; then
-  complete -C `which aws_completer` aws
-fi
+# if command -v aws_compiler &> /dev/null; then
+#   complete -C `which aws_completer` aws
+# fi
 
 # dotnet autocompletion
 _dotnet_zsh_complete()
@@ -302,17 +302,17 @@ fi
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/usr/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/usr/etc/profile.d/conda.sh" ]; then
-        . "/usr/etc/profile.d/conda.sh"
-    else
-        export PATH="/usr/bin:$PATH"
-    fi
-fi
-unset __conda_setup
+# __conda_setup="$('/usr/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+# if [ $? -eq 0 ]; then
+#     eval "$__conda_setup"
+# else
+#     if [ -f "/usr/etc/profile.d/conda.sh" ]; then
+#         . "/usr/etc/profile.d/conda.sh"
+#     else
+#         export PATH="/usr/bin:$PATH"
+#     fi
+# fi
+# unset __conda_setup
 # <<< conda initialize <<<
 
 # Source any secret environment variables
