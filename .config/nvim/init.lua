@@ -63,8 +63,7 @@ if vim.g.vscode ~= 1 then
 	local telescope = require('telescope.builtin')
 	local telescope_actions = require('telescope.actions')
 	-- vim.keymap.set('n', '<C-p>', telescope.find_files)
-	vim.api.nvim_set_keymap('n', '<C-p>', '<cmd>Telescope find_files find_command=rg,--ignore,--hidden,--files<CR>',
-		{ noremap = true, silent = true })
+	vim.api.nvim_set_keymap('n', '<C-p>', "<cmd>Telescope find_files find_command=rg,--ignore,--hidden,--files,--glob=!.git/<CR>", { noremap = true, silent = true })
 	vim.keymap.set('n', '<C-g>', telescope.live_grep)
 	vim.keymap.set('n', '<C-t>', telescope.buffers)
 	vim.keymap.set('n', 'fh', telescope.help_tags)
@@ -145,15 +144,19 @@ if vim.g.vscode ~= 1 then
 	-- vim.cmd("set termguicolors")
 	-- vim.cmd("colorscheme tender")
 	-- vim.cmd("autocmd vimenter * ++nested colorscheme gruvbox")
+	-- require('codetheme').setup({
+    -- style = 'light'
+	-- })
 	vim.cmd("set t_Co=256")
 	vim.cmd("set t_ut=")
 	vim.cmd("colorscheme codedark")
+	-- vim.o.background = "light" -- or "light" for light mode
+	-- vim.cmd([[colorscheme gruvbox]])
 	-- require('onedark').setup {
 	-- 	style = 'warm'
 	-- }
 	-- require('monokai').setup {}
 	-- vim.o.background = 'dark'
-	-- require('vscode').setup({})
 
 	-- vim.keymap.set('n', '<C-e>', ':Explore<CR>')
 else

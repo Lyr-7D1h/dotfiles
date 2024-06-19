@@ -23,8 +23,8 @@ zplug "plugins/git", from:oh-my-zsh
 # zplug "plugins/aws", from:oh-my-zsh
 zplug "plugins/git-auto-fetch", from:oh-my-zsh
 zplug "plugins/terraform", from:oh-my-zsh
-# zplug "plugins/npm", from:oh-my-zsh
-zplug "plugins/poetry", from:oh-my-zsh
+zplug "plugins/npm", from:oh-my-zsh
+# zplug "plugins/poetry", from:oh-my-zsh
 zplug "plugins/docker", from:oh-my-zsh
 zplug "plugins/docker-compose", from:oh-my-zsh
 zplug "plugins/tmux", from:oh-my-zsh
@@ -265,13 +265,13 @@ kaws() {
   export AWS_PROFILE=$selected
 }
 # lazy load kubectl autocomplete
-function kubectl() {
-    if ! type __start_kubectl >/dev/null 2>&1; then
-        source <(command kubectl completion zsh)
-    fi
-
-    command kubectl "$@"
-}
+# function kubectl() {
+#     if ! type __start_kubectl >/dev/null 2>&1; then
+#         source <(command kubectl completion zsh)
+#     fi
+#
+#     command kubectl "$@"
+# }
 ktx() {
   # current="$(kubectl config current-context)"
   selected="$(kubectl config get-contexts -o name | fzf)"
