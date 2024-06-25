@@ -78,9 +78,9 @@ open() {
 
 	echo "Opened note $path"
 	if command -v nvim &>/dev/null ; then
-		nvim "$path"
+		nvim --cmd 'set ft=markdown' "$path"
 	elif command -v vim &>/dev/null ; then
-		vim "$path"
+		vim --cmd 'set ft=markdown' "$path"
 	else
 		nano "$path"
 	fi

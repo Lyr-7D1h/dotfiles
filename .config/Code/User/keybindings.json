@@ -96,5 +96,15 @@
     "key": "ctrl+tab",
     "command": "-workbench.action.quickOpenNavigateNextInEditorPicker",
     "when": "inEditorsPicker && inQuickOpen"
+  },
+  {
+    "key": "ctrl+shift+g",
+    "command": "workbench.view.scm",
+    "when": "workbench.scm.active && !gitlens:disabled && config.gitlens.keymap == 'chorded'"
+  },
+  {
+    "key": "ctrl+shift+g g",
+    "command": "-workbench.view.scm",
+    "when": "workbench.scm.active && !gitlens:disabled && config.gitlens.keymap == 'chorded'"
   }
 ]
