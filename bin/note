@@ -18,10 +18,14 @@ if [[ ! -d ~/notes  ]]; then
 	chmod -R 644 ~/notes
 fi
 
-if [[ -z $@ ]]; then
-	echo "note {[name]|open|rm|sync|latest|todo|}"
-	exit 1
+if [[ "$2" != "" ]]; then
+	help
 fi
+
+help() {
+	echo "note {help|[name]|open|rm|sync|latest|todo}"
+	exit 1
+}
 
 sync_host_exists() {
 	if [[ ! -f ~/.ssh/config ]] || [[ "$(grep -r "Host $SYNC_HOST" ~/.ssh/config)" == "" ]]; then
@@ -106,8 +110,10 @@ elif [[ "$1" == "journal" ]]; then
 	open "journal"
 elif [[ "$1" == "open" ]]; then
 	open $(get_note)
-else
+elif [[ "$1" != "" ]]; then
 	id=`date '+%y%m%d'`
 	open "${id}_${@}.md"
+else
+	open $(get_note)
 fi
 sync_up &
