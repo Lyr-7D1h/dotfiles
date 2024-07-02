@@ -96,19 +96,6 @@
     "key": "ctrl+tab",
     "command": "-workbench.action.quickOpenNavigateNextInEditorPicker",
     "when": "inEditorsPicker && inQuickOpen"
-<<<<<<< HEAD
-  },
-  {
-    "key": "ctrl+shift+g",
-    "command": "workbench.view.scm",
-    "when": "workbench.scm.active && !gitlens:disabled && config.gitlens.keymap == 'chorded'"
-  },
-  {
-    "key": "ctrl+shift+g g",
-    "command": "-workbench.view.scm",
-    "when": "workbench.scm.active && !gitlens:disabled && config.gitlens.keymap == 'chorded'"
-||||||| parent of 70ba1b3 (updated vscode keybinds)
-=======
   },
   {
     "key": "ctrl+shift+g",
