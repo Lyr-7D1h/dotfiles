@@ -96,6 +96,7 @@
     "key": "ctrl+tab",
     "command": "-workbench.action.quickOpenNavigateNextInEditorPicker",
     "when": "inEditorsPicker && inQuickOpen"
+<<<<<<< HEAD
   },
   {
     "key": "ctrl+shift+g",
@@ -106,5 +107,67 @@
     "key": "ctrl+shift+g g",
     "command": "-workbench.view.scm",
     "when": "workbench.scm.active && !gitlens:disabled && config.gitlens.keymap == 'chorded'"
+||||||| parent of 70ba1b3 (updated vscode keybinds)
+=======
+  },
+  {
+    "key": "ctrl+shift+g",
+    "command": "workbench.view.scm",
+    "when": "workbench.scm.active && !gitlens:disabled && config.gitlens.keymap == 'chorded'"
+  },
+  {
+    "key": "ctrl+shift+g g",
+    "command": "-workbench.view.scm",
+    "when": "workbench.scm.active && !gitlens:disabled && config.gitlens.keymap == 'chorded'"
+  },
+  {
+    "key": "ctrl+s n",
+    "command": "workbench.action.terminal.focusNext",
+    "when": "terminalFocus && terminalHasBeenCreated && !terminalEditorFocus || terminalFocus && terminalProcessSupported && !terminalEditorFocus"
+  },
+  {
+    "key": "ctrl+pagedown",
+    "command": "-workbench.action.terminal.focusNext",
+    "when": "terminalFocus && terminalHasBeenCreated && !terminalEditorFocus || terminalFocus && terminalProcessSupported && !terminalEditorFocus"
+  },
+  {
+    "key": "ctrl+s p",
+    "command": "workbench.action.terminal.focusPrevious",
+    "when": "terminalFocus && terminalHasBeenCreated && !terminalEditorFocus || terminalFocus && terminalProcessSupported && !terminalEditorFocus"
+  },
+  {
+    "key": "ctrl+pageup",
+    "command": "-workbench.action.terminal.focusPrevious",
+    "when": "terminalFocus && terminalHasBeenCreated && !terminalEditorFocus || terminalFocus && terminalProcessSupported && !terminalEditorFocus"
+  },
+  {
+    "key": "ctrl+s l",
+    "command": "workbench.action.terminal.focusNextPane",
+    "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
+  },
+  {
+    "key": "ctrl+s h",
+    "command": "workbench.action.terminal.focusNextPane",
+    "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
+  },
+  {
+    "key": "alt+down",
+    "command": "-workbench.action.terminal.focusNextPane",
+    "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
+  },
+  {
+    "key": "alt+right",
+    "command": "-workbench.action.terminal.focusNextPane",
+    "when": "terminalFocus && terminalHasBeenCreated || terminalFocus && terminalProcessSupported"
+  },
+  {
+    "key": "ctrl+s c",
+    "command": "workbench.action.terminal.new",
+    "when": "terminalFocus && terminalProcessSupported || terminalFocus && terminalWebExtensionContributedProfile"
+  },
+  {
+    "key": "ctrl+shift+`",
+    "command": "-workbench.action.terminal.new",
+    "when": "terminalProcessSupported || terminalWebExtensionContributedProfile"
   }
 ]
