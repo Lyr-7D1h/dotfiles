@@ -255,6 +255,7 @@ alias csway="vim ~/.config/sway/config"
 alias clsp="vim ~/.config/nvim/lua/lsp.lua"
 alias cplugin="vim ~/.config/nvim/lua/plugins.lua"
 alias cvim="vim ~/.config/nvim/init.lua"
+alias n="note"
 
 # alias clip="export SCREENSHOT_FILENAME=$HOME/Pictures/screenshots/scrn-$(date +"%Y-%m-%d-%H-%M-%S").png && slurp | grim -g - $SCREENSHOT_FILENAME && cat $SCREENSHOT_FILENAME | wl-copy"
 
@@ -337,8 +338,10 @@ fi
 
 
 # Adding go
-export PATH=$PATH:/usr/local/go/bin
-export PATH=$PATH:$(go env GOPATH)/bin
+if command -v go > /dev/null; then
+  export PATH=$PATH:/usr/local/go/bin
+  export PATH=$PATH:$(go env GOPATH)/bin
+fi
 
 # Adding espup
 export LIBCLANG_PATH="/home/lyr/.rustup/toolchains/esp/xtensa-esp32-elf-clang/esp-16.0.4-20231113/esp-clang/lib"

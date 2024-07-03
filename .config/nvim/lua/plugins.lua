@@ -66,6 +66,7 @@ return require('packer').startup(function()
   use 'jacoborus/tender.vim'
   use 'morhetz/gruvbox'
   use 'tomasiser/vim-code-dark'
+  -- use 'Mofiqul/vscode.nvim'
   use 'tanvirtin/monokai.nvim'
   use 'navarasu/onedark.nvim'
   use "ellisonleao/gruvbox.nvim" 
