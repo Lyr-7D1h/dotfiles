@@ -349,8 +349,6 @@ export PATH="/home/lyr/.rustup/toolchains/esp/xtensa-esp-elf/esp-13.2.0_20230928
 
 # Adding custom executables
 export PATH="$PATH:$HOME/.npm/bin"
-# Adding custom executables
-export PATH="$HOME/bin:$PATH"
 # Adding local bin to path
 export PATH="$HOME/.local/bin:$PATH"
 # Cargo executables
@@ -369,6 +367,9 @@ export PATH="$HOME/.serverless/bin:$PATH"
 
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export PATH="$PATH:$HOME/.rvm/bin"
+
+# Adding custom executables
+export PATH="$HOME/bin:$PATH"
 
 # HACK: something overwrites this in zprofile
 # export WAYLAND_DISPLAY=wayland-0
