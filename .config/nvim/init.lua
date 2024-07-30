@@ -35,8 +35,45 @@ vim.opt.foldenable = true
 -- Show inlay_hints more frequently
 vim.opt.signcolumn = 'yes'
 
--- Load all plugins when not in vscode
-if vim.g.vscode ~= 1 then
+if vim.g.vscode then
+	-- VSCODE
+	vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
+	vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
+	vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
+	vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
+	vim.keymap.set('n', '<C-w>a', function()
+		vim.cmd("call VSCodeNotify('workbench.action.closeOtherEditors')")
+	end)
+	vim.keymap.set('n', 'gt', function()
+		vim.cmd("call VSCodeNotify('editor.action.goToTypeDefinition')")
+	end)
+	vim.keymap.set('n', 'gr', function()
+		vim.cmd("call VSCodeNotify('editor.action.showReferences')")
+	end)
+
+	-- add folding
+	vim.cmd [[
+	nnoremap zM :call VSCodeNotify('editor.foldAll')<CR>
+	nnoremap zR :call VSCodeNotify('editor.unfoldAll')<CR>
+	nnoremap zc :call VSCodeNotify('editor.fold')<CR>
+	nnoremap zC :call VSCodeNotify('editor.foldRecursively')<CR>
+	nnoremap zo :call VSCodeNotify('editor.unfold')<CR>
+	nnoremap zO :call VSCodeNotify('editor.unfoldRecursively')<CR>
+	nnoremap za :call VSCodeNotify('editor.toggleFold')<CR>
+	
+	" function! MoveCursor(direction) abort
+	" 	if(reg_recording() == '' && reg_executing() == '')
+	" 		return 'g'.a:direction
+	" 	else
+	" 		return a:direction
+	" 	endif
+	" endfunction
+	"
+	" nmap <expr> j MoveCursor('j')
+	" nmap <expr> k MoveCursor('k')
+	]]
+else
+	-- Load all plugins when not in vscode
 	require('plugins')
 	require('mylsp')
 	require('autocmp')
@@ -147,9 +184,9 @@ if vim.g.vscode ~= 1 then
 	-- require('codetheme').setup({
     -- style = 'light'
 	-- })
-	vim.cmd("set t_Co=256")
-	vim.cmd("set t_ut=")
-	vim.cmd("colorscheme codedark")
+	-- vim.cmd("set t_Co=256")
+	-- vim.cmd("set t_ut=")
+	-- vim.cmd("colorscheme codedark")
 	-- vim.o.background = "light" -- or "light" for light mode
 	-- vim.cmd([[colorscheme gruvbox]])
 	-- require('onedark').setup {
@@ -159,41 +196,4 @@ if vim.g.vscode ~= 1 then
 	-- vim.o.background = 'dark'
 
 	-- vim.keymap.set('n', '<C-e>', ':Explore<CR>')
-else
-	-- VSCODE
-	vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
-	vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
-	vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
-	vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
-	vim.keymap.set('n', '<C-w>a', function()
-		vim.cmd("call VSCodeNotify('workbench.action.closeOtherEditors')")
-	end)
-	vim.keymap.set('n', 'gt', function()
-		vim.cmd("call VSCodeNotify('editor.action.goToTypeDefinition')")
-	end)
-	vim.keymap.set('n', 'gr', function()
-		vim.cmd("call VSCodeNotify('editor.action.showReferences')")
-	end)
-
-	-- add folding
-	vim.cmd [[
-	nnoremap zM :call VSCodeNotify('editor.foldAll')<CR>
-	nnoremap zR :call VSCodeNotify('editor.unfoldAll')<CR>
-	nnoremap zc :call VSCodeNotify('editor.fold')<CR>
-	nnoremap zC :call VSCodeNotify('editor.foldRecursively')<CR>
-	nnoremap zo :call VSCodeNotify('editor.unfold')<CR>
-	nnoremap zO :call VSCodeNotify('editor.unfoldRecursively')<CR>
-	nnoremap za :call VSCodeNotify('editor.toggleFold')<CR>
-	
-	" function! MoveCursor(direction) abort
-	" 	if(reg_recording() == '' && reg_executing() == '')
-	" 		return 'g'.a:direction
-	" 	else
-	" 		return a:direction
-	" 	endif
-	" endfunction
-	"
-	" nmap <expr> j MoveCursor('j')
-	" nmap <expr> k MoveCursor('k')
-	]]
 end
