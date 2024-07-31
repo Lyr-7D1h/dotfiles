@@ -324,7 +324,7 @@ if [[ -f ~/.secrets ]]; then
 fi
 
 ### Exports
-export DOCKER_BUILDKIT=1
+export DOCKER_BUILDKIT=0
 export FZF_DEFAULT_COMMAND='rg --files'
 export LANG=en_US.UTF-8
 export BROWSER="firefox"
