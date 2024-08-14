@@ -93,7 +93,7 @@ return require('packer').startup(function()
   use 'nvim-treesitter/nvim-treesitter-context'
 
   -- Lsp
-  use 'jose-elias-alvarez/null-ls.nvim'
+  use 'nvimtools/none-ls.nvim'
   use 'MunifTanjim/prettier.nvim'
 
 
