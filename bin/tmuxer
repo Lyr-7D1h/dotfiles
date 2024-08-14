@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+set -euxo pipefail
+
+# Go to the folder of this script
+cd "$(dirname "$0")"
+
+info() {
+  echo -e "\e[34m$@\e[0m"
+}
+
+# get local network ip from default network interface 
+LOCAL_IP() {
+    local interfaces=$(ip link show up | grep -P "(?<=^[0-9]: )((enp)|(wlo)|(eth)|(wlp))[^:]*" -o)
+    local routes=$(ip route show | grep -E '^default')
+    local default=${interfaces[0]}
+    for interface in $interfaces; do
+        gateway=$(ip route show | grep -P "(?<=^default via )([0-9]|[.])*(?= dev $interface)" -o)
+        if [[ "$gateway" != "" ]]; then
+            default=$interface
+            break
+        fi
+    done
+
+    echo `ip a show dev $default | grep 'inet' | awk '{print $2}' | head -n 1 | cut -d '/' -f1`
+}
+
+OS() {
+  uname
+}
+
+WAIT_ON_PORT() {
+  local port = $1
+}
+
+HOSTNAME() {
+  if [[ "$(os)" == "Linux" ]]; then
+      hostname=$(hostname -I)
+      printf "It's probably but make sure\n"
+  elif [[ "$(os)" == "Darwin" ]]; then
+      hostname=$(ipconfig getifaddr en0)
+      printf "It's probably $hostname but make sure\n"
+  else
+      printf "Unable to determine the OS\n"
+  fi
+}
+
+if ! which yq >/dev/null; then
+  info "Please install https://github.com/kislyuk/yq"
+  exit 1
+fi
+
+keys=(`tomlq -r 'keys[]' config.toml`);
+for key in "${keys[@]}"; do
+  path=`tomlq -r ".[\"$key\"].path" config.toml`
+  path=`realpath $path`
+  repo=`tomlq -r ".[\"$key\"].repo" config.toml`
+
+
+  if [ ! -d $path ]; then
+    info "cloning to $path"
+    git clone --recursive $repo $path
+  fi
+  
+  info "Setting up $key on $path"
+  tmux new-session -c $path -d -s $key
+  tmux split-window -v -t $key
+  tmux send-keys -t $key.1 'echo "test"' C-m
+done
