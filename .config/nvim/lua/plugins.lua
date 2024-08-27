@@ -66,10 +66,11 @@ return require('packer').startup(function()
   use 'jacoborus/tender.vim'
   use 'morhetz/gruvbox'
   use 'tomasiser/vim-code-dark'
-  -- use 'Mofiqul/vscode.nvim'
+  -- use { 'Mofiqul/vscode.nvim', as = 'vscodetheme' }
   use 'tanvirtin/monokai.nvim'
   use 'navarasu/onedark.nvim'
   use "ellisonleao/gruvbox.nvim" 
+  use { "catppuccin/nvim", as = "catppuccin" }
 
   -- Treesitter
   use {

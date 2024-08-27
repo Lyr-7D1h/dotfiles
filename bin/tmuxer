@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
 
-set -euxo pipefail
+set -eo pipefail
 
-# Go to the folder of this script
-cd "$(dirname "$0")"
+
+if [[ -z "$1" ]]; then
+  echo "tmuxer {config}
+
+    tmuxer config.toml"
+  exit 1
+fi
+
+CONFIG=`realpath $1`
 
 info() {
-  echo -e "\e[34m$@\e[0m"
+  printf "\033[0;34m$@\033[0m\n"
 }
 
 # get local network ip from default network interface 
@@ -30,7 +37,8 @@ OS() {
 }
 
 WAIT_ON_PORT() {
-  local port = $1
+  local port=$1
+  while ! nc -z localhost 88; do sleep 0.1; done
 }
 
 HOSTNAME() {
@@ -45,17 +53,38 @@ HOSTNAME() {
   fi
 }
 
+get_value() {
+  local key=$1
+  local property=$2
+  local req=$3
+  local value=`tomlq -r ".[\"$key\"].$property" $CONFIG`
+  if [[ "$req" != "" ]] && [[ "$value" == null ]]; then
+    >&2 echo "toml value '$key.$property' is null"
+    exit 1
+  fi
+  echo $value
+}
+
 if ! which yq >/dev/null; then
   info "Please install https://github.com/kislyuk/yq"
   exit 1
 fi
 
-keys=(`tomlq -r 'keys[]' config.toml`);
+keys=(`tomlq -r 'keys[]' $1`);
 for key in "${keys[@]}"; do
-  path=`tomlq -r ".[\"$key\"].path" config.toml`
+  path=$(get_value $key path req)
   path=`realpath $path`
-  repo=`tomlq -r ".[\"$key\"].repo" config.toml`
+  repo=$(get_value $key repo req)
+  exec=$(get_value $key exec)
 
+  cd $path
+
+  execnow=$(get_value $key execnow)
+  if [[ $execnow != null ]]; then
+    echo $execnow
+    eval $execnow
+    continue
+  fi
 
   if [ ! -d $path ]; then
     info "cloning to $path"
@@ -63,7 +92,7 @@ for key in "${keys[@]}"; do
   fi
   
   info "Setting up $key on $path"
-  tmux new-session -c $path -d -s $key
-  tmux split-window -v -t $key
-  tmux send-keys -t $key.1 'echo "test"' C-m
+  # tmux new-session -c $path -d -s $key
+  # tmux split-window -v -t $key
+  # tmux send-keys -t $key.1 'echo "test"' C-m
 done

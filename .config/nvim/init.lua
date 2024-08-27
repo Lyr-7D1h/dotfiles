@@ -180,9 +180,10 @@ else
 	-- Theming
 	-- vim.cmd("set termguicolors")
 	-- vim.cmd("colorscheme tender")
+	-- vim.cmd("colorscheme catppuccin")
 	-- vim.cmd("autocmd vimenter * ++nested colorscheme gruvbox")
-	-- require('codetheme').setup({
-    -- style = 'light'
+	-- require('vscodetheme').setup({
+	--     style = 'light'
 	-- })
 	-- vim.cmd("set t_Co=256")
 	-- vim.cmd("set t_ut=")

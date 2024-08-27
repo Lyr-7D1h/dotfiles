@@ -19,6 +19,7 @@
 	editor = nvim
 	pager = delta
 [alias]
+	pushfwl = "push --force-with-lease"
 	staash = stash --all
 	lgb = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset%n' --abbrev-commit --date=relative --branches
 # when merge conflict fixed before apply again

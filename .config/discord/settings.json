@@ -1,11 +1,11 @@
 {
   "SKIP_HOST_UPDATE": true,
   "chromiumSwitches": {},
-  "IS_MAXIMIZED": true,
+  "IS_MAXIMIZED": false,
   "IS_MINIMIZED": false,
   "WINDOW_BOUNDS": {
     "x": 0,
-    "y": 69,
+    "y": 32,
     "width": 1920,
     "height": 1011
   }
