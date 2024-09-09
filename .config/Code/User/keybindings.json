@@ -28,8 +28,8 @@
   },
   {
     "key": "ctrl+e",
-    "command": "workbench.action.toggleSidebarVisibility"
- //   "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
+    "command": "workbench.action.toggleSidebarVisibility",
+//    "when": "editorTextFocus && neovim.ctrlKeysNormal && neovim.init && neovim.mode != 'insert'"
   },
   {
     "key": "ctrl+shift+b",
