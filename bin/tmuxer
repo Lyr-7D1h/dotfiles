@@ -10,7 +10,7 @@ if [[ -z "$1" ]]; then
   exit 1
 fi
 
-CONFIG=`realpath $1`
+CONFIG_PATH=`realpath $1`
 
 info() {
   printf "\033[0;34m$@\033[0m\n"
@@ -57,8 +57,8 @@ get_value() {
   local key=$1
   local property=$2
   local req=$3
-  local value=`tomlq -r ".[\"$key\"].$property" $CONFIG`
-  if [[ "$req" != "" ]] && [[ "$value" == null ]]; then
+  local value=`tomlq -r ".[\"$key\"].$property" $CONFIG_PATH`
+  if [[ "$req" == "--required" ]] && [[ "$value" == null ]]; then
     >&2 echo "toml value '$key.$property' is null"
     exit 1
   fi
@@ -71,28 +71,36 @@ if ! which yq >/dev/null; then
 fi
 
 keys=(`tomlq -r 'keys[]' $1`);
+PARENT=$(dirname $CONFIG_PATH)
+cd $PARENT
 for key in "${keys[@]}"; do
-  path=$(get_value $key path req)
-  path=`realpath $path`
-  repo=$(get_value $key repo req)
-  exec=$(get_value $key exec)
+  path=$(get_value $key path --required)
+  repo=$(get_value $key repo --required)
 
-  cd $path
+  if [ ! -d $path ]; then
+    info "cloning $repo"
+    git clone --recursive $repo $path
+  fi
+
+  path=$(realpath -s $path)
+
+  update=$(get_value $key update)
+  if [[ $update == "true" ]]; then
+    info "Pulling updates in $path"
+    git -C $path pull
+  fi
+
+  echo $path
 
   execnow=$(get_value $key execnow)
   if [[ $execnow != null ]]; then
-    echo $execnow
-    eval $execnow
-    continue
+    (cd $path && eval $execnow)
   fi
 
-  if [ ! -d $path ]; then
-    info "cloning to $path"
-    git clone --recursive $repo $path
+  exec=$(get_value $key exec)
+  if [[ $exec != null ]]; then
+    info "Running $exec in $path"
+    tmux new-session -c $path -d -s $key
+    tmux send-keys -t $key "$exec" C-m
   fi
-  
-  info "Setting up $key on $path"
-  # tmux new-session -c $path -d -s $key
-  # tmux split-window -v -t $key
-  # tmux send-keys -t $key.1 'echo "test"' C-m
 done
