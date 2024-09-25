@@ -48,7 +48,10 @@ if vim.g.vscode then
 		vim.cmd("call VSCodeNotify('editor.action.goToTypeDefinition')")
 	end)
 	vim.keymap.set('n', 'gr', function()
-		vim.cmd("call VSCodeNotify('editor.action.showReferences')")
+		vim.cmd("call VSCodeNotify('editor.action.goToReferences')")
+	end)
+	vim.keymap.set('n', 'gD', function()
+		vim.cmd("call VSCodeNotify('editor.action.revealDeclaration')")
 	end)
 
 	-- add folding
