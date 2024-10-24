@@ -13,13 +13,19 @@ fi
 CONFIG_PATH=`realpath $1`
 
 info() {
-  printf "\033[0;34m$@\033[0m\n"
+  printf "\033[0;34m$*\033[0m\n"
+}
+warn() {
+  printf "\033[0;33m$*\033[0m\n" >&2
+}
+error() {
+  printf "\033[0;31m$*\033[0m\n" >&2
 }
 
 # get local network ip from default network interface 
 LOCAL_IP() {
     local interfaces=$(ip link show up | grep -P "(?<=^[0-9]: )((enp)|(wlo)|(eth)|(wlp))[^:]*" -o)
-    local routes=$(ip route show | grep -E '^default')
+    # local routes=$(ip route show | grep -E '^default')
     local default=${interfaces[0]}
     for interface in $interfaces; do
         gateway=$(ip route show | grep -P "(?<=^default via )([0-9]|[.])*(?= dev $interface)" -o)
@@ -29,7 +35,7 @@ LOCAL_IP() {
         fi
     done
 
-    echo `ip a show dev $default | grep 'inet' | awk '{print $2}' | head -n 1 | cut -d '/' -f1`
+    echo "$(ip a show dev "$default" | grep 'inet' | awk '{print $2}' | head -n 1 | cut -d '/' -f1)"
 }
 
 OS() {
@@ -38,7 +44,7 @@ OS() {
 
 WAIT_ON_PORT() {
   local port=$1
-  while ! nc -z localhost 88; do sleep 0.1; done
+  while ! nc -z localhost $port; do sleep 0.1; done
 }
 
 HOSTNAME() {
@@ -57,50 +63,70 @@ get_value() {
   local key=$1
   local property=$2
   local req=$3
-  local value=`tomlq -r ".[\"$key\"].$property" $CONFIG_PATH`
+  local value=$(tomlq -r ".[\"$key\"].$property" $CONFIG_PATH)
   if [[ "$req" == "--required" ]] && [[ "$value" == null ]]; then
     >&2 echo "toml value '$key.$property' is null"
     exit 1
   fi
-  echo $value
+  echo "$value"
 }
+
+# update /path/to/repo
+update() {
+  local path="$1"
+  git fetch --all
+  if [[ $(git status -uno | grep -q 'Your branch is behind') ]]; then
+    if [[ ! $(git diff-index --quiet HEAD --) ]]; then
+      info "Pulling updates in $path"
+      git -C "$path" pull
+    else
+      warn "$path is behind remote, couldn't pull due to uncommitted changes"
+    fi
+  fi
+}
+
 
 if ! which yq >/dev/null; then
   info "Please install https://github.com/kislyuk/yq"
   exit 1
 fi
 
-keys=(`tomlq -r 'keys[]' $1`);
+mapfile -t keys <<< "$(tomlq -r 'keys[]' "$CONFIG_PATH")"
 PARENT=$(dirname $CONFIG_PATH)
-cd $PARENT
+cd "$PARENT"
 for key in "${keys[@]}"; do
-  path=$(get_value $key path --required)
-  repo=$(get_value $key repo --required)
-
-  if [ ! -d $path ]; then
+  path=$(get_value "$key" path --required)
+  repo=$(get_value "$key" repo --required)
+  
+  if [ ! -d "$path" ]; then
     info "cloning $repo"
-    git clone --recursive $repo $path
+    git clone --recursive "$repo" "$path"
   fi
 
   path=$(realpath -s $path)
 
   update=$(get_value $key update)
   if [[ $update == "true" ]]; then
-    info "Pulling updates in $path"
-    git -C $path pull
+    update $path
   fi
-
-  echo $path
 
   execnow=$(get_value $key execnow)
   if [[ $execnow != null ]]; then
     (cd $path && eval $execnow)
   fi
 
-  exec=$(get_value $key exec)
-  if [[ $exec != null ]]; then
-    info "Running $exec in $path"
-    tmux new-session -c $path -d -s $key
-    tmux send-keys -t $key "$exec" C-m
+  # name=($(get_value $key windows.name))
+  mapfile -t exec <<< "$(tomlq -r ".[\"$key\"].windows.panes[].exec" "$CONFIG_PATH")"
+  # exec=($(get_value $key windows.panes[].exec))
+  if [[ ${#exec[@]} -gt 0 ]] && [[ ! $(tmux ls 2>/dev/null) || ! $(tmux has-session -t "$key") ]]; then
+    echo "${exec[@]}"
+    info "Creating tmux session $key"
+    tmux new-session -c "$path" -d -s "$key"
+    for exec in "${exec[@]}"; do
+      info "Running \"$exec\" in $path"
+      tmux send-keys -t "$key" "$exec" C-m
+      tmux send-keys -t "$key" "$exec" C-m
+    done
   fi
+  
 done
