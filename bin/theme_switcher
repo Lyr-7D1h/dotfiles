@@ -3,6 +3,8 @@
 # theme_switcher [dark|light]
 
 currenttime=$(date +%H:%M)
+night="20:00"
+morning="8:00"
 
 
 dark() {
@@ -26,7 +28,7 @@ elif [[ "$1" == "light" ]]; then
 fi
 
 
-if [[ "$currenttime" > "18:00" ]] || [[ "$currenttime" < "07:00" ]]; then
+if [[ "$currenttime" > $night ]] || [[ "$currenttime" < $morning ]]; then
   dark
 else
   light
