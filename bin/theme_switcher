@@ -26,7 +26,7 @@ elif [[ "$1" == "light" ]]; then
 fi
 
 
-if [[ "$currenttime" > "20:00" ]] || [[ "$currenttime" < "07:00" ]]; then
+if [[ "$currenttime" > "18:00" ]] || [[ "$currenttime" < "07:00" ]]; then
   dark
 else
   light
