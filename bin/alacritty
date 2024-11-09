@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
 # time bound theme for alacritty
 
-current_time="$(date +'%k%M')"
-lower_bound='900'
-upper_bound='2000'
-
-echo $current_time
-if [ "${current_time}" -ge "${lower_bound}" -a "${current_time}" -lt "${upper_bound}" ]; then 
+if [[ "$(time_for_light)" == "true" ]]; then
 	/usr/bin/alacritty --config-file=/home/lyr/.config/alacritty/light.toml
 else
 	/usr/bin/alacritty
