@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 tz="America/New_York"
-lower_bound='900'
+lower_bound='700'
 upper_bound='1800'
 
 current_date="$(TZ=$tz date +'%k%M')"

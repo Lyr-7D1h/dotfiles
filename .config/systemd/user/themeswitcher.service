@@ -1,0 +1,22 @@
+[Unit]
+Description=Run themeswitcher
+; Maximum 5 retries
+StartLimitBurst=5 
+; Over a course of 200s
+StartLimitInterval=200
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/bin/themeswitcher
+; Give priority to other services
+Nice=19
+IOSchedulingClass=idle
+IOSchedulingPriority=7
+
+
+; Don't need install managed by timer
+; [Install]
+; After=network-online.target
+; Wants=network-online.target
