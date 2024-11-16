@@ -2,6 +2,8 @@
 # switch gnome theme from dark to light depending on args or time of day
 # theme_switcher [dark|light]
 
+set -e
+
 dark() {
   echo "Setting dark"
   gnome-extensions disable light-style@gnome-shell-extensions.gcampax.github.com
@@ -22,8 +24,7 @@ elif [[ "$1" == "light" ]]; then
   exit 0
 fi
 
-
-if [[ "$(time_for_light)" == "true" ]]; then
+if [[ "$(/home/lyr/bin/time_for_light)" == "true" ]]; then
 	light
 else
 	dark
