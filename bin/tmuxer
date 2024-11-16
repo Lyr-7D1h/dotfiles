@@ -1,11 +1,20 @@
 #!/usr/bin/env python
 
 import os
+import re
 import subprocess
 import tomllib
 import sys
 from typing import NoReturn, Optional
 
+
+if "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
+    print(
+        "Usage: tmuxer <config> [-a]\n"
+        "  -a: attach to the last session\n"
+        "  <config>: the name of the config file in ~/.config/tmuxer or the path to a toml file"
+    )
+    exit(0)
 
 attach = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] == "-a" else False
 
@@ -31,7 +40,7 @@ def debug(*args: str) -> None:
 
 
 def info(*args: str) -> None:
-    print("\033[92m" + " ".join(args) + "\033[0m")
+    print("\033[34m" + " ".join(args) + "\033[0m")
 
 
 def parse_path(path: str) -> str:
@@ -47,11 +56,29 @@ class Executor:
     def __init__(self, cwd: Optional[str] = None):
         self.cwd = cwd
 
+    def parse_vars(self, text: str) -> None:
+        if "{{LOCAL_IP}}" in text:
+            text = text.replace("{{LOCAL_IP}}", self.local_ip())
+        return text
+
+    def _parse_command(self, command: str) -> str:
+        command = self.parse_vars(command)
+        wait_on_port = re.search(r"{{wait_on_port ([0-9]+)}}", command)
+        if wait_on_port is not None:
+            port = wait_on_port.group(1)
+            command = command.replace(
+                wait_on_port.group(0),
+                f"while ! nc -z localhost {port}; do  sleep 0.1; done",
+            )
+
+        return command
+
     # exec a command that can fail and return output and returncode
     def safe_run(
         self,
         command: str,
     ) -> str:
+        command = self._parse_command(command)
         debug(f"Executing '{command}'")
         res = subprocess.run(command, capture_output=True, shell=True, cwd=self.cwd)
         if res.returncode != 0:
@@ -108,9 +135,9 @@ for session_name in config:
     repo = entry["repo"]
 
     if not os.path.exists(path):
-        info(f"cloning {repo} to {path}")
+        info(f"Cloning {repo} to {path}")
         exec = Executor()
-        exec.run(f"git clone {repo} {path}")
+        exec.run(f"git clone --recursive {repo} {path}")
 
     exec = Executor(path)
 
@@ -129,10 +156,24 @@ for session_name in config:
                     f"{path} is behind remote, couldn't pull due to uncommitted changes"
                 )
 
+    if "templates" in entry:
+        templates = entry["templates"]
+        if isinstance(entry["templates"], dict):
+            templates = [entry["templates"]]
+
+        for template in templates:
+            source = parse_path(template["source"])
+            target = parse_path(template["target"])
+            template = open(source).read()
+            parsed = exec.parse_vars(template)
+            info(f"Writing parsed template from {source} to {target}")
+            open(target, "w").write(parsed)
+
     if "execnow" in entry:
         exec.run(entry["execnow"])
 
     if "windows" in entry:
+        info(f"Creating new session {session_name}")
         exec.run(f"tmux new-session -d -s {session_name}")
         windows = entry["windows"]
         if isinstance(entry["windows"], dict):
