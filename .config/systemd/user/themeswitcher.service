@@ -9,7 +9,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=%h/bin/themeswitcher
+ExecStart=%h/bin/theme_switcher
 ; Give priority to other services
 Nice=19
 IOSchedulingClass=idle
