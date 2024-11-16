@@ -1,132 +1,173 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python
 
-set -eo pipefail
-
-
-if [[ -z "$1" ]]; then
-  echo "tmuxer {config}
-
-    tmuxer config.toml"
-  exit 1
-fi
-
-CONFIG_PATH=`realpath $1`
-
-info() {
-  printf "\033[0;34m$*\033[0m\n"
-}
-warn() {
-  printf "\033[0;33m$*\033[0m\n" >&2
-}
-error() {
-  printf "\033[0;31m$*\033[0m\n" >&2
-}
-
-# get local network ip from default network interface 
-LOCAL_IP() {
-    local interfaces=$(ip link show up | grep -P "(?<=^[0-9]: )((enp)|(wlo)|(eth)|(wlp))[^:]*" -o)
-    # local routes=$(ip route show | grep -E '^default')
-    local default=${interfaces[0]}
-    for interface in $interfaces; do
-        gateway=$(ip route show | grep -P "(?<=^default via )([0-9]|[.])*(?= dev $interface)" -o)
-        if [[ "$gateway" != "" ]]; then
-            default=$interface
-            break
-        fi
-    done
-
-    echo "$(ip a show dev "$default" | grep 'inet' | awk '{print $2}' | head -n 1 | cut -d '/' -f1)"
-}
-
-OS() {
-  uname
-}
-
-WAIT_ON_PORT() {
-  local port=$1
-  while ! nc -z localhost $port; do sleep 0.1; done
-}
-
-HOSTNAME() {
-  if [[ "$(os)" == "Linux" ]]; then
-      hostname=$(hostname -I)
-      printf "It's probably but make sure\n"
-  elif [[ "$(os)" == "Darwin" ]]; then
-      hostname=$(ipconfig getifaddr en0)
-      printf "It's probably $hostname but make sure\n"
-  else
-      printf "Unable to determine the OS\n"
-  fi
-}
-
-get_value() {
-  local key=$1
-  local property=$2
-  local req=$3
-  local value=$(tomlq -r ".[\"$key\"].$property" $CONFIG_PATH)
-  if [[ "$req" == "--required" ]] && [[ "$value" == null ]]; then
-    >&2 echo "toml value '$key.$property' is null"
-    exit 1
-  fi
-  echo "$value"
-}
-
-# update /path/to/repo
-update() {
-  local path="$1"
-  git fetch --all
-  if [[ $(git status -uno | grep -q 'Your branch is behind') ]]; then
-    if [[ ! $(git diff-index --quiet HEAD --) ]]; then
-      info "Pulling updates in $path"
-      git -C "$path" pull
-    else
-      warn "$path is behind remote, couldn't pull due to uncommitted changes"
-    fi
-  fi
-}
+import os
+import subprocess
+import tomllib
+import sys
+from typing import NoReturn, Optional
 
 
-if ! which yq >/dev/null; then
-  info "Please install https://github.com/kislyuk/yq"
-  exit 1
-fi
+attach = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] == "-a" else False
 
-mapfile -t keys <<< "$(tomlq -r 'keys[]' "$CONFIG_PATH")"
-PARENT=$(dirname $CONFIG_PATH)
-cd "$PARENT"
-for key in "${keys[@]}"; do
-  path=$(get_value "$key" path --required)
-  repo=$(get_value "$key" repo --required)
-  
-  if [ ! -d "$path" ]; then
-    info "cloning $repo"
-    git clone --recursive "$repo" "$path"
-  fi
+config_arg = sys.argv[1]
+if not config_arg.endswith(".toml"):
+    config_arg = os.path.expanduser(f"~/.config/tmuxer/{config_arg}.toml")
+config_path = os.path.expanduser(os.path.expandvars(config_arg))
+config = open(config_path, "rb")
+config = tomllib.load(config)
 
-  path=$(realpath -s $path)
 
-  update=$(get_value $key update)
-  if [[ $update == "true" ]]; then
-    update $path
-  fi
+def error(*args) -> NoReturn:
+    print("\033[91m" + " ".join(args) + "\033[0m", file=sys.stderr)
+    exit(1)
 
-  execnow=$(get_value $key execnow)
-  if [[ $execnow != null ]]; then
-    (cd $path && eval $execnow)
-  fi
 
-  # name=($(get_value $key windows.name))
-  mapfile -t exec <<< "$(tomlq -r ".[\"$key\"].windows.panes[].exec" "$CONFIG_PATH")"
-  # exec=($(get_value $key windows.panes[].exec))
-  if [[ ${#exec[@]} -gt 0 ]] && [[ ! $(tmux ls 2>/dev/null) || ! $(tmux has-session -t "$key") ]]; then
-    echo "${exec[@]}"
-    info "Creating tmux session $key"
-    tmux new-session -c "$path" -d -s "$key"
-    for exec in "${exec[@]}"; do
-      info "Running \"$exec\" in $path"
-      tmux send-keys -t "$key" "$exec" C-m
-      tmux send-keys -t "$key" "$exec" C-m
-    done
-  fi
-  
-done
+def warn(*args) -> None:
+    print("\033[93m" + " ".join(args) + "\033[0m", file=sys.stderr)
+
+
+def debug(*args: str) -> None:
+    print("\033[94m" + " ".join(args) + "\033[0m")
+
+
+def info(*args: str) -> None:
+    print("\033[92m" + " ".join(args) + "\033[0m")
+
+
+def parse_path(path: str) -> str:
+    expanded_path = os.path.expanduser(os.path.expandvars(path))
+    if not os.path.isabs(expanded_path):
+        expanded_path = os.path.abspath(
+            os.path.join(os.path.dirname(config_path), expanded_path)
+        )
+    return expanded_path
+
+
+class Executor:
+    def __init__(self, cwd: Optional[str] = None):
+        self.cwd = cwd
+
+    # exec a command that can fail and return output and returncode
+    def safe_run(
+        self,
+        command: str,
+    ) -> str:
+        debug(f"Executing '{command}'")
+        res = subprocess.run(command, capture_output=True, shell=True, cwd=self.cwd)
+        if res.returncode != 0:
+            out = res.stderr.decode("utf-8").rstrip()
+        else:
+            out = res.stdout.decode("utf-8").rstrip()
+        return (res.returncode, out)
+
+    def run(
+        self,
+        command: str,
+    ) -> str:
+        (code, out) = self.safe_run(command)
+        if code != 0:
+            error(f"Command failed with code {code}\n", out)
+        return out
+
+    def local_ip(self) -> str:
+        interfaces = self.run(
+            "ip link show up | grep -P '(?<=^[0-9]: )((enp)|(wlo)|(eth)|(wlp))[^:]*' -o"
+        )
+        default = interfaces.split("\n")[0]
+        for interface in interfaces.split("\n"):
+            gateway = self.run(
+                f"ip route show | grep -P '(?<=^default via )([0-9]|[.])*(?= dev {interface})' -o"
+            )
+            if gateway != "":
+                default = interface
+                break
+        return self.run(
+            f"ip a show dev {default} | grep 'inet' | awk '{{print $2}}' | head -n 1 | cut -d '/' -f1"
+        )
+
+    # returns 'Linux' or 'Darwin'
+    def os(self) -> str:
+        return self.safe_run("uname")[1]
+
+    def hostname(self) -> str:
+        os = self.os()
+        if os == "Linux":
+            hostname = self.run("hostname -I")
+            warn(f"It's probably {hostname} but make sure")
+        elif os == "Darwin":
+            hostname = self.run("ipconfig getifaddr en0")
+            warn(f"It's probably {hostname} but make sure")
+        else:
+            error("Unable to determine the OS")
+        return hostname
+
+
+for session_name in config:
+    entry = config[session_name]
+    path = parse_path(entry["path"])
+    repo = entry["repo"]
+
+    if not os.path.exists(path):
+        info(f"cloning {repo} to {path}")
+        exec = Executor()
+        exec.run(f"git clone {repo} {path}")
+
+    exec = Executor(path)
+
+    if exec.safe_run(f"tmux has-session -t {session_name}")[0] == 0:
+        warn(f"session {session_name} already exists")
+        continue
+
+    if "update" in entry and entry["update"]:
+        exec.run("git fetch --all")
+        if exec.safe_run("git status -uno | grep -q 'Your branch is behind'")[0] == 0:
+            if exec.safe_run("git diff-index --quiet HEAD --")[0] == 0:
+                info(f"Pulling updates in {path}")
+                exec.run("git pull")
+            else:
+                warn(
+                    f"{path} is behind remote, couldn't pull due to uncommitted changes"
+                )
+
+    if "execnow" in entry:
+        exec.run(entry["execnow"])
+
+    if "windows" in entry:
+        exec.run(f"tmux new-session -d -s {session_name}")
+        windows = entry["windows"]
+        if isinstance(entry["windows"], dict):
+            windows = [entry["windows"]]
+
+        vsplit = entry["vsplit"] if "vsplit" in entry else True
+        for i, window in enumerate(windows):
+            if "name" in window:
+                window_name = window["name"]
+            else:
+                window_name = str(i)
+
+            vsplit = window["vsplit"] if "vsplit" in window else vsplit
+            panes = window["panes"]
+            if isinstance(window["panes"], dict):
+                panes = [window["panes"]]
+
+            if i == 0:
+                exec.run(f"tmux rename-window -t {session_name} {window_name}")
+            else:
+                exec.run(f"tmux new-window -t {session_name} -n {window_name}")
+
+            for j, pane in enumerate(panes):
+                cmd = pane["exec"]
+                if j > 0:
+                    arg = "-v" if vsplit else "-h"
+                    exec.run(f"tmux split-window -t {session_name}:{window_name} {arg}")
+                if "cwd" in pane:
+                    exec.run(
+                        f"tmux send-keys -t {window_name} 'cd {pane["cwd"]}' Enter"
+                    )
+                exec.run(
+                    f"tmux send-keys -t {session_name}:{window_name}.{j} '{pane['exec']}' Enter"
+                )
+
+if attach:
+    exec = Executor()
+    exec.run(f"tmux attach-session -t {session_name}")
