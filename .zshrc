@@ -22,6 +22,7 @@ export ZPLUG_HOME=/home/lyr/.zplug
 zplug "plugins/git", from:oh-my-zsh
 # zplug "plugins/aws", from:oh-my-zsh
 zplug "plugins/git-auto-fetch", from:oh-my-zsh
+zplug "loiccoyle/zsh-github-copilot"
 zplug "plugins/terraform", from:oh-my-zsh
 zplug "plugins/npm", from:oh-my-zsh
 # zplug "plugins/poetry", from:oh-my-zsh
@@ -223,7 +224,9 @@ bindkey  "^[[H"   beginning-of-line
 bindkey  "^[[F"   end-of-line
 bindkey  "^[[3~"  delete-char
 
-
+# copilot
+bindkey '^[I' zsh_gh_copilot_explain  # bind Alt+shift+\ to explain
+bindkey '^[i' zsh_gh_copilot_suggest  # bind Alt+\ to suggest
 
 
 ### Aliases

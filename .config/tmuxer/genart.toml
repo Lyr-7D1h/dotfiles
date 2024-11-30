@@ -2,6 +2,7 @@
 path = "~/p/genart"
 repo = "git@github.com:Lyr-7D1h/genart.git"
 update = true
+execnow = "code -r ."
 [[genart.windows]]
 name = "reload"
 vsplit = false
