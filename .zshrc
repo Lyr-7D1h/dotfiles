@@ -375,6 +375,7 @@ export PATH="$PATH:$HOME/.rvm/bin"
 
 # Adding custom executables
 export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/pbin:$PATH"
 
 # HACK: something overwrites this in zprofile
 # export WAYLAND_DISPLAY=wayland-0
