@@ -112,6 +112,14 @@ class Executor:
             f"ip a show dev {default} | grep 'inet' | awk '{{print $2}}' | head -n 1 | cut -d '/' -f1"
         )
 
+    def list_panes(self) -> list[int]:
+        panes = self.run("tmux list-panes")
+        list = []
+        for line in panes.split("\n"):
+            if line != "":
+                list.append(int(line.split(":")[0]))
+        return list
+
     # returns 'Linux' or 'Darwin'
     def os(self) -> str:
         return self.safe_run("uname")[1]
@@ -205,8 +213,10 @@ for session_name in config:
                     exec.run(
                         f"tmux send-keys -t {window_name} 'cd {pane["cwd"]}' Enter"
                     )
+
+                pane_ids = exec.list_panes()
                 exec.run(
-                    f"tmux send-keys -t {session_name}:{window_name}.{j} '{pane['exec']}' Enter"
+                    f"tmux send-keys -t {session_name}:{window_name}.{pane_ids[j]} '{pane['exec']}' Enter"
                 )
 
 if attach:
