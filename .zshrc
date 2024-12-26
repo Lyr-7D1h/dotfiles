@@ -348,6 +348,10 @@ if command -v go > /dev/null; then
   export PATH=$PATH:$(go env GOPATH)/bin
 fi
 
+if command -v symfony > /dev/null; then
+   export PATH="$HOME/.symfony5/bin:$PATH"
+fi
+
 # Adding espup
 export LIBCLANG_PATH="/home/lyr/.rustup/toolchains/esp/xtensa-esp32-elf-clang/esp-16.0.4-20231113/esp-clang/lib"
 export PATH="/home/lyr/.rustup/toolchains/esp/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:$PATH"
