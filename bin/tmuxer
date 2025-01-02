@@ -205,7 +205,6 @@ for session_name in config:
                 exec.run(f"tmux new-window -t {session_name} -n {window_name}")
 
             for j, pane in enumerate(panes):
-                cmd = pane["exec"]
                 if j > 0:
                     arg = "-v" if vsplit else "-h"
                     exec.run(f"tmux split-window -t {session_name}:{window_name} {arg}")
@@ -215,9 +214,13 @@ for session_name in config:
                     )
 
                 pane_ids = exec.list_panes()
-                exec.run(
-                    f"tmux send-keys -t {session_name}:{window_name}.{pane_ids[j]} '{pane['exec']}' Enter"
-                )
+                cmd = pane["exec"]
+                if type(cmd) != list:
+                    cmd = [cmd]
+                for cmd in cmd:
+                    exec.run(
+                        f"tmux send-keys -t {session_name}:{window_name}.{pane_ids[j]} '{cmd}' Enter"
+                    )
 
 if attach:
     exec = Executor()

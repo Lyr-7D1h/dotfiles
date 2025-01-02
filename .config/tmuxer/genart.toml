@@ -8,7 +8,7 @@ name = "reload"
 vsplit = false
 [[genart.windows.panes]]
 cwd = "genart"
-exec = "npm i && npm run watch"
+exec = ["npm i", "npm run watch"]
 [[genart.windows.panes]]
 cwd = "genart-editor"
-exec = "npm i && npm start"
+exec = ["npm i", "npm start"]
