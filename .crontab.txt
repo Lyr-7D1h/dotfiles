@@ -3,4 +3,4 @@
 @reboot DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus DISPLAY=:0 /home/lyr/bin/theme_switcher
 
 # Run rclone sync 
-*/30 * * * * rclone sync /home/lyr/proton proton:
+*/30 * * * * rclone bisync /home/lyr/proton proton:
