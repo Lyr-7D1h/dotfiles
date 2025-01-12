@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# Setup crontab with latest changes
+#
+
+set -e
+
+# File with crontab entries
+CRONTAB_FILE="$HOME/.crontab.txt"
+
+# save current crontab as latest
+if [[ "$1" == "update" ]]; then 
+	crontab -l > "$CRONTAB_FILE"
+	exit 0
+fi
+
+# Install crontab
+crontab "$CRON_FILE"
+
+# Verify installation
+echo "Crontab installed. Current entries:"
+crontab -l
