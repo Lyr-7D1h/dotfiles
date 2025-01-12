@@ -2,7 +2,7 @@
 
 tz="Europe/Amsterdam"
 lower_bound='700'
-upper_bound='1700'
+upper_bound='1600'
 
 current_date="$(TZ=$tz date +'%k%M')"
 
