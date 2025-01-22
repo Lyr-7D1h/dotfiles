@@ -6,6 +6,9 @@
 	diffFilter = delta --color-only --features=interactive
 [init]
 	defaultBranch = master
+[rebase]
+	# Automatically squash fixup commits when rebasing
+	autosquash = true
 [pull]
 	rebase = true
 [push]
@@ -19,6 +22,8 @@
 	editor = nvim
 	pager = delta
 [alias]
+	# Create a fixup commit to a previous commit
+	fixup = "!git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -o git commit --fixup"
 	pushfii = "push --force-if-includes"
 	pushfwl = "push --force-with-lease"
 	staash = stash --all

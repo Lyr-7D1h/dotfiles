@@ -15,7 +15,8 @@ if [[ "$1" == "update" ]]; then
 fi
 
 # Install crontab
-crontab "$CRON_FILE"
+echo $CRONTAB_FILE
+crontab "$CRONTAB_FILE"
 
 # Verify installation
 echo "Crontab installed. Current entries:"
