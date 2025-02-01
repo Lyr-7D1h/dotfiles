@@ -149,9 +149,6 @@ for session_name in config:
 
     exec = Executor(path)
 
-    if exec.safe_run(f"tmux has-session -t {session_name}")[0] == 0:
-        warn(f"session {session_name} already exists")
-        continue
 
     if "update" in entry and entry["update"]:
         exec.run("git fetch --all")
@@ -179,6 +176,10 @@ for session_name in config:
 
     if "execnow" in entry:
         exec.run(entry["execnow"])
+
+    if exec.safe_run(f"tmux has-session -t {session_name}")[0] == 0:
+        warn(f"session {session_name} already exists")
+        continue
 
     if "windows" in entry:
         info(f"Creating new session {session_name}")

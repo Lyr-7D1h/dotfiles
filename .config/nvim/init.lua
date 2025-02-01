@@ -1,40 +1,3 @@
--- comma as leader
-vim.g.mapleader = " "
-
--- Disable netwr file explorer
-vim.g.loaded = 1
-vim.g.loaded_netrwPlugin = 1
-
-vim.cmd([[
-	so ~/.config/nvim/legacy.vim
-]])
-
-vim.opt.splitbelow = true
-vim.opt.splitright = true
-
---Set completeopt to have a better completion experience
--- :help completeopt
--- menuone: popup even when there's only one match
--- noinsert: Do not insert text until a selection is made
--- noselect: Do not select, force to select one from the menu
--- shortness: avoid showing extra messages when using completion
--- updatetime: set updatetime for CursorHold
-vim.opt.completeopt = { 'menuone', 'noselect', 'noinsert' }
-vim.opt.shortmess = vim.opt.shortmess + { c = true }
-vim.api.nvim_set_option('updatetime', 300)
-
--- Lsp folding (https://github.com/kevinhwang91/nvim-ufo#quickstart)
--- vim.opt.foldcolumn = "1"
-vim.opt.foldlevel = 99
-vim.opt.foldlevelstart = -1
-vim.opt.foldenable = true
-
--- Fixed column for diagnostics to appear
--- Show autodiagnostic popup on cursor hover_range
--- Goto previous / next diagnostic warning / error
--- Show inlay_hints more frequently
-vim.opt.signcolumn = 'yes'
-
 if vim.g.vscode then
 	-- VSCODE
 	vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
@@ -79,6 +42,57 @@ if vim.g.vscode then
 	" nmap <expr> k MoveCursor('k')
 	]]
 else
+	vim.opt.number = true
+	vim.opt.relativenumber = true
+
+	vim.opt.tabstop = 4
+	vim.opt.shiftwidth = 4
+	vim.opt.expandtab = false -- Use hard tabs unless you want spaces
+
+	vim.opt.clipboard:append("unnamedplus")
+	vim.opt.encoding = "utf-8"
+	vim.opt.scrolloff = 8
+	vim.opt.mouse = "a"
+	vim.opt.swapfile = false
+
+	-- Disable automatically wrapping newline
+	vim.opt.formatoptions:remove("t")
+
+
+	-- comma as leader
+	vim.g.mapleader = " "
+
+	-- Disable netwr file explorer
+	vim.g.loaded = 1
+	vim.g.loaded_netrwPlugin = 1
+
+	vim.opt.splitbelow = true
+	vim.opt.splitright = true
+
+	--Set completeopt to have a better completion experience
+	-- :help completeopt
+	-- menuone: popup even when there's only one match
+	-- noinsert: Do not insert text until a selection is made
+	-- noselect: Do not select, force to select one from the menu
+	-- shortness: avoid showing extra messages when using completion
+	-- updatetime: set updatetime for CursorHold
+	vim.opt.completeopt = { 'menuone', 'noselect', 'noinsert' }
+	vim.opt.shortmess = vim.opt.shortmess + { c = true }
+	vim.api.nvim_set_option('updatetime', 300)
+
+	-- Lsp folding (https://github.com/kevinhwang91/nvim-ufo#quickstart)
+	-- vim.opt.foldcolumn = "1"
+	vim.opt.foldlevel = 99
+	vim.opt.foldlevelstart = -1
+	vim.opt.foldenable = true
+
+	-- Fixed column for diagnostics to appear
+	-- Show autodiagnostic popup on cursor hover_range
+	-- Goto previous / next diagnostic warning / error
+	-- Show inlay_hints more frequently
+	vim.opt.signcolumn = 'yes'
+
+
 	-- Load all plugins when not in vscode
 	-- require('plugins')
 	-- require('mylsp')
