@@ -80,11 +80,11 @@ if vim.g.vscode then
 	]]
 else
 	-- Load all plugins when not in vscode
-	require('plugins')
-	require('mylsp')
-	require('autocmp')
-	-- require('mydap')
-	require("treesitter")
+	-- require('plugins')
+	-- require('mylsp')
+	-- require('autocmp')
+	-- -- require('mydap')
+	-- require("treesitter")
 
 
 	-- Disable text after line cause we're using lsp_lines
@@ -103,27 +103,27 @@ else
 
 	-- vim.keymap.set('n', 'gs', ':ChatGPT<CR>')
 
-	local telescope = require('telescope.builtin')
-	local telescope_actions = require('telescope.actions')
-	-- vim.keymap.set('n', '<C-p>', telescope.find_files)
-	vim.api.nvim_set_keymap('n', '<C-p>', "<cmd>Telescope find_files find_command=rg,--ignore,--hidden,--files,--glob=!.git/<CR>", { noremap = true, silent = true })
-	vim.keymap.set('n', '<C-g>', telescope.live_grep)
-	vim.keymap.set('n', '<C-t>', telescope.buffers)
-	vim.keymap.set('n', 'fh', telescope.help_tags)
-	vim.keymap.set('n', 'gr', function() telescope.lsp_references({ include_declaration = false }) end)
-	vim.keymap.set('n', 'gt', telescope.lsp_type_definitions)
-	vim.keymap.set('n', 'gd', telescope.lsp_definitions)
-	vim.keymap.set('n', 'gi', telescope.lsp_implementations)
-	require('telescope').setup({
-		defaults = {
-			mappings = {
-				i = {
-					["<esc>"] = telescope_actions.close,
-					["<C-u>"] = false
-				}
-			}
-		},
-	})
+	-- local telescope = require('telescope.builtin')
+	-- local telescope_actions = require('telescope.actions')
+	-- -- vim.keymap.set('n', '<C-p>', telescope.find_files)
+	-- vim.api.nvim_set_keymap('n', '<C-p>', "<cmd>Telescope find_files find_command=rg,--ignore,--hidden,--files,--glob=!.git/<CR>", { noremap = true, silent = true })
+	-- vim.keymap.set('n', '<C-g>', telescope.live_grep)
+	-- vim.keymap.set('n', '<C-t>', telescope.buffers)
+	-- vim.keymap.set('n', 'fh', telescope.help_tags)
+	-- vim.keymap.set('n', 'gr', function() telescope.lsp_references({ include_declaration = false }) end)
+	-- vim.keymap.set('n', 'gt', telescope.lsp_type_definitions)
+	-- vim.keymap.set('n', 'gd', telescope.lsp_definitions)
+	-- vim.keymap.set('n', 'gi', telescope.lsp_implementations)
+	-- require('telescope').setup({
+	-- 	defaults = {
+	-- 		mappings = {
+	-- 			i = {
+	-- 				["<esc>"] = telescope_actions.close,
+	-- 				["<C-u>"] = false
+	-- 			}
+	-- 		}
+	-- 	},
+	-- })
 
 	vim.keymap.set('n', '^^N', ':bnext<CR>')
 	vim.keymap.set('n', '^^p', ':bprevious<CR>')
