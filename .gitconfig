@@ -19,11 +19,15 @@
 	process = git-lfs filter-process
 	required = true
 [core]
-	editor = nvim
+	editor = vim
 	pager = delta
 [alias]
 	# Create a fixup commit to a previous commit
-	fixup = "!git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7 | xargs -o git commit --fixup"
+	fixup = "!f() { \
+		hash=$(git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7) && \
+		git commit --fixup=${hash} && \
+		git rebase --autosquash ${hash}~1 ; \
+	}; f"
 	pushfii = "push --force-if-includes"
 	pushfwl = "push --force-with-lease"
 	staash = stash --all

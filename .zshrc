@@ -231,6 +231,7 @@ bindkey '^[i' zsh_gh_copilot_suggest  # bind Alt+\ to suggest
 
 ### Aliases
 alias g="git"
+alias grc="git rebase --continue"
 alias ga="git add"
 alias gsw="git switch"
 alias gst="git status"
@@ -238,6 +239,7 @@ alias gb="git branch"
 alias gc="git commit -v"
 alias gchb="git checkout -b"
 alias gca="git commit -a"
+alias gcm="git commit -m"
 alias gcam="git commit -am"
 alias gda="git diff -a"
 alias gd="git diff"
