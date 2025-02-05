@@ -1,3 +1,5 @@
+vim.opt.clipboard:append("unnamedplus")
+
 if vim.g.vscode then
 	-- VSCODE
 	vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
@@ -49,7 +51,6 @@ else
 	vim.opt.shiftwidth = 4
 	vim.opt.expandtab = false -- Use hard tabs unless you want spaces
 
-	vim.opt.clipboard:append("unnamedplus")
 	vim.opt.encoding = "utf-8"
 	vim.opt.scrolloff = 8
 	vim.opt.mouse = "a"
