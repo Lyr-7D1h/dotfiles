@@ -149,7 +149,6 @@ for session_name in config:
 
     exec = Executor(path)
 
-
     if "update" in entry and entry["update"]:
         exec.run("git fetch --all")
         if exec.safe_run("git status -uno | grep -q 'Your branch is behind'")[0] == 0:

@@ -1,0 +1,26 @@
+[creagen]
+path = "~/p/creagen"
+repo = "git@github.com:Lyr-7d1h/creagen.git"
+vsplit=false
+execnow="code ~/p/creagen ~/p/creagen-editor ~/p/creagen-generations"
+# update = true
+[[creagen.windows.panes]]
+exec = "npm i && npm run watch"
+[[creagen.windows.panes]]
+cwd = "~/p/creagen-editor"
+exec = "npm i && npm run dev"
+
+[creagen-editor]
+path = "~/p/creagen-editor"
+repo = "git@github.com:Lyr-7d1h/creagen-editor.git"
+# update = true
+
+[creagen-generations]
+path = "~/p/creagen-generations"
+repo = "git@github.com:Lyr-7d1h/creagen-generations.git"
+# update = true
+
+[creagen-cloudflare]
+path = "~/p/creagen-cloudflare"
+repo = "git@github.com:Lyr-7d1h/creagen-cloudflare.git"
+# update = true

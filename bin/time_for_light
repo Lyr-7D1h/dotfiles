@@ -1,13 +1,37 @@
 #!/usr/bin/env bash
 
-tz="Europe/Amsterdam"
-lower_bound='700'
-upper_bound='1800'
+set -eu
 
-current_date="$(TZ=$tz date +'%k%M')"
-
-if [ "${current_date}" -ge "${lower_bound}" -a "${current_date}" -lt "${upper_bound}" ]; then
-	echo "true"
-else
-	echo "false"
+# Set your OpenWeather API Key
+if [[ -z "$OPENWEATHER_API_KEY" ]]; then
+	echo "Set OPENWEATHER_API_KEY env var"
+	exit 1
 fi
+
+CITY="Pittsburgh"
+COUNTRY="US"  # Optional, improves accuracy
+
+# Get weather data from OpenWeather API
+API_RESPONSE=$(curl --fail-with-body -s "https://api.openweathermap.org/data/2.5/weather?q=$CITY,$COUNTRY&appid=$OPENWEATHER_API_KEY")
+
+
+# Extract latitude, longitude, and timezone offset
+LAT=$(echo "$API_RESPONSE" | jq -r '.coord.lat')
+LON=$(echo "$API_RESPONSE" | jq -r '.coord.lon')
+TIMEZONE_OFFSET=$(echo "$API_RESPONSE" | jq -r '.timezone')
+
+# Extract sunrise and sunset times (in Unix timestamp)
+SUNRISE_UNIX=$(echo "$API_RESPONSE" | jq -r '.sys.sunrise')
+SUNSET_UNIX=$(echo "$API_RESPONSE" | jq -r '.sys.sunset')
+
+# Convert timestamps to local time
+SUNRISE_LOCAL=$(TZ="UTC" date -d @$((SUNRISE_UNIX + TIMEZONE_OFFSET)) +%H:%M:%S)
+SUNSET_LOCAL=$(TZ="UTC" date -d @$((SUNSET_UNIX + TIMEZONE_OFFSET)) +%H:%M:%S)
+CURRENT_TIME=$(date +%H:%M:%S)
+
+if [[ "$CURRENT_TIME" > "$SUNRISE_LOCAL" && "$CURRENT_TIME" < "$SUNSET_LOCAL" ]]; then
+    echo "true"
+else
+    echo "false"
+fi
+
