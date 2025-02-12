@@ -2,7 +2,7 @@
 # switch gnome theme from dark to light depending on args or time of day
 # theme_switcher [dark|light]
 
-set -e
+set -eu
 
 dark() {
   echo "Setting dark"
@@ -16,15 +16,19 @@ light() {
   gsettings set org.gnome.desktop.interface color-scheme default
 }
 
-if [[ "$1" == "dark" ]]; then
+theme="${1:-""}"
+if [[ "$theme" == "dark" ]]; then
   dark
   exit 0
-elif [[ "$1" == "light" ]]; then
+elif [[ "$theme" == "light" ]]; then
   light
   exit 0
 fi
 
-if [[ "$(/home/lyr/bin/time_for_light)" == "true" ]]; then
+# debug time for light
+/home/lyr/bin/time_for_light
+
+if [[ "$($HOME/bin/time_for_light)" == "true" ]]; then
 	light
 else
 	dark

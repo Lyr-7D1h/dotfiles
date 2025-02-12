@@ -2,12 +2,12 @@
 Description=Run themeswitcher
 ; Maximum 5 retries
 StartLimitBurst=5 
-; Over a course of 200s
 StartLimitInterval=200
 After=network-online.target
 Wants=network-online.target
 
 [Service]
+EnvironmentFile=%h/.secrets
 Type=oneshot
 ExecStart=%h/bin/theme_switcher
 ; Give priority to other services

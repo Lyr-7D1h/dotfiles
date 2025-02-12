@@ -12,12 +12,12 @@ CITY="Pittsburgh"
 COUNTRY="US"  # Optional, improves accuracy
 
 # Get weather data from OpenWeather API
-API_RESPONSE=$(curl --fail-with-body -s "https://api.openweathermap.org/data/2.5/weather?q=$CITY,$COUNTRY&appid=$OPENWEATHER_API_KEY")
+if ! API_RESPONSE=$(curl --fail-with-body -s "https://api.openweathermap.org/data/2.5/weather?q=$CITY,$COUNTRY&appid=$OPENWEATHER_API_KEY"); then
+  echo "Error response: $API_RESPONSE"
+  exit 1
+fi
 
 
-# Extract latitude, longitude, and timezone offset
-LAT=$(echo "$API_RESPONSE" | jq -r '.coord.lat')
-LON=$(echo "$API_RESPONSE" | jq -r '.coord.lon')
 TIMEZONE_OFFSET=$(echo "$API_RESPONSE" | jq -r '.timezone')
 
 # Extract sunrise and sunset times (in Unix timestamp)
@@ -25,9 +25,11 @@ SUNRISE_UNIX=$(echo "$API_RESPONSE" | jq -r '.sys.sunrise')
 SUNSET_UNIX=$(echo "$API_RESPONSE" | jq -r '.sys.sunset')
 
 # Convert timestamps to local time
-SUNRISE_LOCAL=$(TZ="UTC" date -d @$((SUNRISE_UNIX + TIMEZONE_OFFSET)) +%H:%M:%S)
-SUNSET_LOCAL=$(TZ="UTC" date -d @$((SUNSET_UNIX + TIMEZONE_OFFSET)) +%H:%M:%S)
-CURRENT_TIME=$(date +%H:%M:%S)
+# use utc for calculating all timezones
+export TZ="UTC"
+SUNRISE_LOCAL=$(date -d @$((SUNRISE_UNIX + TIMEZONE_OFFSET)) +%H:%M:%S)
+SUNSET_LOCAL=$(date -d @$((SUNSET_UNIX + TIMEZONE_OFFSET)) +%H:%M:%S)
+CURRENT_TIME=$(date -d @$(($(date +%s) + TIMEZONE_OFFSET)) +%H:%M:%S)
 
 if [[ "$CURRENT_TIME" > "$SUNRISE_LOCAL" && "$CURRENT_TIME" < "$SUNSET_LOCAL" ]]; then
     echo "true"
