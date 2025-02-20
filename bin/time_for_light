@@ -2,6 +2,10 @@
 
 set -eu
 
+if [[ -f "$HOME/.secrets" ]]; then
+	source "$HOME/.secrets"
+fi
+
 # Set your OpenWeather API Key
 if [[ -z "$OPENWEATHER_API_KEY" ]]; then
 	echo "Set OPENWEATHER_API_KEY env var"

@@ -8,9 +8,11 @@ import sys
 from typing import NoReturn, Optional
 
 
-if "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
+if len(sys.argv) <= 1 or "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
     print(
-        "Usage: tmuxer <config> [-a]\n"
+        "Usage: tmuxer list|<config> [-a|-h]\n"
+        "  list: list all available config files\n"
+        "  --help | -h: display this help message\n"
         "  -a: attach to the last session\n"
         "  <config>: the name of the config file in ~/.config/tmuxer or the path to a toml file"
     )
@@ -19,11 +21,19 @@ if "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
 attach = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] == "-a" else False
 
 config_arg = sys.argv[1]
+if config_arg == "list":
+    config_dir = os.path.expanduser("~/.config/tmuxer")
+    configs = [f for f in os.listdir(config_dir) if f.endswith(".toml")]
+    print("Available config files:")
+    for config in configs:
+        print(f"  - {config.split('.')[0]}")
+    exit(0)
+
 if not config_arg.endswith(".toml"):
     config_arg = os.path.expanduser(f"~/.config/tmuxer/{config_arg}.toml")
 config_path = os.path.expanduser(os.path.expandvars(config_arg))
-config = open(config_path, "rb")
-config = tomllib.load(config)
+with open(config_path, "rb") as config_file:
+    config = tomllib.load(config_file)
 
 
 def error(*args) -> NoReturn:
