@@ -10,15 +10,20 @@ from typing import NoReturn, Optional
 
 if len(sys.argv) <= 1 or "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
     print(
-        "Usage: tmuxer list|<config> [-a|-h]\n"
+        "Usage: tmuxer list|<config> [-a|-h|<entry>]\n"
         "  list: list all available config files\n"
-        "  --help | -h: display this help message\n"
-        "  -a: attach to the last session\n"
         "  <config>: the name of the config file in ~/.config/tmuxer or the path to a toml file"
+        "  -h | --help: display this help message\n"
+        "  -a: attach to the last session\n"
+        "  <entry>: Which entry in the config to execute\n"
+        "\n\n"
+        "Examples:\n"
+        "   tmuxer list"
+        "   tmuxer my-config my-entry -a"
     )
     exit(0)
 
-attach = sys.argv[2] if len(sys.argv) > 2 and sys.argv[2] == "-a" else False
+attach = "-a" in sys.argv[1:]
 
 config_arg = sys.argv[1]
 if config_arg == "list":
@@ -29,6 +34,7 @@ if config_arg == "list":
         print(f"  - {config.split('.')[0]}")
     exit(0)
 
+entry = sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith("-") else ""
 if not config_arg.endswith(".toml"):
     config_arg = os.path.expanduser(f"~/.config/tmuxer/{config_arg}.toml")
 config_path = os.path.expanduser(os.path.expandvars(config_arg))
@@ -147,7 +153,9 @@ class Executor:
         return hostname
 
 
-for session_name in config:
+for session_name in list(
+    filter(lambda session_name: len(entry) == 0 or session_name == entry, config)
+):
     entry = config[session_name]
     path = parse_path(entry["path"])
     repo = entry["repo"]
@@ -224,7 +232,11 @@ for session_name in config:
                     )
 
                 pane_ids = exec.list_panes()
-                cmd = pane["exec"]
+                if "exec" in pane:
+                    cmd = pane["exec"]
+                else:
+                    cmd = ""
+
                 if type(cmd) != list:
                     cmd = [cmd]
                 for cmd in cmd:
