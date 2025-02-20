@@ -42,7 +42,7 @@ def error(*args) -> NoReturn:
 
 
 def warn(*args) -> None:
-    print("\033[93m" + " ".join(args) + "\033[0m", file=sys.stderr)
+    print("\033[38;5;208m" + " ".join(args) + "\033[0m", file=sys.stderr)
 
 
 def debug(*args: str) -> None:
