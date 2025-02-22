@@ -4,16 +4,31 @@
 
 set -eu
 
+code() {
+	local path="$HOME/.config/Code/User/settings.json"
+	if [[ ! -f "$path" ]]; then
+		return
+	fi
+  local theme="${1:-"light"}"
+  if [[ "$theme" == "dark" ]]; then
+    sed -i 's/"workbench.colorTheme": "Default Light Modern",/"workbench.colorTheme": "Default Dark Modern",/' "$path"
+  else
+    sed -i 's/"workbench.colorTheme": "Default Dark Modern",/"workbench.colorTheme": "Default Light Modern",/' "$path"
+  fi
+}
+
 dark() {
   echo "Setting dark"
   gnome-extensions disable light-style@gnome-shell-extensions.gcampax.github.com
   gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+  code dark
 }
 
 light() {
   echo "Setting light"
   gnome-extensions enable light-style@gnome-shell-extensions.gcampax.github.com
   gsettings set org.gnome.desktop.interface color-scheme default
+  code light
 }
 
 theme="${1:-""}"
