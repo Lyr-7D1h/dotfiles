@@ -5,10 +5,16 @@ vsplit=false
 execnow="code ~/p/creagen ~/p/creagen-editor ~/p/creagen-generations"
 # update = true
 [[creagen.windows.panes]]
-exec = "npm i && npm run watch"
+exec = [
+	"npm i", 
+	"npm run watch:chokidar"
+]
 [[creagen.windows.panes]]
 cwd = "~/p/creagen-editor"
-exec = "npm i && npm run dev"
+exec = [
+	"npm i",
+	"npm run dev"
+]
 
 [creagen-editor]
 path = "~/p/creagen-editor"

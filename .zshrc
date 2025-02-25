@@ -263,6 +263,7 @@ alias clsp="vim ~/.config/nvim/lua/lsp.lua"
 alias cplugin="vim ~/.config/nvim/lua/plugins.lua"
 alias cvim="vim ~/.config/nvim/init.lua"
 alias n="note"
+alias py="python"
 
 # alias clip="export SCREENSHOT_FILENAME=$HOME/Pictures/screenshots/scrn-$(date +"%Y-%m-%d-%H-%M-%S").png && slurp | grim -g - $SCREENSHOT_FILENAME && cat $SCREENSHOT_FILENAME | wl-copy"
 

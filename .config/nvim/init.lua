@@ -21,6 +21,9 @@ if vim.g.vscode then
 	vim.keymap.set('n', 'gD', function()
 		vim.cmd("call VSCodeNotify('editor.action.revealDeclaration')")
 	end)
+	vim.keymap.set('n', '<C-j>', function()
+		vim.cmd("call VSCodeNotify('workbench.action.togglePanel')")
+	end)
 
 	-- add folding
 	vim.cmd [[
