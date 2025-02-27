@@ -2,8 +2,21 @@
 
 set -eu
 
+CACHE_FILE=/tmp/time_for_light.cache
+
 if [[ -f "$HOME/.secrets" ]]; then
 	source "$HOME/.secrets"
+fi
+# source from cache to only call the first time you check timezone offset
+if [[ -f "$CACHE_FILE" ]]; then
+	# check if only these 3 vars are set
+	if grep -q -E '^(TIMEZONE_OFFSET|SUNRISE_UNIX|SUNSET_UNIX)=' "$CACHE_FILE" && \
+		 ! grep -q -v -E '^(TIMEZONE_OFFSET|SUNRISE_UNIX|SUNSET_UNIX)=' "$CACHE_FILE"; then
+		source "$CACHE_FILE"
+	else
+		echo "invalid cache file"
+		exit 1 
+	fi
 fi
 
 # Set your OpenWeather API Key
@@ -15,18 +28,24 @@ fi
 CITY="Pittsburgh"
 COUNTRY="US"  # Optional, improves accuracy
 
-# Get weather data from OpenWeather API
-if ! API_RESPONSE=$(curl --fail-with-body -s "https://api.openweathermap.org/data/2.5/weather?q=$CITY,$COUNTRY&appid=$OPENWEATHER_API_KEY"); then
-  echo "Error response: $API_RESPONSE"
-  exit 1
-fi
+if [[ -z "${TIMEZONE_OFFSET:-}" ]]; then
+	# Get weather data from OpenWeather API
+	if ! API_RESPONSE=$(curl --fail-with-body -s "https://api.openweathermap.org/data/2.5/weather?q=$CITY,$COUNTRY&appid=$OPENWEATHER_API_KEY"); then
+	  echo "Error response: $API_RESPONSE"
+	  exit 1
+	fi
 
 
-TIMEZONE_OFFSET=$(echo "$API_RESPONSE" | jq -r '.timezone')
+	TIMEZONE_OFFSET=$(echo "$API_RESPONSE" | jq -r '.timezone')
 
-# Extract sunrise and sunset times (in Unix timestamp)
+	# Extract sunrise and sunset times (in Unix timestamp)
+	SUNRISE_UNIX=$(echo "$API_RESPONSE" | jq -r '.sys.sunrise')
+	SUNSET_UNIX=$(echo "$API_RESPONSE" | jq -r '.sys.sunset')
+
+	echo "TIMEZONE_OFFSET=$(echo "$API_RESPONSE" | jq -r '.timezone')
 SUNRISE_UNIX=$(echo "$API_RESPONSE" | jq -r '.sys.sunrise')
-SUNSET_UNIX=$(echo "$API_RESPONSE" | jq -r '.sys.sunset')
+SUNSET_UNIX=$(echo "$API_RESPONSE" | jq -r '.sys.sunset')" > $CACHE_FILE
+fi
 
 # Convert timestamps to local time
 # use utc for calculating all timezones
