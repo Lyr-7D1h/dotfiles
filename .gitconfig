@@ -25,8 +25,19 @@
 	# Create a fixup commit to a previous commit
 	fixup = "!f() { \
 		hash=$(git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7) && \
+		if [[ -z \"$hash\" ]]; then \
+			exit 0; \
+		fi && \
 		git commit --fixup=${hash} && \
+		if ! git diff-index --quiet HEAD --; then \
+			changes=1; \
+			git stash; \
+		fi && \
 		git rebase --autosquash ${hash}~1 ; \
+		if [[ \"$changes\" == \"1\" ]]; then \
+			changes=1; \
+			git stash pop; \
+		fi; \
 	}; f"
 	pushfii = "push --force-if-includes"
 	pushfwl = "push --force-with-lease"
