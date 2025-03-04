@@ -14,16 +14,17 @@ if len(sys.argv) <= 1 or "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
         "  list: list all available config files\n"
         "  <config>: the name of the config file in ~/.config/tmuxer or the path to a toml file"
         "  -h | --help: display this help message\n"
-        "  -a: attach to the last session\n"
+        "  -a | --attach: attach to the last session\n"
         "  <entry>: Which entry in the config to execute\n"
         "\n\n"
         "Examples:\n"
-        "   tmuxer list"
-        "   tmuxer my-config my-entry -a"
+        "   - tmuxer list\n"
+        "   - tmuxer ./my-config my-entry -a\n"
+        "   - tmuxer ./my-config"
     )
     exit(0)
 
-attach = "-a" in sys.argv[1:]
+attach = "-a" in sys.argv[1:] or "--attach" in sys.argv[1:]
 
 config_arg = sys.argv[1]
 if config_arg == "list":

@@ -13,7 +13,7 @@ exec = [
 cwd = "~/p/creagen-editor"
 exec = [
 	"npm i",
-	"npm run dev"
+	"npm start"
 ]
 
 [creagen-editor]
