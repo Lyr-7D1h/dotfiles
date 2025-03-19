@@ -1,0 +1,160 @@
+#!/usr/bin/env python
+
+import os
+import subprocess
+import sys
+import tomllib
+from typing import Any, NoReturn, Optional
+
+
+if len(sys.argv) <= 1 or "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
+    print(
+        "Usage: archbuilder list|<config> [-a|-h|<entry>]\n"
+        "  list: list all available config files\n"
+        "  <config>: the name of the config file in ~/.config/tmuxer or the path to a toml file"
+        "  -h | --help: display this help message\n"
+        "  -a | --attach: attach to the last session\n"
+        "  <entry>: Which entry in the config to execute\n"
+        "\n\n"
+        "Examples:\n"
+        "   - tmuxer list\n"
+        "   - tmuxer ./my-config my-entry -a\n"
+        "   - tmuxer ./my-config"
+    )
+    exit(0)
+
+PLATFORMS = {
+    "linux/amd64",
+    "linux/arm64",
+    "linux/arm/v7",
+    "linux/arm/v6",
+    "linux/ppc64le",
+    "linux/s390x",
+    "linux/riscv64",
+    "windows/amd64",
+    "darwin/amd64",
+    "darwin/arm64",
+}
+
+
+def is_valid_platform(platform: str) -> bool:
+    return platform in PLATFORMS
+
+
+def parse_path(path: str) -> str:
+    return os.path.expanduser(os.path.expandvars(path))
+
+
+def error(*args) -> NoReturn:
+    print("\033[91m" + " ".join(args) + "\033[0m", file=sys.stderr)
+    exit(1)
+
+
+def warn(*args) -> None:
+    print("\033[38;5;208m" + " ".join(args) + "\033[0m", file=sys.stderr)
+
+
+def debug(*args: str) -> None:
+    print("\033[94m" + " ".join(args) + "\033[0m")
+
+
+def info(*args: str) -> None:
+    print("\033[34m" + " ".join(args) + "\033[0m")
+
+
+# exec a command that can fail and return output and returncode
+def safe_run(command: str, capture=True) -> tuple[int, str]:
+    debug(f"Executing '{command}'")
+    res = subprocess.run(
+        command,
+        capture_output=capture,
+        stdout=sys.stdout if not capture else None,
+        shell=True,
+    )
+    if res.returncode != 0:
+        out = res.stderr.decode("utf-8").rstrip()
+    else:
+        out = res.stdout.decode("utf-8").rstrip()
+    return (res.returncode, out)
+
+
+def run(command: str, capture=True) -> str:
+    (code, out) = safe_run(command, capture=capture)
+    if code != 0:
+        error(f"Command failed with code {code}\n", out)
+    return out
+
+
+class Config:
+    def __init__(self, config_path: str):
+        with open(config_path, "rb") as config_file:
+            config = tomllib.load(config_file)
+        self.config = config
+
+    def safe_get(self, key: str) -> Optional[Any]:
+        return self.config.get(key)
+
+    def get(self, key: str) -> Any:
+        value = self.config.get(key)
+        if value == None:
+            error(f"Failed to get {key} from config")
+        return value
+
+
+config_path = sys.argv[1]
+config = Config(config_path)
+
+tmp_dir = f"/tmp/archbuilder_{config_path.split('.')[0]}"
+if not os.path.exists(tmp_dir):
+    run(f"git clone {config.get("repo")} {tmp_dir}")
+
+info(f"Chdir to {tmp_dir}")
+os.chdir(tmp_dir)
+
+exec = config.safe_get("exec")
+if exec and type(exec) != list:
+    exec = [exec]
+if exec:
+    for command in exec:
+        run(command)
+
+kube_namespace = config.safe_get("kube_namespace")
+kube_context = config.safe_get("kube_context") or os.getenv("KUBE_CONTEXT")
+if kube_namespace:
+    (code, out) = safe_run(f"kubectl get namespace {kube_namespace}")
+    if code != 0:
+        info(f"Namespace '{kube_namespace}' does not exist. Creating it...")
+        run(f"kubectl create namespace {kube_namespace}")
+    else:
+        info(f"Namespace '{kube_namespace}' already exists.")
+
+builder = config.safe_get("builder") or "archbuilder"
+(code, out) = safe_run("docker buildx ls")
+if builder in out:
+    run(f"docker buildx rm {builder}")
+buildx_options = ""
+if kube_namespace is not None:
+    buildx_options = f"--driver kubernetes --driver-opt namespace={kube_namespace}"
+run(f"docker buildx create {buildx_options} --name {builder}")
+
+
+image_name = config.get("image_name")
+image_registry = config.get("image_registry")
+image = f"{image_registry}/{image_name}"
+image_platforms = config.get("image_platforms")
+if type(image_platforms) != list:
+    image_platforms = [image_platforms]
+for platform in image_platforms:
+    if is_valid_platform(platform) == False:
+        error(f"Invalid platform {platform}")
+
+docker_args = config.safe_get("docker_args") or ""
+run(
+    f"docker buildx build --platform {','.join(image_platforms)} --builder {builder} -t {image} --push {docker_args} .",
+    capture=False,
+)
+
+
+info("Cleanup")
+run(f"rm -rf {tmp_dir}")
+run(f"docker buildx rm {builder}")

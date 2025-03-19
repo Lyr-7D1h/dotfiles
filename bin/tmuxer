@@ -94,7 +94,7 @@ class Executor:
     def safe_run(
         self,
         command: str,
-    ) -> str:
+    ) -> tuple[int, str]:
         command = self._parse_command(command)
         debug(f"Executing '{command}'")
         res = subprocess.run(command, capture_output=True, shell=True, cwd=self.cwd)

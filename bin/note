@@ -9,13 +9,14 @@
 #
 
 SYNC_HOST="home"
+NOTES_FOLDER=~/notes
 
 set -e
 
-if [[ ! -d ~/notes  ]]; then
+if [[ ! -d $NOTES_FOLDER  ]]; then
 	echo "Making notes directory..."
-	mkdir ~/notes
-	chmod -R 644 ~/notes
+	mkdir $NOTES_FOLDER
+	chmod -R 644 $NOTES_FOLDER
 fi
 
 if [[ "$2" != "" ]]; then
@@ -43,9 +44,9 @@ sync_down() {
 	# TODO improve performance by using tar
 	local path=$(mktemp --directory)
 	# Copy from host to local
-	# ssh $SYNC_HOST 'TMP=$(mktemp --directory) ; tar cvf $TMP/notes.tar ~/notes/* ; rm -r $TMP' 
-	scp -prq "$SYNC_HOST:~/notes/*" $path
-	cp -ru $path/* ~/notes
+	# ssh $SYNC_HOST 'TMP=$(mktemp --directory) ; tar cvf $TMP/notes.tar $NOTES_FOLDER/* ; rm -r $TMP' 
+	scp -prq "$SYNC_HOST:$NOTES_FOLDER/*" $path
+	cp -ru $path/* $NOTES_FOLDER
 	rm -r $path
 }
 
@@ -57,19 +58,19 @@ sync_up() {
 	fi
 	# Copy from local to host
 	local path=$(ssh home mktemp --directory)
-	scp -prq ~/notes/* "$SYNC_HOST:$path"
-	ssh $SYNC_HOST "cp -ru $path/* ~/notes ; rm -r $path"
+	scp -prq $NOTES_FOLDER/* "$SYNC_HOST:$path"
+	ssh $SYNC_HOST "cp -ru $path/* $NOTES_FOLDER ; rm -r $path"
 }
 
-get_note() {
-	ls ~/notes | fzf
+get_notes() {
+	find $NOTES_FOLDER/* -name '*.md' | sed "s|^$NOTES_FOLDER/||" | fzf
 }
 
 rm_file() {
-	path="/home/$USER/notes/$1"
+	path="$NOTES_FOLDER/$1"
 	echo "Removing $path"
-	rm ~/notes/$1
-	ssh $SYNC_HOST "rm ~/notes/$1"
+	rm $NOTES_FOLDER/$1
+	ssh $SYNC_HOST "rm $NOTES_FOLDER/$1"
 }
 
 # open {filename}
@@ -78,7 +79,7 @@ open() {
 		echo "Invalid file given"
 		exit 1
 	fi
-	path=$(printf ~/notes/%q "$1")
+	path=$(printf $NOTES_FOLDER/%q "$1")
 
 	echo "Opened note $path"
 	if command -v nvim &>/dev/null ; then
@@ -95,7 +96,7 @@ if [[ "$1" == "sync" ]]; then
 	sync_up
 	exit 0
 elif [[ "$1" == "rm" ]]; then
-	file=$(get_note)
+	file=$(get_notes)
 	rm_file $file 
 	exit 0
 fi
@@ -103,7 +104,7 @@ fi
 
 sync_down || true
 if [[ "$1" == "latest" ]]; then
-	open "$(ls ~/notes | grep -E '^[0-9]{6}' | tail -n 1)"
+	open "$(ls $NOTES_FOLDER | grep -E '^[0-9]{6}' | tail -n 1)"
 elif [[ "$1" == "todo" ]]; then
 	open "todo"
 elif [[ "$1" == "did" ]]; then
@@ -111,11 +112,11 @@ elif [[ "$1" == "did" ]]; then
 elif [[ "$1" == "journal" ]]; then
 	open "journal"
 elif [[ "$1" == "open" ]]; then
-	open $(get_note)
+	open $(get_notes)
 elif [[ "$1" != "" ]]; then
 	id=`date '+%y%m%d'`
-	open "${id}_${@}.md"
+	open "journal/${id}_${@}.md"
 else
-	open $(get_note)
+	open $(get_notes)
 fi
 sync_up &
