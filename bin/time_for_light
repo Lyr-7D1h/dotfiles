@@ -2,49 +2,168 @@
 
 set -eu
 
+COUNTRY="NL"  
+CITY="Amsterdam"
+CACHE_ENABLED=0
 CACHE_FILE=/tmp/time_for_light.cache
 
+# Function to get sunrise/sunset data using GWeather
+get_sunrise_sunset_gweather() {
+    local city="$1"
+    local country="$2"
+    
+    if ! python3 -c "import gi; gi.require_version('GWeather', '4.0'); from gi.repository import GWeather" 2>/dev/null; then
+        echo "GWeather not available" >&2
+        return 1
+    fi
+    
+    if ! GWEATHER_DATA=$(python3 - "$city" "$country" <<'PYTHON_EOF'
+import gi
+import sys
+import json
+import time
+from datetime import datetime
+
+# Import GWeather library
+gi.require_version("GWeather", "4.0")
+from gi.repository import GWeather
+
+
+def get_sunrise_sunset(city, country):
+    # Initialize world database
+    world = GWeather.Location.get_world()
+    country_locations = world.find_by_country_code(country)
+    if not country_locations:
+        sys.stderr.write(f"Error: Could not find location for {city}, {country}\n")
+        sys.exit(1)
+
+    location = None
+    child = country_locations.next_child()
+    while child:
+        if child.get_name() == city:
+            location = child
+            break
+        child = country_locations.next_child(child)
+
+    if not location:
+        sys.stderr.write(f"Error: Could not find location for {city}, {country}\n")
+        sys.exit(1)
+
+    # Create info object for this location
+    info = GWeather.Info.new(location)
+    info.update()
+
+    # Get sunrise and sunset times
+    sunrise = info.get_value_sunrise()
+    sunset = info.get_value_sunset()
+
+    # Calculate timezone offset in seconds
+    timezone_offset = int(time.timezone * -1)  # Convert to seconds east of UTC
+
+    # Convert to Unix timestamps
+    sunrise_unix = int(sunrise.value)
+    sunset_unix = int(sunset.value)
+
+    # Return the data as JSON
+    result = {
+        "timezone": timezone_offset,
+        "sunrise": sunrise_unix,
+        "sunset": sunset_unix,
+    }
+
+    return json.dumps(result)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        sys.stderr.write("Usage: script.py CITY COUNTRY [LAT LON]\n")
+        sys.exit(1)
+
+    city = sys.argv[1]
+    country = sys.argv[2]
+
+    print(
+        get_sunrise_sunset(
+            city,
+            country,
+        )
+    )
+PYTHON_EOF
+); then
+        echo "GWeather script failed" >&2
+        return 1
+    fi
+    
+    # Parse the JSON response
+    echo "$GWEATHER_DATA" | jq -r '.timezone, .sunrise, .sunset'
+}
+
+# Function to get sunrise/sunset data using OpenWeather API
+get_sunrise_sunset_openweather() {
+    local city="$1"
+    local country="$2"
+    
+    # Check if API key is available
+    if [[ -z "${OPENWEATHER_API_KEY:-}" ]]; then
+        echo "OpenWeather API key not set" >&2
+        return 1
+    fi
+    
+    # Get weather data from OpenWeather API
+    if ! API_RESPONSE=$(curl --fail-with-body -s "https://api.openweathermap.org/data/2.5/weather?q=$city,$country&appid=$OPENWEATHER_API_KEY"); then
+        echo "Error response from OpenWeather API" >&2
+        return 1
+    fi
+    
+    # Extract and output the relevant data
+    echo "$API_RESPONSE" | jq -r '.timezone, .sys.sunrise, .sys.sunset'
+}
+
 if [[ -f "$HOME/.secrets" ]]; then
-	source "$HOME/.secrets"
+    source "$HOME/.secrets"
 fi
+
 # source from cache to only call the first time you check timezone offset
-if [[ -f "$CACHE_FILE" ]]; then
-	# check if only these 3 vars are set
-	if grep -q -E '^(TIMEZONE_OFFSET|SUNRISE_UNIX|SUNSET_UNIX)=' "$CACHE_FILE" && \
-		 ! grep -q -v -E '^(TIMEZONE_OFFSET|SUNRISE_UNIX|SUNSET_UNIX)=' "$CACHE_FILE"; then
-		source "$CACHE_FILE"
-	else
-		echo "invalid cache file"
-		exit 1 
-	fi
+if [[ "$CACHE_ENABLED" == "1" ]] && [[ -f "$CACHE_FILE" ]]; then
+    # check if only these 3 vars are set
+    if grep -q -E '^(TIMEZONE_OFFSET|SUNRISE_UNIX|SUNSET_UNIX)=' "$CACHE_FILE" && \
+       ! grep -q -v -E '^(TIMEZONE_OFFSET|SUNRISE_UNIX|SUNSET_UNIX)=' "$CACHE_FILE"; then
+        source "$CACHE_FILE"
+    else
+        echo "invalid cache file"
+        exit 1 
+    fi
 fi
 
-# Set your OpenWeather API Key
-if [[ -z "$OPENWEATHER_API_KEY" ]]; then
-	echo "Set OPENWEATHER_API_KEY env var"
-	exit 1
-fi
-
-CITY="Pittsburgh"
-COUNTRY="US"  # Optional, improves accuracy
 
 if [[ -z "${TIMEZONE_OFFSET:-}" ]]; then
-	# Get weather data from OpenWeather API
-	if ! API_RESPONSE=$(curl --fail-with-body -s "https://api.openweathermap.org/data/2.5/weather?q=$CITY,$COUNTRY&appid=$OPENWEATHER_API_KEY"); then
-	  echo "Error response: $API_RESPONSE"
-	  exit 1
-	fi
+    # Try GWeather first, then fall back to OpenWeather API
+    if ! WEATHER_DATA=$(get_sunrise_sunset_gweather "$CITY" "$COUNTRY"); then
+        echo "Failed to get from gweather: $WEATHER_DATA" >&2
+        if ! WEATHER_DATA=$(get_sunrise_sunset_openweather "$CITY" "$COUNTRY"); then
+            echo "$WEATHER_DATA" >&2
+            echo "Failed to get weather data from any source" >&2
+            exit 1
+        fi
+    fi
 
+    # Read the data (both functions output in the same format)
+    WEATHER_DATA=$(echo "$WEATHER_DATA" | tr '\n' ' ')
+    read -r TIMEZONE_OFFSET SUNRISE_UNIX SUNSET_UNIX <<< "$WEATHER_DATA"
 
-	TIMEZONE_OFFSET=$(echo "$API_RESPONSE" | jq -r '.timezone')
+    if [[ "$CACHE_ENABLED" == "1" ]]; then
+        # Check if the cache file is writable
+        if [[ ! -w "$CACHE_FILE" ]]; then
+            echo "Cache file is not writable: $CACHE_FILE" >&2
+            exit 1
+        fi
 
-	# Extract sunrise and sunset times (in Unix timestamp)
-	SUNRISE_UNIX=$(echo "$API_RESPONSE" | jq -r '.sys.sunrise')
-	SUNSET_UNIX=$(echo "$API_RESPONSE" | jq -r '.sys.sunset')
-
-	echo "TIMEZONE_OFFSET=$(echo "$API_RESPONSE" | jq -r '.timezone')
-SUNRISE_UNIX=$(echo "$API_RESPONSE" | jq -r '.sys.sunrise')
-SUNSET_UNIX=$(echo "$API_RESPONSE" | jq -r '.sys.sunset')" > $CACHE_FILE
+        # Write the data to the cache file
+        echo "Writing to cache file: $CACHE_FILE"
+        echo "TIMEZONE_OFFSET=$TIMEZONE_OFFSET
+SUNRISE_UNIX=$SUNRISE_UNIX
+SUNSET_UNIX=$SUNSET_UNIX" > "$CACHE_FILE"
+    fi
 fi
 
 # Convert timestamps to local time
@@ -53,6 +172,7 @@ export TZ="UTC"
 SUNRISE_LOCAL=$(date -d @$((SUNRISE_UNIX + TIMEZONE_OFFSET)) +%H:%M:%S)
 SUNSET_LOCAL=$(date -d @$((SUNSET_UNIX + TIMEZONE_OFFSET)) +%H:%M:%S)
 CURRENT_TIME=$(date -d @$(($(date +%s) + TIMEZONE_OFFSET)) +%H:%M:%S)
+
 
 if [[ "$CURRENT_TIME" > "$SUNRISE_LOCAL" && "$CURRENT_TIME" < "$SUNSET_LOCAL" ]]; then
     echo "true"
