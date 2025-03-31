@@ -21,17 +21,19 @@ export ZPLUG_HOME=/home/lyr/.zplug
 # zplug "plugins/kubectl", from:oh-my-zsh
 zplug "plugins/git", from:oh-my-zsh
 # zplug "plugins/aws", from:oh-my-zsh
-zplug "plugins/git-auto-fetch", from:oh-my-zsh
-zplug "loiccoyle/zsh-github-copilot"
-zplug "plugins/terraform", from:oh-my-zsh
-zplug "plugins/npm", from:oh-my-zsh
 # zplug "plugins/poetry", from:oh-my-zsh
-zplug "plugins/docker", from:oh-my-zsh
-zplug "plugins/docker-compose", from:oh-my-zsh
-zplug "plugins/tmux", from:oh-my-zsh
 zplug "zsh-users/zsh-autosuggestions"
 zplug "romkatv/powerlevel10k", as:theme, depth:1
-# zplug "zplug/zplug" #, hook-build: 'zplug --self-manage'
+
+zplug "plugins/tmux", from:oh-my-zsh, defer:2
+zplug "plugins/git-auto-fetch", from:oh-my-zsh, defer:2
+zplug "loiccoyle/zsh-github-copilot", defer:2
+zplug "plugins/terraform", from:oh-my-zsh, defer:2
+zplug "plugins/npm", from:oh-my-zsh, defer:2
+zplug "plugins/docker", from:oh-my-zsh, defer:2
+zplug "plugins/docker-compose", from:oh-my-zsh, defer:2
+zplug "zsh-users/zsh-syntax-highlighting", defer:2
+# zplug "zplug/zplug", hook-build: 'zplug --self-manage'
 
 if ! zplug check ; then
       zplug install
