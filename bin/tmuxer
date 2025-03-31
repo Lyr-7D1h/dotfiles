@@ -193,7 +193,11 @@ for session_name in list(
             open(target, "w").write(parsed)
 
     if "execnow" in entry:
-        exec.run(entry["execnow"])
+        cmd = entry["execnow"]
+        if type(cmd) != list:
+            cmd = [cmd]
+        for cmd in cmd:
+            exec.run(cmd)
 
     if exec.safe_run(f"tmux has-session -t {session_name}")[0] == 0:
         warn(f"session {session_name} already exists")

@@ -223,7 +223,7 @@ class Cargo(Module):
         return f"https://crates.io/crates/{name}"
 
     def validate(self):
-        if not exists(f"{HOME}/.cargo/credentials"):
+        if not exists(f"{HOME}/.cargo/credentials.toml"):
             error(f"{HOME}/.cargo/credentials does not exist")
 
         exec("cargo test")
