@@ -199,7 +199,8 @@ for session_name in list(
         for cmd in cmd:
             exec.run(cmd)
 
-    if exec.safe_run(f"tmux has-session -t {session_name}")[0] == 0:
+    tmux_ls = exec.run(f"tmux ls")
+    if session_name + ":" in tmux_ls:
         warn(f"session {session_name} already exists")
         continue
 
