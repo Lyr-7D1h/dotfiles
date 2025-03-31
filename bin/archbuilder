@@ -111,12 +111,16 @@ if not os.path.exists(tmp_dir):
 info(f"Chdir to {tmp_dir}")
 os.chdir(tmp_dir)
 
-exec = config.safe_get("exec")
-if exec and type(exec) != list:
-    exec = [exec]
-if exec:
-    for command in exec:
-        run(command)
+# Modify folder if not already modified
+build_flag_path = f"{tmp_dir}/.archbuilder_modified"
+if not os.path.exists(build_flag_path):
+    exec = config.safe_get("exec")
+    if exec and type(exec) != list:
+        exec = [exec]
+    if exec:
+        for command in exec:
+            run(command)
+open(build_flag_path, "a").close()
 
 kube_namespace = config.safe_get("kube_namespace")
 kube_context = config.safe_get("kube_context") or os.getenv("KUBE_CONTEXT")
