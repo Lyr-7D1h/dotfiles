@@ -199,12 +199,12 @@ for session_name in list(
         for cmd in cmd:
             exec.run(cmd)
 
-    tmux_ls = exec.run(f"tmux ls")
-    if session_name + ":" in tmux_ls:
-        warn(f"session {session_name} already exists")
-        continue
-
     if "windows" in entry:
+        tmux_ls = exec.safe_run(f"tmux ls")
+        if tmux_ls[0] == 0 and session_name + ":" in tmux_ls[1]:
+            warn(f"session {session_name} already exists")
+            continue
+
         info(f"Creating new session {session_name}")
         exec.run(f"tmux new-session -d -s {session_name}")
         windows = entry["windows"]
