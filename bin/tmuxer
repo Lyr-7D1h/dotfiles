@@ -7,40 +7,7 @@ import tomllib
 import sys
 from typing import NoReturn, Optional
 
-
-if len(sys.argv) <= 1 or "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
-    print(
-        "Usage: tmuxer list|<config> [-a|-h|<entry>]\n"
-        "  list: list all available config files\n"
-        "  <config>: the name of the config file in ~/.config/tmuxer or the path to a toml file"
-        "  -h | --help: display this help message\n"
-        "  -a | --attach: attach to the last session\n"
-        "  <entry>: Which entry in the config to execute\n"
-        "\n\n"
-        "Examples:\n"
-        "   - tmuxer list\n"
-        "   - tmuxer ./my-config my-entry -a\n"
-        "   - tmuxer ./my-config"
-    )
-    exit(0)
-
-attach = "-a" in sys.argv[1:] or "--attach" in sys.argv[1:]
-
-config_arg = sys.argv[1]
-if config_arg == "list":
-    config_dir = os.path.expanduser("~/.config/tmuxer")
-    configs = [f for f in os.listdir(config_dir) if f.endswith(".toml")]
-    print("Available config files:")
-    for config in configs:
-        print(f"  - {config.split('.')[0]}")
-    exit(0)
-
-entry = sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith("-") else ""
-if not config_arg.endswith(".toml"):
-    config_arg = os.path.expanduser(f"~/.config/tmuxer/{config_arg}.toml")
-config_path = os.path.expanduser(os.path.expandvars(config_arg))
-with open(config_path, "rb") as config_file:
-    config = tomllib.load(config_file)
+TMUXER_CONFIG_PATH = os.path.expanduser(f"~/.config/tmuxer")
 
 
 def error(*args) -> NoReturn:
@@ -63,9 +30,13 @@ def info(*args: str) -> None:
 def parse_path(path: str) -> str:
     expanded_path = os.path.expanduser(os.path.expandvars(path))
     if not os.path.isabs(expanded_path):
-        expanded_path = os.path.abspath(
-            os.path.join(os.path.dirname(config_path), expanded_path)
-        )
+        if config_path:
+            # Get path relative to config path given
+            expanded_path = os.path.abspath(
+                os.path.join(os.path.dirname(config_path), expanded_path)
+            )
+        else:
+            expanded_path = os.path.abspath(expanded_path)
     return expanded_path
 
 
@@ -73,9 +44,14 @@ class Executor:
     def __init__(self, cwd: Optional[str] = None):
         self.cwd = cwd
 
-    def parse_vars(self, text: str) -> None:
+    def parse_vars(self, text: str, variables: Optional[dict[str, str]] = None) -> None:
+        if "{{HOME}}" in text:
+            text = text.replace("{{HOME}}", os.path.expanduser("~"))
         if "{{LOCAL_IP}}" in text:
             text = text.replace("{{LOCAL_IP}}", self.local_ip())
+        if variables:
+            for key, value in variables.items():
+                text = text.replace(f"{{{{{key}}}}}", value)
         return text
 
     def _parse_command(self, command: str) -> str:
@@ -154,6 +130,69 @@ class Executor:
         return hostname
 
 
+def parse_template(
+    executor: Executor, source: str, secrets: Optional[str]
+) -> tuple[str, str]:
+    if secrets:
+        secrets_path = parse_path(secrets)
+        if os.path.exists(secrets_path):
+            info(f"Parsing secrets from {secrets_path}")
+            with open(secrets_path, "rb") as secrets_file:
+                secrets = tomllib.load(secrets_file)
+
+    source = parse_path(source)
+    template_content = open(source).read()
+    parsed = executor.parse_vars(template_content, secrets)
+    return parsed
+
+
+if len(sys.argv) <= 1 or "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
+    print(
+        "Usage: tmuxer template|list|<config> [-a|-h|<entry>]\n"
+        "  list: list all available config files\n"
+        "  template <source> [secrets]: parse a template using optional secrets\n"
+        "  <config>: the name of the config file in ~/.config/tmuxer or the path to a toml file"
+        "  -h | --help: display this help message\n"
+        "  -a | --attach: attach to the last session\n"
+        "  <entry>: Which entry in the config to execute\n"
+        "\n\n"
+        "Examples:\n"
+        "   - tmuxer list\n"
+        "   - tmuxer ./my-config my-entry -a\n"
+        "   - tmuxer ./my-config"
+    )
+    exit(0)
+
+attach = "-a" in sys.argv[1:] or "--attach" in sys.argv[1:]
+
+config_arg = sys.argv[1]
+if config_arg == "list":
+    config_dir = os.path.expanduser("~/.config/tmuxer")
+    configs = [f for f in os.listdir(config_dir) if f.endswith(".toml")]
+    print("Available config files:")
+    for config in configs:
+        print(f"  - {config.split('.')[0]}")
+    exit(0)
+
+elif config_arg == "template":
+    exec = Executor()
+    source = (
+        sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith("-") else None
+    )
+    secrets = (
+        sys.argv[3] if len(sys.argv) > 3 and not sys.argv[3].startswith("-") else None
+    )
+    parsed = parse_template(exec, source, secrets)
+    print(parsed)
+    exit(0)
+
+entry = sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith("-") else ""
+if not config_arg.endswith(".toml"):
+    config_arg = os.path.expanduser(f"~/.config/tmuxer/{config_arg}.toml")
+config_path = os.path.expanduser(os.path.expandvars(config_arg))
+with open(config_path, "rb") as config_file:
+    config = tomllib.load(config_file)
+
 for session_name in list(
     filter(lambda session_name: len(entry) == 0 or session_name == entry, config)
 ):
@@ -183,14 +222,11 @@ for session_name in list(
         templates = entry["templates"]
         if isinstance(entry["templates"], dict):
             templates = [entry["templates"]]
-
         for template in templates:
-            source = parse_path(template["source"])
+            parsed = parse_template(exec, template["source"], template["secrets"])
             target = parse_path(template["target"])
-            template = open(source).read()
-            parsed = exec.parse_vars(template)
-            info(f"Writing parsed template from {source} to {target}")
-            open(target, "w").write(parsed)
+            info(f"Writing parsed template to {target}")
+            open(target, "w+").write(parsed)
 
     if "execnow" in entry:
         cmd = entry["execnow"]
