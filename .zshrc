@@ -227,8 +227,8 @@ bindkey  "^[[F"   end-of-line
 bindkey  "^[[3~"  delete-char
 
 # copilot
-bindkey '^[I' zsh_gh_copilot_explain  # bind Alt+shift+\ to explain
-bindkey '^[i' zsh_gh_copilot_suggest  # bind Alt+\ to suggest
+bindkey '^[I' zsh_gh_copilot_explain  # bind Alt+shift+I to explain
+bindkey '^[i' zsh_gh_copilot_suggest  # bind Alt+i to suggest
 
 
 ### Aliases
