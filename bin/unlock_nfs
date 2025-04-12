@@ -10,6 +10,7 @@ IP=`echo "$HOST" | cut -d'@' -f2`
 PASS=`bw get password "$IP"`
 
 ssh $HOST "bash -s " <<EOF
+set -e
 for d in \`ls /dev/sd*\`
 do
 	rand=\$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 15)
