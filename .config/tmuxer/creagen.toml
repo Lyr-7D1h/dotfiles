@@ -4,6 +4,8 @@ repo = "git@github.com:Lyr-7d1h/creagen.git"
 vsplit=false
 execnow="code ~/p/creagen ~/p/creagen-editor ~/p/creagen-generations"
 # update = true
+[[creagen.windows]]
+name = "app"
 [[creagen.windows.panes]]
 exec = [
 	"npm i", 
@@ -15,18 +17,21 @@ exec = [
 	"npm i",
 	"npm start"
 ]
+[[creagen.windows]]
+name = "generations"
+cwd = "~/p/creagen-generations"
 
 [creagen-editor]
 path = "~/p/creagen-editor"
 repo = "git@github.com:Lyr-7d1h/creagen-editor.git"
-# update = true
+update = true
 
 [creagen-generations]
 path = "~/p/creagen-generations"
 repo = "git@github.com:Lyr-7d1h/creagen-generations.git"
-# update = true
+update = true
 
 [creagen-cloudflare]
 path = "~/p/creagen-cloudflare"
 repo = "git@github.com:Lyr-7d1h/creagen-cloudflare.git"
-# update = true
+update = true

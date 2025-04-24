@@ -242,7 +242,7 @@ for session_name in list(
             continue
 
         info(f"Creating new session {session_name}")
-        exec.run(f"tmux new-session -d -s {session_name}")
+        exec.run(f"tmux new-session -d -s {session_name} -n blank -c 'sleep infinity'")
         windows = entry["windows"]
         if isinstance(entry["windows"], dict):
             windows = [entry["windows"]]
@@ -254,23 +254,46 @@ for session_name in list(
             else:
                 window_name = str(i)
 
+            # Get window-level cwd if specified
+            window_cwd = window.get("cwd")
+            window_cwd_path = ""
+            if window_cwd:
+                window_cwd_path = parse_path(window_cwd)
+
+            # Use -c option to set cwd for new windows
+            cwd_option = f"-c {window_cwd_path}" if window_cwd_path else ""
+            exec.run(f"tmux new-window -t {session_name} -n {window_name} {cwd_option}")
+
+            # remove blank window
+            if i == 0:
+                exec.run(f"tmux kill-window -t {session_name}:blank")
+                # move first window to 1 index
+                exec.run(f"tmux move-window -s {session_name}:{i + 2} -t {i + 1}")
+
             vsplit = window["vsplit"] if "vsplit" in window else vsplit
+            if "panes" not in window:
+                continue
             panes = window["panes"]
             if isinstance(window["panes"], dict):
                 panes = [window["panes"]]
 
-            if i == 0:
-                exec.run(f"tmux rename-window -t {session_name} {window_name}")
-            else:
-                exec.run(f"tmux new-window -t {session_name} -n {window_name}")
-
             for j, pane in enumerate(panes):
                 if j > 0:
                     arg = "-v" if vsplit else "-h"
-                    exec.run(f"tmux split-window -t {session_name}:{window_name} {arg}")
-                if "cwd" in pane:
+                    # Use -c option to set cwd for new panes, defaulting to window cwd if available
+                    pane_cwd = (
+                        parse_path(pane["cwd"]) if "cwd" in pane else window_cwd_path
+                    )
+                    cwd_option = f"-c {pane_cwd}" if pane_cwd else ""
                     exec.run(
-                        f"tmux send-keys -t {window_name} 'cd {pane["cwd"]}' Enter"
+                        f"tmux split-window -t {session_name}:{window_name} {arg} {cwd_option}"
+                    )
+                elif "cwd" in pane and (
+                    not window_cwd_path or pane["cwd"] != window_cwd
+                ):
+                    # Only set pane-specific cwd if it's not the same as window cwd
+                    exec.run(
+                        f"tmux send-keys -t {window_name} 'cd {parse_path(pane['cwd'])}' Enter"
                     )
 
                 pane_ids = exec.list_panes()
