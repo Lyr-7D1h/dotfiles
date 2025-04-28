@@ -30,8 +30,13 @@ update = true
 path = "~/p/creagen-generations"
 repo = "git@github.com:Lyr-7d1h/creagen-generations.git"
 update = true
+update = true
+[[creagen-generations.windows]]
+name = "generations"
 
-[creagen-cloudflare]
-path = "~/p/creagen-cloudflare"
+[creagen-deployment]
+path = "~/p/creagen-deployment"
 repo = "git@github.com:Lyr-7d1h/creagen-cloudflare.git"
 update = true
+[[creagen-generations.windows]]
+name = "deployment"
