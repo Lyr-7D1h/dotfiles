@@ -249,6 +249,10 @@ alias gd="git diff"
 alias gp="git push"
 alias gf="git fetch"
 alias gfa="git fetch --all"
+alias gsth="git stash"
+alias gsthp="git stash pop"
+alias gstha="git stash apply"
+
 alias ls='ls --color=auto'
 alias tf='terraform'
 # Fix screen coloring since most remote clients don't support alacritty

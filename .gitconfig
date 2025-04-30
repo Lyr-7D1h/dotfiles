@@ -1,3 +1,4 @@
+# https://blog.gitbutler.com/how-git-core-devs-configure-git/
 [user]
 	email = lyr-7d1h@pm.me
 	name = Lyr
@@ -8,11 +9,17 @@
 	defaultBranch = master
 [rebase]
 	# Automatically squash fixup commits when rebasing
-	autosquash = true
+	autoSquash = true
+	updateRefs = true
+	autoStash = true
 [pull]
 	rebase = true
 [push]
+	# create branch on remote if not setup yet
 	autoSetupRemote = true
+	default = simple
+	# push all tags on push
+	followTags = true
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
@@ -46,6 +53,7 @@
 # when merge conflict fixed before apply again
 [rerere]
 	enabled = true
+	autoupdate = true
 [column]
 	ui = auto
 [includeIf "gitdir:~/b/"]
@@ -54,6 +62,20 @@
 [delta]
 	navigate = true
 [merge]
-	conflictstyle = diff3
+	conflictstyle = zdiff3
 [diff]
-	colorMoved = default
+	algorithm = histogram
+	mnemonicPrefix = true
+	renames = true
+[branch]
+	sort = -committerdate
+[tag]
+	sort = version:refname
+[fetch]
+	prune = true
+	pruneTags = true
+	all = true
+[help]
+	autocorrect = prompt
+[commit]
+	verbose = true
