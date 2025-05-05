@@ -271,11 +271,14 @@ for session_name in list(
                 exec.run(f"tmux move-window -s {session_name}:{i + 2} -t {i + 1}")
 
             vsplit = window["vsplit"] if "vsplit" in window else vsplit
-            if "panes" not in window:
-                continue
-            panes = window["panes"]
-            if isinstance(window["panes"], dict):
+            panes = window["panes"] if "panes" in window else []
+            if isinstance(panes, dict):
                 panes = [window["panes"]]
+
+            if i == 0:
+                exec.run(f"tmux rename-window -t {session_name} {window_name}")
+            else:
+                exec.run(f"tmux new-window -a -t {session_name} -n {window_name}")
 
             for j, pane in enumerate(panes):
                 if j > 0:

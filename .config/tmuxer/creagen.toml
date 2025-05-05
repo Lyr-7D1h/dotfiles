@@ -1,42 +1,30 @@
-[creagen]
-path = "~/p/creagen"
-repo = "git@github.com:Lyr-7d1h/creagen.git"
-vsplit=false
-execnow="code ~/p/creagen ~/p/creagen-editor ~/p/creagen-generations"
-# update = true
-[[creagen.windows]]
-name = "app"
-[[creagen.windows.panes]]
-exec = [
-	"npm i", 
-	"npm run watch:chokidar"
-]
-[[creagen.windows.panes]]
-cwd = "~/p/creagen-editor"
-exec = [
-	"npm i",
-	"npm start"
-]
-[[creagen.windows]]
-name = "generations"
-cwd = "~/p/creagen-generations"
-
 [creagen-editor]
 path = "~/p/creagen-editor"
 repo = "git@github.com:Lyr-7d1h/creagen-editor.git"
-update = true
+# update = true
 
 [creagen-generations]
 path = "~/p/creagen-generations"
 repo = "git@github.com:Lyr-7d1h/creagen-generations.git"
 update = true
-update = true
-[[creagen-generations.windows]]
-name = "generations"
 
 [creagen-deployment]
 path = "~/p/creagen-deployment"
 repo = "git@github.com:Lyr-7d1h/creagen-cloudflare.git"
 update = true
-[[creagen-generations.windows]]
-name = "deployment"
+
+[creagen]
+path = "~/p/creagen"
+repo = "git@github.com:Lyr-7d1h/creagen.git"
+vsplit = false
+execnow = "code -r ~/p/creagen ~/p/creagen-editor ~/p/creagen-generations"
+[[creagen.windows]]
+name = "app"
+[[creagen.windows.panes]]
+exec = ["npm i", "npm run watch:chokidar"]
+[[creagen.windows.panes]]
+cwd = "~/p/creagen-editor"
+exec = ["npm i", "npm start"]
+[[creagen.windows]]
+name = "generations"
+cwd = "~/p/creagen-generations"
