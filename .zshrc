@@ -18,6 +18,7 @@ fi
 ### Plugins
 source ~/.zplug/init.zsh
 export ZPLUG_HOME=/home/lyr/.zplug
+zplug "Aloxaf/fzf-tab"
 # zplug "plugins/kubectl", from:oh-my-zsh
 zplug "plugins/git", from:oh-my-zsh
 # zplug "plugins/aws", from:oh-my-zsh
@@ -65,20 +66,40 @@ setopt autocd
 
 # ZStyle
 # Do menu-driven completion.
-zstyle ':completion:*' menu select
+# disable sort when completing `git checkout`
+zstyle ':completion:*:git-checkout:*' sort false
+zstyle ':completion:*:git-checkout:*' sort false
+# set descriptions format to enable group support
+# NOTE: don't use escape sequences (like '%F{red}%d%f') here, fzf-tab will ignore them
+zstyle ':completion:*:descriptions' format '[%d]'
+# set list-colors to enable filename colorizing
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+# force zsh not to show completion menu, which allows fzf-tab to capture the unambiguous prefix
+zstyle ':completion:*' menu no
+zstyle ':fzf-tab:*' prefix ''
+# preview directory's content with eza when completing cd
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
+# custom fzf flags
+# NOTE: fzf-tab does not follow FZF_DEFAULT_OPTS by default
+zstyle ':fzf-tab:*' fzf-flags --color=fg:1,fg+:2 --bind=tab:accept
+# To make fzf-tab follow FZF_DEFAULT_OPTS.
+# NOTE: This may lead to unexpected behavior since some flags break this plugin. See Aloxaf/fzf-tab#455.
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+# switch group using `<` and `>`
+zstyle ':fzf-tab:*' switch-group '<' '>'
 
 # Color completion for some things.
 # http://linuxshellaccount.blogspot.com/2008/12/color-completion-using-zsh-modules-on.html
-zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+# zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 
 # formatting and messages
 # http://www.masterzen.fr/2009/04/19/in-love-with-zsh-part-one/
-zstyle ':completion:*' verbose yes
-zstyle ':completion:*:descriptions' format "$fg[yellow]%B--- %d%b"
-zstyle ':completion:*:messages' format '%d'
-zstyle ':completion:*:warnings' format "$fg[red]No matches for:$reset_color %d"
-zstyle ':completion:*:corrections' format '%B%d (errors: %e)%b'
-zstyle ':completion:*' group-name ''
+# zstyle ':completion:*' verbose yes
+# zstyle ':completion:*:descriptions' format "$fg[yellow]%B--- %d%b"
+# zstyle ':completion:*:messages' format '%d'
+# zstyle ':completion:*:warnings' format "$fg[red]No matches for:$reset_color %d"
+# zstyle ':completion:*:corrections' format '%B%d (errors: %e)%b'
+# zstyle ':completion:*' group-name ''
 
 
 
@@ -90,19 +111,28 @@ autoload -U compinit && compinit
 #   complete -C `which aws_completer` aws
 # fi
 
-# dotnet autocompletion
-_dotnet_zsh_complete()
-{
-	local completions=("$(dotnet complete "$words")")
-
-	reply=( "${(ps:\n:)completions}" )
-}
-compctl -K _dotnet_zsh_complete dotnet
-
 # Helm autocompletaion
 if command -v helm &> /dev/null; then
   source <(helm completion zsh)
 fi
+
+# Git overwrite branch autocompletion to sort by most recent
+_git-most-recent() {
+	local -a recent branches
+
+	recent=(${(f)"$(git for-each-ref --sort=-committerdate --format='%(refname:short)' refs/heads | head -n 10)"})
+  branches=(${(f)"$(git for-each-ref --format='%(refname:short)' refs/heads)"})
+  # Remove branches that are in 'recent' from 'all_branches'
+  # branches=(${branches:|recent})
+	_describe -t branches 'local branches' recent 
+  _describe -t all-branches 'other branches' branches && return
+}
+# overwrites switch command
+_git-switch() {
+  _git-most-recent
+}
+# needed to overwrite checkout
+compdef _git_checkout git-checkout
 
 ### Keybindings
 # set emacs keybinds (ctrl+a, ctrl+e)

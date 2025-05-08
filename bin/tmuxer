@@ -90,20 +90,51 @@ class Executor:
         return out
 
     def local_ip(self) -> str:
-        interfaces = self.run(
-            "ip link show up | grep -P '(?<=^[0-9]: )((enp)|(wlo)|(eth)|(wlp))[^:]*' -o"
-        )
-        default = interfaces.split("\n")[0]
-        for interface in interfaces.split("\n"):
-            gateway = self.run(
-                f"ip route show | grep -P '(?<=^default via )([0-9]|[.])*(?= dev {interface})' -o"
-            )
-            if gateway != "":
-                default = interface
-                break
-        return self.run(
-            f"ip a show dev {default} | grep 'inet' | awk '{{print $2}}' | head -n 1 | cut -d '/' -f1"
-        )
+        """Get local IP address in a cross-platform way."""
+        system = self.os()
+
+        if system == "Darwin":  # macOS
+            try:
+                # First try the primary interface en0
+                ip = self.run("ipconfig getifaddr en0")
+                return ip
+            except:
+                # Fall back to alternative interfaces if en0 fails
+                try:
+                    return self.run("ipconfig getifaddr en1")
+                except:
+                    warn("Could not determine local IP on macOS")
+                    return "127.0.0.1"
+
+        elif system == "Linux":
+            # Existing Linux implementation
+            try:
+                interfaces = self.run(
+                    "ip link show up | grep -P '(?<=^[0-9]: )((enp)|(wlo)|(eth)|(wlp))[^:]*' -o"
+                )
+                if not interfaces:
+                    warn("No network interfaces found")
+                    return "127.0.0.1"
+
+                default = interfaces.split("\n")[0]
+                for interface in interfaces.split("\n"):
+                    gateway = self.safe_run(
+                        f"ip route show | grep -P '(?<=^default via )([0-9]|[.])*(?= dev {interface})' -o"
+                    )[1]
+                    if gateway != "":
+                        default = interface
+                        break
+                return self.run(
+                    f"ip a show dev {default} | grep 'inet' | awk '{{print $2}}' | head -n 1 | cut -d '/' -f1"
+                )
+            except:
+                warn("Could not determine local IP on Linux")
+                return "127.0.0.1"
+
+        else:
+            # Fallback for other systems
+            warn(f"Getting local IP not supported on {system}, returning localhost")
+            return "127.0.0.1"
 
     def list_panes(self) -> list[int]:
         panes = self.run("tmux list-panes")
@@ -113,8 +144,17 @@ class Executor:
                 list.append(int(line.split(":")[0]))
         return list
 
-    # returns 'Linux' or 'Darwin'
+    # Returns Linux, Darwin, FreeBSD or the output of uname
     def os(self) -> str:
+        """Returns the operating system name in a more reliable way using Python's platform module"""
+        # Use Python's built-in platform module instead of running external command
+        import platform
+
+        system = platform.system()
+        # Return standardized names for common systems
+        if system in ["Linux", "Darwin", "FreeBSD"]:
+            return system
+        # Fall back to uname for other Unix variants if needed
         return self.safe_run("uname")[1]
 
     def hostname(self) -> str:
@@ -242,33 +282,46 @@ for session_name in list(
             continue
 
         info(f"Creating new session {session_name}")
-        exec.run(f"tmux new-session -d -s {session_name} -n blank -c 'sleep infinity'")
+        # Create session with the right CWD from the beginning for the first window
+        exec.run(f"tmux new-session -d -s {session_name} -c {path}")
+
+        tmux_base_index = int(
+            exec.run("tmux show-option -gv base-index").strip() or "0"
+        )
+
         windows = entry["windows"]
         if isinstance(entry["windows"], dict):
             windows = [entry["windows"]]
 
         vsplit = entry["vsplit"] if "vsplit" in entry else True
+
         for i, window in enumerate(windows):
             if "name" in window:
                 window_name = window["name"]
             else:
                 window_name = str(i)
 
+            window_cwd_path = path
+
             # Get window-level cwd if specified
             window_cwd = window.get("cwd")
-            window_cwd_path = ""
             if window_cwd:
                 window_cwd_path = parse_path(window_cwd)
 
-            # Use -c option to set cwd for new windows
-            cwd_option = f"-c {window_cwd_path}" if window_cwd_path else ""
-            exec.run(f"tmux new-window -t {session_name} -n {window_name} {cwd_option}")
-
-            # remove blank window
+            # For first window, rename instead of creating new
             if i == 0:
-                exec.run(f"tmux kill-window -t {session_name}:blank")
-                # move first window to 1 index
-                exec.run(f"tmux move-window -s {session_name}:{i + 2} -t {i + 1}")
+                exec.run(
+                    f"tmux rename-window -t {session_name}:{tmux_base_index} {window_name}"
+                )
+                # If first window needs a different CWD than session default
+                if window_cwd:
+                    exec.run(
+                        f"tmux send-keys -t {session_name}:{window_name} 'cd {window_cwd_path}' Enter"
+                    )
+            else:
+                exec.run(
+                    f"tmux new-window -t {session_name} -n {window_name} -c {window_cwd_path}"
+                )
 
             vsplit = window["vsplit"] if "vsplit" in window else vsplit
             panes = window["panes"] if "panes" in window else []
