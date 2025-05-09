@@ -5,6 +5,7 @@ import re
 import subprocess
 import tomllib
 import sys
+import shlex
 from typing import NoReturn, Optional
 
 TMUXER_CONFIG_PATH = os.path.expanduser(f"~/.config/tmuxer")
@@ -361,8 +362,9 @@ for session_name in list(
                 if type(cmd) != list:
                     cmd = [cmd]
                 for cmd in cmd:
+                    cmd = shlex.quote(cmd)
                     exec.run(
-                        f"tmux send-keys -t {session_name}:{window_name}.{pane_ids[j]} '{cmd}' Enter"
+                        f"tmux send-keys -t {session_name}:{window_name}.{pane_ids[j]} {cmd} Enter"
                     )
 
 if attach:
