@@ -104,10 +104,68 @@ bindkey '^U' backward-kill-line
 # zstyle ':completion:*' group-name ''
 
 
+### Exports
+export DOCKER_BUILDKIT=0
+export FZF_DEFAULT_COMMAND='rg --files'
+export LANG=en_US.UTF-8
+export BROWSER="firefox"
+export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
+# Preferred editor for local and remote sessions
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='vim'
+else
+  export EDITOR='nvim'
+fi
+
+
+# Adding go
+if command -v go > /dev/null; then
+  export PATH=$PATH:/usr/local/go/bin
+  export PATH=$PATH:$(go env GOPATH)/bin
+fi
+
+if command -v symfony > /dev/null; then
+   export PATH="$HOME/.symfony5/bin:$PATH"
+fi
+
+# Adding espup
+# export LIBCLANG_PATH="/home/lyr/.rustup/toolchains/esp/xtensa-esp32-elf-clang/esp-16.0.4-20231113/esp-clang/lib"
+# export PATH="/home/lyr/.rustup/toolchains/esp/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:$PATH"
+
+# Adding custom executables
+export PATH="$PATH:$HOME/.npm/bin"
+# Adding local bin to path
+export PATH="$HOME/.local/bin:$PATH"
+# Cargo executables
+export PATH="$HOME/.cargo/bin:$PATH"
+
+
+# Add Deno Install
+export DENO_INSTALL="/home/lyr/.deno"
+export PATH="$DENO_INSTALL/bin:$PATH"
+
+# Add gem executables
+export PATH="$PATH:$HOME/.gem/ruby/2.7.0/bin"
+
+# Added by serverless binary installer
+export PATH="$HOME/.serverless/bin:$PATH"
+
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rvm/bin"
+
+# Adding custom executables
+export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/pbin:$PATH"
+
 
 ### Autocompletions
 autoload bashcompinit && bashcompinit
 autoload -U compinit && compinit
+
+# [JJ autocomplete](https://jj-vcs.github.io/jj/latest/install-and-setup/#zsh)
+if command -v jj &> /dev/null; then
+	source <(jj util completion zsh)
+fi
 
 # if command -v aws_compiler &> /dev/null; then
 #   complete -C `which aws_completer` aws
@@ -370,58 +428,6 @@ if [[ -f ~/.secrets ]]; then
 	set +a
 fi
 
-### Exports
-export DOCKER_BUILDKIT=0
-export FZF_DEFAULT_COMMAND='rg --files'
-export LANG=en_US.UTF-8
-export BROWSER="firefox"
-export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
-# Preferred editor for local and remote sessions
-if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='vim'
-else
-  export EDITOR='nvim'
-fi
-
-
-# Adding go
-if command -v go > /dev/null; then
-  export PATH=$PATH:/usr/local/go/bin
-  export PATH=$PATH:$(go env GOPATH)/bin
-fi
-
-if command -v symfony > /dev/null; then
-   export PATH="$HOME/.symfony5/bin:$PATH"
-fi
-
-# Adding espup
-# export LIBCLANG_PATH="/home/lyr/.rustup/toolchains/esp/xtensa-esp32-elf-clang/esp-16.0.4-20231113/esp-clang/lib"
-# export PATH="/home/lyr/.rustup/toolchains/esp/xtensa-esp-elf/esp-13.2.0_20230928/xtensa-esp-elf/bin:$PATH"
-
-# Adding custom executables
-export PATH="$PATH:$HOME/.npm/bin"
-# Adding local bin to path
-export PATH="$HOME/.local/bin:$PATH"
-# Cargo executables
-export PATH="$HOME/.cargo/bin:$PATH"
-
-
-# Add Deno Install
-export DENO_INSTALL="/home/lyr/.deno"
-export PATH="$DENO_INSTALL/bin:$PATH"
-
-# Add gem executables
-export PATH="$PATH:$HOME/.gem/ruby/2.7.0/bin"
-
-# Added by serverless binary installer
-export PATH="$HOME/.serverless/bin:$PATH"
-
-# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-export PATH="$PATH:$HOME/.rvm/bin"
-
-# Adding custom executables
-export PATH="$HOME/bin:$PATH"
-export PATH="$HOME/pbin:$PATH"
 
 # HACK: something overwrites this in zprofile
 # export WAYLAND_DISPLAY=wayland-0
