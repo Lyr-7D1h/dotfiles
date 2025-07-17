@@ -362,6 +362,8 @@ alias cvim="vim ~/.config/nvim/init.lua"
 alias n="note"
 alias py="python"
 
+alias lunch="curl 'http://icarus.prod.virt.i.bitonic.nl:1439/add?name=Ivo'"
+
 # alias clip="export SCREENSHOT_FILENAME=$HOME/Pictures/screenshots/scrn-$(date +"%Y-%m-%d-%H-%M-%S").png && slurp | grim -g - $SCREENSHOT_FILENAME && cat $SCREENSHOT_FILENAME | wl-copy"
 
 
