@@ -2,8 +2,8 @@
 
 set -eu
 
-COUNTRY="NL"  
-CITY="Amsterdam"
+COUNTRY="US" 
+CITY="Pittsburgh"
 CACHE_ENABLED=0
 CACHE_FILE=/tmp/time_for_light.cache
 
