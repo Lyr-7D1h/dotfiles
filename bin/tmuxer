@@ -234,12 +234,14 @@ config_path = os.path.expanduser(os.path.expandvars(config_arg))
 with open(config_path, "rb") as config_file:
     config = tomllib.load(config_file)
 
+
+last_tmux_session = None
 for session_name in list(
     filter(lambda session_name: len(entry) == 0 or session_name == entry, config)
 ):
     entry = config[session_name]
     path = parse_path(entry["path"])
-    repo = entry["repo"]
+    repo = entry["repo"] if "repo" in entry else None
 
     if not os.path.exists(path):
         info(f"Cloning {repo} to {path}")
@@ -277,6 +279,8 @@ for session_name in list(
             exec.run(cmd)
 
     if "windows" in entry:
+        last_tmux_session = session_name
+
         tmux_ls = exec.safe_run(f"tmux ls")
         if tmux_ls[0] == 0 and session_name + ":" in tmux_ls[1]:
             warn(f"session {session_name} already exists")
@@ -287,7 +291,7 @@ for session_name in list(
         exec.run(f"tmux new-session -d -s {session_name} -c {path}")
 
         tmux_base_index = int(
-            exec.run("tmux show-option -gv base-index").strip() or "0"
+            Executor().run("tmux show-option -gv base-index").strip() or "0"
         )
 
         windows = entry["windows"]
@@ -321,7 +325,7 @@ for session_name in list(
                     )
             else:
                 exec.run(
-                    f"tmux new-window -t {session_name} -n {window_name} -c {window_cwd_path}"
+                    f"tmux new-window -t {session_name}:{tmux_base_index + i} -n {window_name} -c {window_cwd_path}"
                 )
 
             vsplit = window["vsplit"] if "vsplit" in window else vsplit
@@ -331,14 +335,22 @@ for session_name in list(
 
             for j, pane in enumerate(panes):
                 if j > 0:
-                    arg = "-v" if vsplit else "-h"
+                    split_direction = pane.get(
+                        "split", "vertical" if vsplit else "horizontal"
+                    )
+                    arg = "-v" if split_direction == "vertical" else "-h"
+
+                    size_option = ""
+                    if "size" in pane:
+                        size_option = f"-p {pane["size"]}"
+
                     # Use -c option to set cwd for new panes, defaulting to window cwd if available
                     pane_cwd = (
                         parse_path(pane["cwd"]) if "cwd" in pane else window_cwd_path
                     )
                     cwd_option = f"-c {pane_cwd}" if pane_cwd else ""
                     exec.run(
-                        f"tmux split-window -t {session_name}:{window_name} {arg} {cwd_option}"
+                        f"tmux split-window -t {session_name}:{window_name} {arg} {size_option} {cwd_option}"
                     )
                 elif "cwd" in pane and (
                     not window_cwd_path or pane["cwd"] != window_cwd
@@ -362,6 +374,6 @@ for session_name in list(
                         f"tmux send-keys -t {session_name}:{window_name}.{pane_ids[j]} {cmd} Enter"
                     )
 
-if attach:
+if attach and last_tmux_session is not None:
     exec = Executor()
-    exec.run(f"tmux attach-session -t {session_name}")
+    exec.run(f"tmux attach-session -t {last_tmux_session}")
