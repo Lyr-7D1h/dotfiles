@@ -169,7 +169,8 @@ autoload -U compinit && compinit
 
 # [JJ autocomplete](https://jj-vcs.github.io/jj/latest/install-and-setup/#zsh)
 if command -v jj &> /dev/null; then
-	source <(jj util completion zsh)
+	# Dynamic autocompletion
+	source <(COMPLETE=zsh jj)
 fi
 
 # if command -v aws_compiler &> /dev/null; then
