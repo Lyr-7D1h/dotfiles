@@ -207,6 +207,14 @@ bindkey -e
 # ctrl + space to accept suggestions
 bindkey '^N' autosuggest-accept
 
+function insert_ai_commit_message() {
+  LBUFFER+="Write a commit message using jj describe -m '{message}' using the given diff. Follow the Conventional Commits format strictly for commit messages. Use the structure: <type>[optional scope]: <description>. Guidelines: 1. **Type and Scope**: Choose an appropriate type (e.g., 'feat', 'fix') and optional scope to describe the affected module or feature. 2. **Description**: Write a concise, informative description in the header; use backticks if referencing code or specific terms. Commit messages should be concise, clear, informative, and professional, aiding readability and project tracking, try to prevent too many generic terms.
+
+'$(jj diff --no-pager)'"
+}
+zle -N insert_ai_commit_message
+bindkey '^_' insert_ai_commit_message  
+
 # https://github.com/junegunn/fzf/blob/master/shell/key-bindings.zsh
 # ctrl + p - fzf for file path
 __fzfcmd() {
