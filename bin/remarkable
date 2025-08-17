@@ -37,16 +37,21 @@ get_ip() {
         echo "Search for remarkable ip on your network"
         echo "$(basename $0) ip [-h]"
     fi
-    local interfaces=$(ip link show up | grep -P "(?<=^[0-9]: )((enp)|(wlo)|(eth))[^:]*" -o)
-    local routes=$(ip route show | grep -E '^default')
-    for interface in $interfaces; do
-        gateway=$(ip route show | grep -P "(?<=^default via )([0-9]|[.])*(?= dev $device)" -o)
-        if [[ "$gateway" != "" ]]; then
-            break
-        fi
-    done
+    local gateway=$(ip route show | grep -E '^default' | grep -P "(?<=^default via )([0-9]|[.])*" -o)
+
+	if [[ "$gateway" == "" ]]; then
+		echo "failed to find gateway" >&2
+		exit 1
+	fi
 
     local ips=$(sudo nmap -sn -n $gateway/24 | grep "Ampak Technology" -B 2 | grep -P "(?<=Nmap scan report for )([0-9]|[.]){3,16}" -o)
+
+	local ip=$(echo $ips | cut -d ' ' -f1)
+
+	if [[ "$ip" == "" ]]; then
+		echo "failed to find ip" >&2
+		exit 1
+	fi
 
     echo $(echo $ips | cut -d ' ' -f1)
 }

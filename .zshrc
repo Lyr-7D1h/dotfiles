@@ -448,3 +448,11 @@ fi
 # HACK: something overwrites this in zprofile
 # export WAYLAND_DISPLAY=wayland-0
 # zprof
+
+# pnpm
+export PNPM_HOME="/home/lyr/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
