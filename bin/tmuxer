@@ -266,7 +266,8 @@ for session_name in list(
         if isinstance(entry["templates"], dict):
             templates = [entry["templates"]]
         for template in templates:
-            parsed = parse_template(exec, template["source"], template["secrets"])
+            secrets = template["secrets"] if "secrets" in template else None
+            parsed = parse_template(exec, template["source"], secrets)
             target = parse_path(template["target"])
             info(f"Writing parsed template to {target}")
             open(target, "w+").write(parsed)
