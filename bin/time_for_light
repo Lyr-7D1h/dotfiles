@@ -2,8 +2,124 @@
 
 set -eu
 
-COUNTRY="US" 
-CITY="Pittsburgh"
+# Extract timezone info from timedatectl
+get_location_from_timedatectl() {
+    local timezone_info
+    timezone_info=$(timedatectl show --property=Timezone --value)
+    
+    if [[ -z "$timezone_info" ]]; then
+        echo "Error: Could not get timezone from timedatectl" >&2
+        return 1
+    fi
+    
+    # Parse timezone format like "America/New_York" or "Europe/London"
+    if [[ "$timezone_info" =~ ^([^/]+)/(.+)$ ]]; then
+        local region="${BASH_REMATCH[1]}"
+        local city_tz="${BASH_REMATCH[2]}"
+        
+        # Convert timezone city to actual city name (remove underscores, get main city)
+        local city
+        city=$(echo "$city_tz" | sed 's/_/ /g' | cut -d'/' -f1)
+        
+        # Map regions to country codes
+        case "$region" in
+            "America")
+                # For America, we need to determine the country based on the city/subregion
+                if [[ "$city_tz" =~ ^(New_York) ]]; then
+                    echo "US" "New York"
+                elif [[ "$city_tz" =~ ^(Chicago) ]]; then
+                    echo "US" "Chicago"
+                elif [[ "$city_tz" =~ ^(Denver) ]]; then
+                    echo "US" "Denver"
+                elif [[ "$city_tz" =~ ^(Los_Angeles) ]]; then
+                    echo "US" "San Francisco"
+                elif [[ "$city_tz" =~ ^(Detroit) ]]; then
+                    echo "US" "Detroit"
+                elif [[ "$city_tz" =~ ^(Phoenix) ]]; then
+                    echo "US" "Phoenix"
+                elif [[ "$city_tz" =~ ^(Anchorage) ]]; then
+                    echo "US" "Anchorage"
+                elif [[ "$city_tz" =~ ^(Honolulu) ]]; then
+                    echo "US" "Honolulu"
+                elif [[ "$city_tz" =~ ^(Toronto|Vancouver|Montreal|Edmonton) ]]; then
+                    echo "CA" "$city"
+                elif [[ "$city_tz" =~ ^(Mexico_City|Tijuana|Cancun) ]]; then
+                    echo "MX" "$city"
+                elif [[ "$city_tz" =~ ^(Sao_Paulo|Rio_de_Janeiro) ]]; then
+                    echo "BR" "$city"
+                elif [[ "$city_tz" =~ ^(Buenos_Aires|Cordoba) ]]; then
+                    echo "AR" "$city"
+                else
+                    # Default to US for other American timezones
+                    echo "US" "New York"
+                fi
+                ;;
+            "Europe")
+                case "$city_tz" in
+                    "London") echo "GB" "London" ;;
+                    "Paris") echo "FR" "Paris" ;;
+                    "Berlin"|"Munich") echo "DE" "$city" ;;
+                    "Rome"|"Milan") echo "IT" "$city" ;;
+                    "Madrid"|"Barcelona") echo "ES" "$city" ;;
+                    "Amsterdam") echo "NL" "Amsterdam" ;;
+                    "Brussels") echo "BE" "Brussels" ;;
+                    "Vienna") echo "AT" "Vienna" ;;
+                    "Zurich") echo "CH" "Zurich" ;;
+                    "Stockholm") echo "SE" "Stockholm" ;;
+                    "Oslo") echo "NO" "Oslo" ;;
+                    "Copenhagen") echo "DK" "Copenhagen" ;;
+                    "Helsinki") echo "FI" "Helsinki" ;;
+                    "Warsaw") echo "PL" "Warsaw" ;;
+                    "Prague") echo "CZ" "Prague" ;;
+                    "Budapest") echo "HU" "Budapest" ;;
+                    "Moscow") echo "RU" "Moscow" ;;
+                    *) echo "GB" "$city" ;; # Default to UK for other European timezones
+                esac
+                ;;
+            "Asia")
+                case "$city_tz" in
+                    "Tokyo") echo "JP" "Tokyo" ;;
+                    "Shanghai"|"Beijing") echo "CN" "$city" ;;
+                    "Seoul") echo "KR" "Seoul" ;;
+                    "Bangkok") echo "TH" "Bangkok" ;;
+                    "Singapore") echo "SG" "Singapore" ;;
+                    "Hong_Kong") echo "HK" "Hong Kong" ;;
+                    "Mumbai"|"Kolkata") echo "IN" "$city" ;;
+                    "Dubai") echo "AE" "Dubai" ;;
+                    *) echo "JP" "$city" ;; # Default to Japan for other Asian timezones
+                esac
+                ;;
+            "Australia")
+                echo "AU" "$city"
+                ;;
+            "Africa")
+                case "$city_tz" in
+                    "Cairo") echo "EG" "Cairo" ;;
+                    "Johannesburg") echo "ZA" "Johannesburg" ;;
+                    "Lagos") echo "NG" "Lagos" ;;
+                    *) echo "EG" "$city" ;; # Default to Egypt for other African timezones
+                esac
+                ;;
+            *)
+                echo "US" "New York" # Default fallback
+                ;;
+        esac
+    else
+        echo "Error: Invalid timezone format: $timezone_info" >&2
+        return 1
+    fi
+}
+
+# Get country and city from timedatectl
+if ! LOCATION_INFO=$(get_location_from_timedatectl); then
+    echo "Failed to get location from timedatectl, using defaults" >&2
+    COUNTRY="US"
+    CITY="New York"
+else
+    read -r COUNTRY CITY <<< "$LOCATION_INFO"
+    echo "Detected location: $CITY, $COUNTRY" >&2
+fi
+
 CACHE_ENABLED=0
 CACHE_FILE=/tmp/time_for_light.cache
 
@@ -103,6 +219,10 @@ get_sunrise_sunset_openweather() {
     local city="$1"
     local country="$2"
     
+    # URL encode the city name (replace spaces with %20)
+    local encoded_city
+    encoded_city=$(printf '%s' "$city" | sed 's/ /%20/g')
+    
     # Check if API key is available
     if [[ -z "${OPENWEATHER_API_KEY:-}" ]]; then
         echo "OpenWeather API key not set" >&2
@@ -110,7 +230,7 @@ get_sunrise_sunset_openweather() {
     fi
     
     # Get weather data from OpenWeather API
-    if ! API_RESPONSE=$(curl --fail-with-body -s "https://api.openweathermap.org/data/2.5/weather?q=$city,$country&appid=$OPENWEATHER_API_KEY"); then
+    if ! API_RESPONSE=$(curl --fail-with-body -s "https://api.openweathermap.org/data/2.5/weather?q=$encoded_city,$country&appid=$OPENWEATHER_API_KEY"); then
         echo "Error response from OpenWeather API" >&2
         return 1
     fi
@@ -128,6 +248,7 @@ if [[ "$CACHE_ENABLED" == "1" ]] && [[ -f "$CACHE_FILE" ]]; then
     # check if only these 3 vars are set
     if grep -q -E '^(TIMEZONE_OFFSET|SUNRISE_UNIX|SUNSET_UNIX)=' "$CACHE_FILE" && \
        ! grep -q -v -E '^(TIMEZONE_OFFSET|SUNRISE_UNIX|SUNSET_UNIX)=' "$CACHE_FILE"; then
+        # shellcheck source=/dev/null
         source "$CACHE_FILE"
     else
         echo "invalid cache file"

@@ -9,7 +9,7 @@
 #
 
 SYNC_HOST="home"
-NOTES_FOLDER=~/notes
+NOTES_FOLDER=~/notes/notes
 
 set -e
 
@@ -115,7 +115,7 @@ elif [[ "$1" == "open" ]]; then
 	open $(get_notes)
 elif [[ "$1" != "" ]]; then
 	id=`date '+%y%m%d'`
-	open "journal/${id}_${@}.md"
+	open "${id}_${@}.md"
 else
 	open $(get_notes)
 fi
