@@ -16,15 +16,18 @@ update = true
 [creagen]
 path = "~/p/creagen"
 repo = "git@github.com:Lyr-7d1h/creagen.git"
-vsplit = false
 execnow = "code ~/p/creagen ~/p/creagen-editor ~/p/creagen-generations"
 update= true
 [[creagen.windows]]
 name = "app"
 [[creagen.windows.panes]]
-exec = ["npm i", "npm run watch:chokidar"]
+exec = ""
+[[creagen.windows.panes]]
+exec = ["npm i", "npm run watch"]
+size = 90
 [[creagen.windows.panes]]
 cwd = "~/p/creagen-editor"
+split = "horizontal"
 exec = ["npm i", "npm start"]
 [[creagen.windows]]
 name = "generations"

@@ -67,15 +67,15 @@
 [tag]
 	sort = version:refname
 [fetch]
-	prune = true
-	pruneTags = true
-	all = true
+	#prune = true
+	#pruneTags = true
+	#all = true
 [help]
 	autocorrect = prompt
 [commit]
 	verbose = true
 [filter "lfs"]
+	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
-	clean = git-lfs clean -- %f

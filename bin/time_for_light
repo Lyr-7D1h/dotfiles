@@ -138,11 +138,48 @@ import gi
 import sys
 import json
 import time
-from datetime import datetime
+import math
+from datetime import datetime, timezone
 
 # Import GWeather library
 gi.require_version("GWeather", "4.0")
 from gi.repository import GWeather
+
+
+def calculate_sunrise_sunset(lat, lon, date=None):
+    """Calculate sunrise/sunset using astronomical formulas"""
+    if date is None:
+        date = datetime.now()
+    
+    # Day of year
+    day_of_year = date.timetuple().tm_yday
+    
+    # Solar declination
+    declination = 23.45 * math.sin(math.radians(360 * (284 + day_of_year) / 365))
+    
+    # Hour angle
+    lat_rad = math.radians(lat)
+    decl_rad = math.radians(declination)
+    
+    try:
+        hour_angle = math.acos(-math.tan(lat_rad) * math.tan(decl_rad))
+        hour_angle_deg = math.degrees(hour_angle)
+        
+        # Sunrise and sunset times (in hours from solar noon)
+        sunrise_hour = 12 - hour_angle_deg / 15
+        sunset_hour = 12 + hour_angle_deg / 15
+        
+        # Convert to timestamps (assuming UTC, adjust for timezone later)
+        base_date = date.replace(hour=0, minute=0, second=0, microsecond=0)
+        sunrise_time = base_date.replace(hour=int(sunrise_hour), 
+                                       minute=int((sunrise_hour % 1) * 60))
+        sunset_time = base_date.replace(hour=int(sunset_hour), 
+                                      minute=int((sunset_hour % 1) * 60))
+        
+        return int(sunrise_time.timestamp()), int(sunset_time.timestamp())
+    except ValueError:
+        # Polar day/night
+        return 0, 0
 
 
 def get_sunrise_sunset(city, country):
@@ -165,29 +202,39 @@ def get_sunrise_sunset(city, country):
         sys.stderr.write(f"Error: Could not find location for {city}, {country}\n")
         sys.exit(1)
 
-    # Create info object for this location
+    # Get coordinates from location
+    lat, lon = location.get_coords()
+    
+    # Try the GWeather approach first with proper setup
     info = GWeather.Info.new(location)
-    info.update()
-
-    # Get sunrise and sunset times
+    info.set_application_id("com.example.weather")
+    info.set_contact_info("user@example.com")
+    
+    # Try to get sunrise/sunset directly without network update
     sunrise = info.get_value_sunrise()
     sunset = info.get_value_sunset()
-
-    # Calculate timezone offset in seconds
-    timezone_offset = int(time.timezone * -1)  # Convert to seconds east of UTC
-
-    # Convert to Unix timestamps
-    sunrise_unix = int(sunrise.value)
-    sunset_unix = int(sunset.value)
-
-    # Return the data as JSON
-    result = {
-        "timezone": timezone_offset,
-        "sunrise": sunrise_unix,
-        "sunset": sunset_unix,
-    }
-
-    return json.dumps(result)
+    
+    if sunrise[0] and sunset[0]:
+        # GWeather has the data
+        timezone_offset = int(time.timezone * -1)
+        return json.dumps({
+            "timezone": timezone_offset,
+            "sunrise": int(sunrise[1]),
+            "sunset": int(sunset[1]),
+        })
+    else:
+        # Fall back to calculation
+        sunrise_ts, sunset_ts = calculate_sunrise_sunset(lat, lon)
+        
+        # Calculate timezone offset
+        timezone_offset = int(time.timezone * -1)
+        
+        return json.dumps({
+            "timezone": timezone_offset,
+            "sunrise": sunrise_ts,
+            "sunset": sunset_ts,
+            "method": "calculated"
+        })
 
 
 if __name__ == "__main__":
