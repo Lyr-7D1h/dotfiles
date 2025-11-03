@@ -9,7 +9,7 @@ HOST=$1
 IP=`echo "$HOST" | cut -d'@' -f2`
 PASS=`bw get password "$IP"`
 
-ssh $HOST "bash -s " <<EOF
+ssh -o KexAlgorithms=ecdh-sha2-nistp521 $HOST "bash -s " <<EOF
 set -e
 for d in \`ls /dev/sd*\`
 do

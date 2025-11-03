@@ -402,6 +402,19 @@ ktx() {
       kubectl config use-context "${selected}"
   fi
 }
+# Remove all local bookmarks that don't exist in remote
+jj-prune () {
+  set -e
+  jj git fetch 
+  for bm in $(jj bookmark list | awk '{print $1}'); do
+	# detect if any remote matches
+	if ! jj bookmark list --all-remotes | grep -q "^${bm}@"; then
+		echo "$bm"
+		# jj bookmark forget "$bm"
+	fi
+  done
+}
+
 
 
 ### Autoloads
