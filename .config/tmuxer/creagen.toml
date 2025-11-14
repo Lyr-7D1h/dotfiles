@@ -19,12 +19,9 @@ repo = "git@github.com:Lyr-7d1h/creagen.git"
 execnow = "code ~/p/creagen ~/p/creagen-editor ~/p/creagen-generations ~/p/creagen-deployment"
 update= true
 [[creagen.windows]]
-name = "app"
-[[creagen.windows.panes]]
-exec = ""
+name = "live"
 [[creagen.windows.panes]]
 exec = ["npm i", "npm run watch"]
-size = 90
 [[creagen.windows.panes]]
 cwd = "~/p/creagen-editor"
 split = "horizontal"
@@ -32,3 +29,11 @@ exec = ["npm i", "npm start"]
 [[creagen.windows]]
 name = "generations"
 cwd = "~/p/creagen-generations"
+[[creagen.windows]]
+name = "vcs"
+[[creagen.windows.panes]]
+cwd = "~/p/creagen-editor"
+exec = ["watch --color jj --ignore-working-copy log --color=always"]
+[[creagen.windows.panes]]
+cwd = "~/p/creagen-editor"
+exec = [""]
