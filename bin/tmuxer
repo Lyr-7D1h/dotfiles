@@ -189,22 +189,27 @@ def parse_template(
 
 if len(sys.argv) <= 1 or "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
     print(
-        "Usage: tmuxer template|list|<config> [-a|-h|<entry>]\n"
+        "Usage: tmuxer template|list|<config> [-n|-t|-a|-h|<entry>]\n"
         "  list: list all available config files\n"
         "  template <source> [secrets]: parse a template using optional secrets\n"
         "  <config>: the name of the config file in ~/.config/tmuxer or the path to a toml file"
         "  -h | --help: display this help message\n"
         "  -a | --attach: attach to the last session\n"
+        "  -t | --template: run a config only the templates on the config\n",
+        "  -n | --no-updates: run the config without updating the repos\n",
         "  <entry>: Which entry in the config to execute\n"
         "\n\n"
         "Examples:\n"
         "   - tmuxer list\n"
         "   - tmuxer ./my-config my-entry -a\n"
-        "   - tmuxer ./my-config"
+        "   - tmuxer ./my-config -t -n # updates just the templated configs\n"
+        "   - tmuxer ./my-config",
     )
     exit(0)
 
 attach = "-a" in sys.argv[1:] or "--attach" in sys.argv[1:]
+template_only = "-t" in sys.argv[1:] or "--template" in sys.argv[1:]
+no_updates = "-n" in sys.argv[1:] or "--no-updates" in sys.argv[1:]
 
 config_arg = sys.argv[1]
 if config_arg == "list":
@@ -250,7 +255,7 @@ for session_name in list(
 
     exec = Executor(path)
 
-    if "update" in entry and entry["update"]:
+    if no_updates is False and "update" in entry and entry["update"]:
         exec.run("git fetch --all")
         if exec.safe_run("git status -uno | grep -q 'Your branch is behind'")[0] == 0:
             if exec.safe_run("git diff-index --quiet HEAD --")[0] == 0:
@@ -271,6 +276,9 @@ for session_name in list(
             target = parse_path(template["target"])
             info(f"Writing parsed template to {target}")
             open(target, "w+").write(parsed)
+
+    if template_only:
+        continue
 
     if "execnow" in entry:
         cmd = entry["execnow"]
