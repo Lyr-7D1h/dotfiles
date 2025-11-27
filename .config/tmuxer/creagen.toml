@@ -25,10 +25,10 @@ exec = ["npm i", "npm run watch"]
 [[creagen.windows.panes]]
 cwd = "~/p/creagen-editor"
 split = "horizontal"
-exec = ["npm i", "npm start"]
-[[creagen.windows]]
-name = "generations"
-cwd = "~/p/creagen-generations"
+exec = [
+	"npm i", 
+	"CREAGEN_EDITOR_CONTROLLER_URL=http://localhost:8787 npm start"
+]
 [[creagen.windows]]
 name = "vcs"
 [[creagen.windows.panes]]
@@ -37,3 +37,15 @@ exec = ["watch --color jj --ignore-working-copy log --color=always"]
 [[creagen.windows.panes]]
 cwd = "~/p/creagen-editor"
 exec = [""]
+[[creagen.windows]]
+name = "deployment"
+[[creagen.windows.panes]]
+exec = [
+	"npm i", 
+	"CREAGEN_EDITOR_CONTROLLER_URL=http://localhost:8787 npm start"
+]
+[[creagen.windows.panes]]
+exec = ""
+[[creagen.windows]]
+name = "generations"
+cwd = "~/p/creagen-generations"
