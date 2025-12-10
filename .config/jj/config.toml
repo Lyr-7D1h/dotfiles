@@ -8,6 +8,7 @@ email = "lyr-7d1h@pm.me"
 default-command = "log"
 pager = "delta"
 diff-formatter = ":git"
+diff-editor = ":builtin"
 
 [templates]
 # show diff in commands like 'describe'
