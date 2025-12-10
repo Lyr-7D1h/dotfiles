@@ -16,7 +16,7 @@ update = true
 [creagen]
 path = "~/p/creagen"
 repo = "git@github.com:Lyr-7d1h/creagen.git"
-execnow = "code ~/p/creagen ~/p/creagen-editor ~/p/creagen-generations ~/p/creagen-deployment"
+execnow = "code ~/p/creagen ~/p/creagen-editor ~/p/creagen-generations"
 update= true
 [[creagen.windows]]
 name = "live"
@@ -33,14 +33,18 @@ exec = [
 name = "vcs"
 [[creagen.windows.panes]]
 cwd = "~/p/creagen-editor"
-exec = ["watch --color jj --ignore-working-copy log --color=always"]
+exec = [
+	"watch --interval=1 --color --no-title \"jj --color=always -r 'all()'\""
+]
 [[creagen.windows.panes]]
 cwd = "~/p/creagen-editor"
 exec = [""]
 [[creagen.windows]]
+cwd = "~/p/creagen-deployment"
 name = "deployment"
 [[creagen.windows.panes]]
 exec = [
+	"cd controller",
 	"npm i", 
 	"CREAGEN_EDITOR_CONTROLLER_URL=http://localhost:8787 npm start"
 ]
