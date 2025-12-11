@@ -124,6 +124,10 @@ if command -v go > /dev/null; then
   export PATH=$PATH:$(go env GOPATH)/bin
 fi
 
+if command -v julia > /dev/null; then
+	export PATH="$PATH:/path/to/your/julia/bin"
+fi
+
 if command -v symfony > /dev/null; then
    export PATH="$HOME/.symfony5/bin:$PATH"
 fi
