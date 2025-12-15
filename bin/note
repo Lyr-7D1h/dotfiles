@@ -106,11 +106,15 @@ sync_down || true
 if [[ "$1" == "latest" ]]; then
 	open "$(ls $NOTES_FOLDER | grep -E '^[0-9]{6}' | tail -n 1)"
 elif [[ "$1" == "todo" ]]; then
-	open "todo"
+	open "todo.md"
+elif [[ "$1" == "btodo" ]]; then
+	open "btodo.md"
+elif [[ "$1" == "stodo" ]]; then
+	open "stodo.md"
 elif [[ "$1" == "did" ]]; then
-	open "did"
+	open "did.md"
 elif [[ "$1" == "journal" ]]; then
-	open "journal"
+	open "journal.md"
 elif [[ "$1" == "open" ]]; then
 	open $(get_notes)
 elif [[ "$1" != "" ]]; then

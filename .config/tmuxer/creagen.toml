@@ -26,15 +26,15 @@ exec = ["npm i", "npm run watch"]
 cwd = "~/p/creagen-editor"
 split = "horizontal"
 exec = [
-	"npm i", 
-	"CREAGEN_EDITOR_CONTROLLER_URL=http://localhost:8787 npm start"
+	"npm i",
+	"CREAGEN_EDITOR_CONTROLLER_URL=http://localhost:8787 npm start",
 ]
 [[creagen.windows]]
 name = "vcs"
 [[creagen.windows.panes]]
 cwd = "~/p/creagen-editor"
 exec = [
-	"watch --interval=1 --color --no-title \"jj --color=always -r 'all()'\""
+	"watch --interval=1 --color --no-title \"jj --color=always -r 'all()'\"",
 ]
 [[creagen.windows.panes]]
 cwd = "~/p/creagen-editor"
@@ -43,11 +43,8 @@ exec = [""]
 cwd = "~/p/creagen-deployment"
 name = "deployment"
 [[creagen.windows.panes]]
-exec = [
-	"cd controller",
-	"npm i", 
-	"CREAGEN_EDITOR_CONTROLLER_URL=http://localhost:8787 npm start"
-]
+cwd = "~/p/creagen-deployment/controller"
+exec = ["cd controller", "npm i", "npm start"]
 [[creagen.windows.panes]]
 exec = ""
 [[creagen.windows]]
