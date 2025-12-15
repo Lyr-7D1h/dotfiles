@@ -16,7 +16,7 @@ update = true
 [creagen]
 path = "~/p/creagen"
 repo = "git@github.com:Lyr-7d1h/creagen.git"
-execnow = "code ~/p/creagen ~/p/creagen-editor ~/p/creagen-generations"
+execnow = "code ~/p/creagen ~/p/creagen-editor ~/p/creagen-generations ~/p/creagen-deployment"
 update= true
 [[creagen.windows]]
 name = "live"
