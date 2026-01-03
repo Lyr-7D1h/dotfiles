@@ -3,7 +3,7 @@ repo = "git@github.com:Lyr-7D1h/lssg.git"
 path = "~/p/lssg"
 vsplit = false
 [[lssg.windows.panes]]
-exec = ["cargo watch -x 'run -- examples/lyrx/home.md ./build'"]
+exec = ["cargo watch -x 'run -- examples/lyrx/home.md ./build --no-media-optimization'"]
 [[lssg.windows.panes]]
 exec = ["live-server ./build --no-browser"]
 [[lssg.windows.panes]]

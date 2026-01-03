@@ -16,14 +16,20 @@ fi
 # typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
 ### Plugins
-source ~/.zplug/init.zsh
+# Exit early for non-interactive shells to avoid expensive startup work
+[[ $- == *i* ]] || return
+
+# Set ZPLUG_HOME before sourcing zplug to avoid extra lookups
 export ZPLUG_HOME=/home/lyr/.zplug
-zplug "Aloxaf/fzf-tab"
+source ~/.zplug/init.zsh
+
+# Lazy-load some heavier plugins to improve interactive startup time
+zplug "Aloxaf/fzf-tab", defer:2
 # zplug "plugins/kubectl", from:oh-my-zsh
 zplug "plugins/git", from:oh-my-zsh
 # zplug "plugins/aws", from:oh-my-zsh
 # zplug "plugins/poetry", from:oh-my-zsh
-zplug "zsh-users/zsh-autosuggestions"
+zplug "zsh-users/zsh-autosuggestions", defer:2
 zplug "romkatv/powerlevel10k", as:theme, depth:1
 
 zplug "plugins/tmux", from:oh-my-zsh, defer:2
@@ -105,6 +111,8 @@ bindkey '^U' backward-kill-line
 
 
 ### Exports
+# always set utf-8 locale for shell
+export LC_ALL=C.UTF-8
 export DOCKER_BUILDKIT=0
 export FZF_DEFAULT_COMMAND='rg --files'
 export LANG=en_US.UTF-8
@@ -146,10 +154,34 @@ export PATH="$HOME/.cargo/bin:$PATH"
 # Add Deno Install
 export DENO_INSTALL="/home/lyr/.deno"
 
-# Nvm
+# Nvm - lazy load to improve startup time
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  
+# Only set up nvm when it's actually called
+nvm() {
+  unset -f nvm node npm npx
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+  nvm "$@"
+}
+# Lazy load node, npm, npx as well
+node() {
+  unset -f nvm node npm npx
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+  node "$@"
+}
+npm() {
+  unset -f nvm node npm npx
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+  npm "$@"
+}
+npx() {
+  unset -f nvm node npm npx
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+  npx "$@"
+}
 
 export PATH="$DENO_INSTALL/bin:$PATH"
 
@@ -169,7 +201,7 @@ export PATH="$HOME/pbin:$PATH"
 
 ### Autocompletions
 autoload bashcompinit && bashcompinit
-autoload -U compinit && compinit
+autoload -U compinit && compinit -u
 
 # [JJ autocomplete](https://jj-vcs.github.io/jj/latest/install-and-setup/#zsh)
 if command -v jj &> /dev/null; then
