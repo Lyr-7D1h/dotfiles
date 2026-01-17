@@ -464,6 +464,9 @@ if [[ "$GNOME_TERMINAL_SCREEN" != "" ]]; then
   . /etc/profile.d/vte.sh
 fi
 
+# Code better shell detection
+[[ "$TERM_PROGRAM" == "vscode" ]] && . "$(code --locate-shell-integration-path zsh)"
+
 # Adding Pyenv
 # if command -v pyenv &> /dev/null; then
 #     export PYENV_ROOT="$HOME/.pyenv"
