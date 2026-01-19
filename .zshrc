@@ -34,7 +34,6 @@ zplug "romkatv/powerlevel10k", as:theme, depth:1
 
 zplug "plugins/tmux", from:oh-my-zsh, defer:2
 zplug "plugins/git-auto-fetch", from:oh-my-zsh, defer:2
-zplug "loiccoyle/zsh-github-copilot", defer:2
 zplug "plugins/terraform", from:oh-my-zsh, defer:2
 zplug "plugins/npm", from:oh-my-zsh, defer:2
 zplug "plugins/docker", from:oh-my-zsh, defer:2
@@ -367,8 +366,31 @@ bindkey  "^[[F"   end-of-line
 bindkey  "^[[3~"  delete-char
 
 # copilot
-bindkey '^[I' zsh_gh_copilot_explain  # bind Alt+shift+I to explain
-bindkey '^[i' zsh_gh_copilot_suggest  # bind Alt+i to suggest
+copilot_what_the_shell () {
+    TMPFILE=$(mktemp);
+    trap 'rm -f $TMPFILE' EXIT;
+    if /home/lyr/.nvm/versions/node/v23.11.1/bin/github-copilot-cli what-the-shell "$@" --shellout $TMPFILE; then
+      if [ -e "$TMPFILE" ]; then
+        FIXED_CMD=$(cat $TMPFILE);
+        print -s "$FIXED_CMD";
+        eval "$FIXED_CMD"
+      else
+        echo "Apologies! Extracting command failed"
+      fi
+    else
+      return 1
+    fi
+  };
+
+copilot_what_the_shell_widget() {
+  local query="$BUFFER"
+  zle push-line # Save current buffer
+  BUFFER="copilot_what_the_shell \"$query\""
+  zle accept-line
+}
+alias '??'='copilot_what_the_shell';
+zle -N copilot_what_the_shell_widget
+bindkey '^[i' copilot_what_the_shell_widget;  # bind Alt+i to suggest
 
 
 ### Aliases
