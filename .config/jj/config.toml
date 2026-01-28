@@ -23,3 +23,8 @@ concat(
   diff.git(),
 )
 '''
+
+[aliases]
+gp = ["git", "push"]
+gf = ["git", "fetch"]
+dm = ["desc", "-m"]
