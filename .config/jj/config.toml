@@ -25,6 +25,6 @@ concat(
 '''
 
 [aliases]
-gp = ["git", "push"]
+gp = ["git", "push", "--allow-new"]
 gf = ["git", "fetch"]
 dm = ["desc", "-m"]

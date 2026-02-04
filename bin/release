@@ -184,9 +184,11 @@ class Aur(Module):
         with open("PKGBUILD", "r") as file:
             pkgbuild: str = file.read()
         pkgbuild = re.sub(
-            "^pkgver\\s*=.*", f"pkgver={VERSION}", pkgbuild, 1, re.MULTILINE
+            "^pkgver\\s*=.*", f"pkgver={VERSION}", pkgbuild, count=1, flags=re.MULTILINE
         )
-        pkgbuild = re.sub("^pkgrel\\s*=.*", f"pkgrel=1", pkgbuild, 1, re.MULTILINE)
+        pkgbuild = re.sub(
+            "^pkgrel\\s*=.*", f"pkgrel=1", pkgbuild, count=1, flags=re.MULTILINE
+        )
 
         # write before generating sums
         with open("PKGBUILD", "w") as file:
@@ -235,7 +237,11 @@ class Cargo(Module):
         with open("Cargo.toml", "r") as file:
             cargo_toml: str = file.read()
         cargo_toml = re.sub(
-            "^version\\s*=.*", f'version = "{VERSION}"', cargo_toml, 1, re.MULTILINE
+            "^version\\s*=.*",
+            f'version = "{VERSION}"',
+            cargo_toml,
+            count=1,
+            flags=re.MULTILINE,
         )
         with open("Cargo.toml", "w") as file:
             file.write(cargo_toml)
