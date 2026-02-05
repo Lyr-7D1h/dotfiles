@@ -3,14 +3,9 @@ repo = "git@github.com:Lyr-7D1h/lssg.git"
 path = "~/p/lssg"
 vsplit = false
 [[lssg.windows.panes]]
-exec = ["cargo watch -x 'run -- examples/lyrx/home.md ./build --no-media-optimization'"]
-[[lssg.windows.panes]]
-exec = ["live-server ./build --no-browser"]
+exec = ["cargo watch -x 'run -- examples/lyrx/home.md ./build --no-media-optimization --preview'"]
 [[lssg.windows.panes]]
 exec = ["watch --interval 1 --color --no-title \"jj --color=always -r 'all()'\""]
-split = "vertical"
-size = 99
 [[lssg.windows.panes]]
 exec = [""]
 split = "vertical"
-size=10
