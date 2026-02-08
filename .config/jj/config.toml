@@ -28,3 +28,6 @@ concat(
 gp = ["git", "push", "--allow-new"]
 gf = ["git", "fetch"]
 dm = ["desc", "-m"]
+
+[remotes.origin]
+auto-track-bookmarks = "*"
