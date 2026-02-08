@@ -25,9 +25,10 @@ concat(
 '''
 
 [aliases]
-gp = ["git", "push", "--allow-new"]
+gp = ["git", "push"]
 gf = ["git", "fetch"]
 dm = ["desc", "-m"]
+e = ["edit"]
 
 [remotes.origin]
 auto-track-bookmarks = "*"
