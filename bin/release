@@ -237,7 +237,7 @@ class Cargo(Module):
             cargo_toml: str = file.read()
 
         self.local_deps = False
-        if re.search("path\s*=", cargo_toml, re.MULTILINE):
+        if re.search("path\\s*=", cargo_toml, re.MULTILINE):
             debug("Local dependencies detected, using cargo workspace")
             self.local_deps = True
             exec(f"cargo workspaces version {VERSION} --no-git-tag --yes")
