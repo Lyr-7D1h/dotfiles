@@ -9,6 +9,7 @@ default-command = "log"
 pager = "delta"
 diff-formatter = ":git"
 diff-editor = ":builtin"
+merge-editor = "vscode"
 
 [templates]
 # show diff in commands like 'describe'

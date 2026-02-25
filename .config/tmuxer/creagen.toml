@@ -18,27 +18,31 @@ path = "~/p/creagen"
 repo = "git@github.com:Lyr-7d1h/creagen.git"
 execnow = "code ~/p/creagen ~/p/creagen-editor ~/p/creagen-generations ~/p/creagen-deployment"
 update= true
+
 [[creagen.windows]]
-name = "live"
+name = "creagen"
 [[creagen.windows.panes]]
 exec = ["npm i", "npm run watch"]
 [[creagen.windows.panes]]
+exec = "watch --interval=1 --color --no-title \"jj --color=always -r 'all()'\""
+[[creagen.windows.panes]]
+split = "horizontal"
+exec = ""
+
+[[creagen.windows]]
+name = "creagen-editor"
 cwd = "~/p/creagen-editor"
+[[creagen.windows.panes]]
 split = "horizontal"
 exec = [
 	"npm i",
 	"CREAGEN_EDITOR_CONTROLLER_URL=http://localhost:8787 npm start",
 ]
-[[creagen.windows]]
-name = "vcs"
 [[creagen.windows.panes]]
-cwd = "~/p/creagen-editor"
-exec = [
-	"watch --interval=1 --color --no-title \"jj --color=always -r 'all()'\"",
-]
+exec = "watch --interval=1 --color --no-title \"jj --color=always -r 'all()'\""
 [[creagen.windows.panes]]
-cwd = "~/p/creagen-editor"
-exec = [""]
+exec = ""
+
 [[creagen.windows]]
 cwd = "~/p/creagen-deployment"
 name = "deployment"
@@ -47,6 +51,7 @@ cwd = "~/p/creagen-deployment/controller"
 exec = ["cd controller", "npm i", "npm start"]
 [[creagen.windows.panes]]
 exec = ""
+
 [[creagen.windows]]
 name = "generations"
 cwd = "~/p/creagen-generations"

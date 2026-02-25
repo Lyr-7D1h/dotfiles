@@ -19,10 +19,6 @@ if [[ ! -d $NOTES_FOLDER  ]]; then
 	chmod -R 644 $NOTES_FOLDER
 fi
 
-if [[ "$2" != "" ]]; then
-	help
-fi
-
 help() {
 	echo "note {help|[name]|open|rm|sync|latest|todo}"
 	exit 1
@@ -116,11 +112,11 @@ elif [[ "$1" == "did" ]]; then
 elif [[ "$1" == "journal" ]]; then
 	open "journal.md"
 elif [[ "$1" == "open" ]]; then
-	open $(get_notes)
+	open "$(get_notes)"
 elif [[ "$1" != "" ]]; then
 	id=`date '+%y%m%d'`
-	open "${id}_${@}.md"
+	open "${id}_$*.md"
 else
-	open $(get_notes)
+	open "$(get_notes)"
 fi
 sync_up &
