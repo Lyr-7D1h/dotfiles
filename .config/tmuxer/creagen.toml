@@ -41,6 +41,7 @@ exec = [
 [[creagen.windows.panes]]
 exec = "watch --interval=1 --color --no-title \"jj --color=always -r 'all()'\""
 [[creagen.windows.panes]]
+split = "horizontal"
 exec = ""
 
 [[creagen.windows]]
