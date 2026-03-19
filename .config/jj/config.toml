@@ -31,6 +31,7 @@ gp = ["git", "push", "--allow-new"]
 gpd = ["git", "push", "--allow-new", "-r", "descendants(@) & remote_bookmarks(remote=origin)"]
 gf = ["git", "fetch"]
 dm = ["desc", "-m"]
+cm = ["commit", "-m"]
 e = ["edit"]
 
 [remotes.origin]

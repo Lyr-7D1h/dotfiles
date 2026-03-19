@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import shutil
 import os
 import re
 import subprocess
@@ -300,7 +301,10 @@ for session_name in list(
 
         info(f"Creating new session {session_name}")
         # Create session with the right CWD from the beginning for the first window
-        exec.run(f"tmux new-session -d -s {session_name} -c {path}")
+        tput_size = (
+            ' -x "$(tput cols)" -y "$(tput lines)"' if shutil.which("tput") else ""
+        )
+        exec.run(f"tmux new-session -d -s {session_name} -c {path}{tput_size}")
 
         tmux_base_index = int(
             Executor().run("tmux show-option -gv base-index").strip() or "0"

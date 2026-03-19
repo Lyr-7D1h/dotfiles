@@ -68,6 +68,7 @@ unsetopt HIST_EXPIRE_DUPS_FIRST
 setopt SHARE_HISTORY
 unsetopt EXTENDED_HISTORY
 setopt autocd
+setopt correct
 
 # ZStyle
 # Do menu-driven completion.
@@ -112,7 +113,6 @@ bindkey '^U' backward-kill-line
 ### Exports
 # always set utf-8 locale for shell
 export LC_ALL=C.UTF-8
-export DOCKER_BUILDKIT=0
 export FZF_DEFAULT_COMMAND='rg --files'
 export LANG=en_US.UTF-8
 export BROWSER="firefox"
