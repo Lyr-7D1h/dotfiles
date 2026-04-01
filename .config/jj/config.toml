@@ -26,7 +26,7 @@ concat(
 '''
 
 [aliases]
-gp = ["git", "push", "--allow-new"]
+gp = ["git", "push"]
 # Push new bookmarks for all bookmarks after working commit
 gpd = ["git", "push", "--allow-new", "-r", "descendants(@) & remote_bookmarks(remote=origin)"]
 gf = ["git", "fetch"]
