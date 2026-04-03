@@ -2,13 +2,11 @@
 path = "~/p/versie"
 repo = "git@github.com:Lyr-7d1h/versie.git"
 update = true
-execnow = "npm link"
 
 [creagen-editor]
 path = "~/p/creagen-editor"
 repo = "git@github.com:Lyr-7d1h/creagen-editor.git"
 update = true
-execnow = "npm link versie"
 
 [creagen-generations]
 path = "~/p/creagen-generations"
@@ -40,7 +38,7 @@ exec = ""
 [[creagen.windows]]
 name = "creagen"
 [[creagen.windows.panes]]
-exec = ["npm i", "npm run build:watch"]
+exec = ["npm i", "npm run watch"]
 [[creagen.windows.panes]]
 exec = "watch --interval=1 --color --no-title \"jj --color=always -r 'all()'\""
 [[creagen.windows.panes]]
