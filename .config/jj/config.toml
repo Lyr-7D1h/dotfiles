@@ -12,6 +12,7 @@ diff-editor = ":builtin"
 merge-editor = "vscode"
 
 [templates]
+git_push_bookmark = '"lyr/push-" ++ change_id.short()'
 # show diff in commands like 'describe'
 draft_commit_description = '''
 concat(
@@ -26,13 +27,14 @@ concat(
 '''
 
 [aliases]
-gp = ["git", "push"]
+gp = ["git", "push", "--allow-new"]
 # Push new bookmarks for all bookmarks after working commit
 gpd = ["git", "push", "--allow-new", "-r", "descendants(@) & remote_bookmarks(remote=origin)"]
 gf = ["git", "fetch"]
 dm = ["desc", "-m"]
 cm = ["commit", "-m"]
 e = ["edit"]
+outdated = ["log", "-r", "bookmarks() & ~(master@origin | remote_bookmarks())"]
 
 [remotes.origin]
 auto-track-bookmarks = "*"
