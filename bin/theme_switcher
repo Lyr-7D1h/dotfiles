@@ -11,9 +11,9 @@ code() {
 	fi
   local theme="${1:-"light"}"
   if [[ "$theme" == "dark" ]]; then
-    sed -i 's/"workbench.colorTheme": "Default Light Modern",/"workbench.colorTheme": "Default Dark Modern",/' "$path"
+    sed -i 's/"workbench.colorTheme": "Light 2026",/"workbench.colorTheme": "Dark 2026",/' "$path"
   else
-    sed -i 's/"workbench.colorTheme": "Default Dark Modern",/"workbench.colorTheme": "Default Light Modern",/' "$path"
+    sed -i 's/"workbench.colorTheme": "Dark 2026",/"workbench.colorTheme": "Light 2026",/' "$path"
   fi
 }
 
