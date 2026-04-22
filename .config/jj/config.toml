@@ -11,6 +11,10 @@ diff-formatter = ":git"
 diff-editor = ":builtin"
 merge-editor = "vscode"
 
+[git]
+# Don't commit anything labeled octomerge
+# private-commits = "description('[octomerge]')"
+
 [templates]
 git_push_bookmark = '"lyr/push-" ++ change_id.short()'
 # show diff in commands like 'describe'
@@ -26,7 +30,19 @@ concat(
 )
 '''
 
+[revset-aliases]
+# MegaMerge flow https://isaaccorbrey.com/notes/jujutsu-megamerges-for-fun-and-profit
+"closest_merge(to)" = "heads(::to & merges())"
+
 [aliases]
+# MegaMerge flow https://isaaccorbrey.com/notes/jujutsu-megamerges-for-fun-and-profit
+# `jj stack <revset>` to include specific revs
+stack = ["rebase", "--after", "trunk()", "--before", "closest_merge(@)", "--revisions"]
+# `jj stage` to include the whole stack after the megamerge
+stage = ["stack", "closest_merge(@).. ~ empty()"]
+# `jj restack` to rebase your changes onto `trunk()`
+restack = ["rebase", "-d", "trunk()", "--source", "all:roots(trunk()..) & mutable()"]
+
 gp = ["git", "push", "--allow-new"]
 # Push new bookmarks for all bookmarks after working commit
 gpd = ["git", "push", "--allow-new", "-r", "descendants(@) & remote_bookmarks(remote=origin)"]
@@ -35,6 +51,7 @@ dm = ["desc", "-m"]
 cm = ["commit", "-m"]
 e = ["edit"]
 outdated = ["log", "-r", "bookmarks() & ~(master@origin | remote_bookmarks())"]
+ship = ["util", "exec", "--", "bash", "-c", "jj commit -m \"$1\" && jj bookmark set master -r @-", "--"]
 
 [remotes.origin]
 auto-track-bookmarks = "*"
