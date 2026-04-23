@@ -52,7 +52,8 @@ cwd = "~/p/creagen-editor"
 split = "horizontal"
 exec = [
 	"npm i",
-	"CREAGEN_EDITOR_CONTROLLER_URL=http://localhost:8787 npm start",
+# CREAGEN_DEV_PATH=../creagen CREAGEN_TURNSTILE_SITE_KEY=0x4AAAAAAC1B7j42DqgKtO_I CREAGEN_REMOTE_URL=https://storage.creagen.dev npm start
+	"CREAGEN_DEV_PATH=../creagen CREAGEN_REMOTE_URL=http://localhost:8788 CREAGEN_EDITOR_CONTROLLER_URL=http://localhost:8787 npm start",
 ]
 [[creagen.windows.panes]]
 exec = "watch --interval=1 --color --no-title \"jj --color=always -r 'all()'\""
@@ -65,6 +66,10 @@ cwd = "~/p/creagen-deployment"
 name = "deployment"
 [[creagen.windows.panes]]
 cwd = "~/p/creagen-deployment/controller"
-exec = ["cd controller", "npm i", "npm start"]
+exec = ["npm i", "npm start"]
 [[creagen.windows.panes]]
+cwd = "~/p/creagen-deployment/storage"
+exec = ["npm i", "npm start"]
+[[creagen.windows.panes]]
+split = "horizontal"
 exec = ""
