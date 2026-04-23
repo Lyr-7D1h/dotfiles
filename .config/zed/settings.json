@@ -7,64 +7,73 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "redact_private_values": true,
+  "agent_servers": {
+    "github-copilot-cli": {
+      "type": "registry",
+    },
+  },
   "project_panel": {
-    "dock": "left"
+    "dock": "right",
   },
   "outline_panel": {
-    "dock": "left"
+    "dock": "right",
   },
   "collaboration_panel": {
-    "dock": "left"
+    "dock": "right",
   },
   "git_panel": {
-    "dock": "left"
+    "dock": "right",
   },
   "agent": {
-    "dock": "right",
+    "dock": "left",
     "default_model": {
       "provider": "openai",
       "model": "gpt-5-mini",
-      "enable_thinking": false
+      "enable_thinking": false,
     },
     "favorite_models": [],
-    "model_parameters": []
+    "model_parameters": [],
   },
   "session": {
-    "trust_all_worktrees": true
+    "trust_all_worktrees": true,
   },
   "vim_mode": true,
   "terminal": {
-    "copy_on_select": true
+    "copy_on_select": true,
   },
   "telemetry": {
     "diagnostics": false,
-    "metrics": false
+    "metrics": false,
   },
   "relative_line_numbers": "enabled",
   "sticky_scroll": {
-    "enabled": true
+    "enabled": true,
   },
   "vertical_scroll_margin": 10.0,
   "gutter": {
-    "line_numbers": true
+    "line_numbers": true,
   },
   "minimap": {
-    "show": "never"
+    "show": "never",
   },
   "buffer_font_fallbacks": [
     "Inconsolata",
     "Monaco",
     "Consolas",
     "Courier New",
-    "monospace"
+    "monospace",
   ],
   "buffer_font_family": "Consolas",
   "file_types": {
-    "jsonc": [
-      "*.json"
-    ]
+    "jsonc": ["*.json"],
   },
+
   "show_edit_predictions": true,
+  "edit_predictions": {
+    "disabled_globs": ["**/config.toml", "**/config.json", "**/.env"],
+  },
+
   "soft_wrap": "editor_width",
   "tab_size": 2,
   "base_keymap": "VSCode",
