@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
-import shutil
 import os
 import re
-import subprocess
-import tomllib
-import sys
 import shlex
+import shutil
+import subprocess
+import sys
 from typing import NoReturn, Optional
+
+import tomllib
 
 TMUXER_CONFIG_PATH = os.path.expanduser(f"~/.config/tmuxer")
 
@@ -190,7 +191,7 @@ def parse_template(
 
 if len(sys.argv) <= 1 or "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
     print(
-        "Usage: tmuxer template|list|<config> [-n|-t|-a|-x|-h|<entry>]\n"
+        "Usage: tmuxer template|list|<config> [-n|-t|-a|-x|-o|-h|<entry>]\n"
         "  list: list all available config files\n"
         "  template <source> [secrets]: parse a template using optional secrets\n"
         "  <config>: the name of the config file in ~/.config/tmuxer or the path to a toml file"
@@ -199,6 +200,7 @@ if len(sys.argv) <= 1 or "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
         "  -t | --template: run a config only the templates on the config\n",
         "  -n | --no-updates: run the config without updating the repos\n",
         "  -x | --ignore-execnow: run the config without executing execnow commands\n",
+        "  -o | --execnow-only: only execute execnow statements, skip tmux windows\n",
         "  <entry>: Which entry in the config to execute\n"
         "\n\n"
         "Examples:\n"
@@ -206,6 +208,7 @@ if len(sys.argv) <= 1 or "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
         "   - tmuxer ./my-config my-entry -a\n"
         "   - tmuxer ./my-config -t -n # updates just the templated configs\n"
         "   - tmuxer ./my-config -x # skip all execnow commands\n"
+        "   - tmuxer ./my-config -o # only run execnow commands\n"
         "   - tmuxer ./my-config",
     )
     exit(0)
@@ -214,6 +217,7 @@ attach = "-a" in sys.argv[1:] or "--attach" in sys.argv[1:]
 template_only = "-t" in sys.argv[1:] or "--template" in sys.argv[1:]
 no_updates = "-n" in sys.argv[1:] or "--no-updates" in sys.argv[1:]
 ignore_execnow = "-x" in sys.argv[1:] or "--ignore-execnow" in sys.argv[1:]
+execnow_only = "-o" in sys.argv[1:] or "--execnow-only" in sys.argv[1:]
 
 config_arg = sys.argv[1]
 if config_arg == "list":
@@ -291,6 +295,9 @@ for session_name in list(
         for cmd in cmd:
             exec.run(cmd)
 
+    if execnow_only:
+        continue
+
     if "windows" in entry:
         last_tmux_session = session_name
 
@@ -358,7 +365,7 @@ for session_name in list(
 
                     size_option = ""
                     if "size" in pane:
-                        size_option = f"-p {pane["size"]}"
+                        size_option = f"-p {pane['size']}"
 
                     # Use -c option to set cwd for new panes, defaulting to window cwd if available
                     pane_cwd = (

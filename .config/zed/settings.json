@@ -7,6 +7,29 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "lsp": {
+    "vtsls": {
+      "settings": {
+        "typescript": {
+          "tsserver": {
+            "experimental": {
+              "enableProjectDiagnostics": true,
+            },
+          },
+          "updateImportsOnFileMove": {
+            "enabled": "always",
+          },
+        },
+        "javascript": {
+          "updateImportsOnFileMove": {
+            "enabled": "always",
+          },
+        },
+      },
+      "enable_lsp_tasks": true,
+    },
+  },
+  "cli_default_open_behavior": "new_window",
   "redact_private_values": true,
   "agent_servers": {
     "github-copilot-cli": {
@@ -26,10 +49,18 @@
     "dock": "right",
   },
   "agent": {
+    "default_profile": "write",
+    "tool_permissions": {
+      "tools": {
+        "terminal": {
+          "default": "allow",
+        },
+      },
+    },
     "dock": "left",
     "default_model": {
-      "provider": "openai",
-      "model": "gpt-5-mini",
+      "provider": "zed.dev",
+      "model": "claude-haiku-4-5",
       "enable_thinking": false,
     },
     "favorite_models": [],
@@ -68,8 +99,22 @@
   "file_types": {
     "jsonc": ["*.json"],
   },
+  "languages": {
+    "TypeScript": {
+      "formatter": [
+        {
+          "language_server": {
+            "name": null,
+          },
+        },
+        { "code_action": "source.fixAll.eslint" },
+        // Organize imports on save:
+        { "code_action": "source.organizeImports" },
+      ],
+    },
+  },
 
-  "show_edit_predictions": true,
+  "show_edit_predictions": false,
   "edit_predictions": {
     "disabled_globs": ["**/config.toml", "**/config.json", "**/.env"],
   },
