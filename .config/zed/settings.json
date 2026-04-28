@@ -7,6 +7,7 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "icon_theme": "Zed (Default)",
   "lsp": {
     "vtsls": {
       "settings": {
@@ -104,17 +105,17 @@
     "jsonc": ["*.json"],
   },
   "languages": {
+    "TSX": {
+      "code_actions_on_format": {
+        "source.organizeImports": true,
+        "source.fixAll.eslint": true,
+      },
+    },
     "TypeScript": {
-      "formatter": [
-        {
-          "language_server": {
-            "name": null,
-          },
-        },
-        { "code_action": "source.fixAll.eslint" },
-        // Organize imports on save:
-        { "code_action": "source.organizeImports" },
-      ],
+      "code_actions_on_format": {
+        "source.organizeImports": true,
+        "source.fixAll.eslint": true,
+      },
     },
   },
 
@@ -129,8 +130,8 @@
   "ui_font_size": 16,
   "buffer_font_size": 14.0,
   "theme": {
-    "mode": "system",
-    "light": "One Light",
+    "mode": "light",
+    "light": "VSCode Light Modern",
     "dark": "One Dark",
   },
 }
