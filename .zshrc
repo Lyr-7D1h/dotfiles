@@ -47,6 +47,9 @@ fi
 
 zplug load 
 
+# oh-my-zsh git plugin sets this alias, prevent this since its a used binary
+unalias gg
+
 GIT_AUTO_FETCH_INTERVAL=1200 # in seconds
 
 # ZSH-AUTOSUGGESTIONS

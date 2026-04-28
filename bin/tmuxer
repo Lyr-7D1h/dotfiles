@@ -10,7 +10,7 @@ from typing import NoReturn, Optional
 
 import tomllib
 
-TMUXER_CONFIG_PATH = os.path.expanduser(f"~/.config/tmuxer")
+TMUXER_CONFIG_PATH = os.path.expanduser("~/.config/tmuxer")
 
 
 def error(*args) -> NoReturn:
@@ -139,14 +139,6 @@ class Executor:
             warn(f"Getting local IP not supported on {system}, returning localhost")
             return "127.0.0.1"
 
-    def list_panes(self) -> list[int]:
-        panes = self.run("tmux list-panes")
-        list = []
-        for line in panes.split("\n"):
-            if line != "":
-                list.append(int(line.split(":")[0]))
-        return list
-
     # Returns Linux, Darwin, FreeBSD or the output of uname
     def os(self) -> str:
         """Returns the operating system name in a more reliable way using Python's platform module"""
@@ -187,6 +179,138 @@ def parse_template(
     template_content = open(source).read()
     parsed = executor.parse_vars(template_content, secrets)
     return parsed
+
+
+def get_active_pane_id(exec: Executor, session_name: str, window_name: str) -> str:
+    """Return the tmux pane ID (e.g. '%3') of the currently active pane in a window."""
+    return exec.run(
+        f"tmux display-message -t {session_name}:{window_name} -p '#{{pane_id}}'"
+    ).strip()
+
+
+def split_pane_with_id(
+    exec: Executor,
+    session_name: str,
+    window_name: str,
+    target_pane_id: str,
+    direction: str,  # "-v" (top/bottom) or "-h" (left/right)
+    pct: int,
+    cwd: str,
+) -> str:
+    """Split *target_pane_id* and return the new pane's ID."""
+    return exec.run(
+        f"tmux split-window"
+        f" -t {session_name}:{window_name}.{target_pane_id}"
+        f" {direction} -p {pct} -c {cwd}"
+        f" -P -F '#{{pane_id}}'"
+    ).strip()
+
+
+def create_grid_layout(
+    exec: Executor,
+    session_name: str,
+    window_name: str,
+    window_cwd_path: str,
+    layout_spec: list,
+) -> list[str]:
+    """
+    Build a grid layout for a tmux window and return an ordered list of pane
+    IDs (row by row, left to right).
+
+    layout_spec format::
+
+        [
+          [[col_size, ...], row_height],
+          ...
+        ]
+
+    Sizes are relative – they are normalised to 100 % internally, so
+    ``[[80, 20], 20]`` and ``[[4, 1], 1]`` are equivalent.
+
+    Example – two rows, top row has 2 panes (80 % / 50 % wide) taking 50 % of
+    the height; bottom row has 3 panes (50 % / 20 % / 30 % wide) taking 50 %::
+
+        layout = [
+          [[80, 20], 50],
+          [[50, 20, 30], 50],
+        ]
+    """
+    if not layout_spec:
+        return [get_active_pane_id(exec, session_name, window_name)]
+
+    # Two supported row formats:
+    #   [[80, 20], 30]  – explicit col sizes + explicit row height
+    #   [80, 20]        – col sizes only; height defaults to 1 (uniform share)
+    def parse_row(row):
+        if isinstance(row[0], list):
+            col_sizes = row[0]
+            height = row[1] if len(row) > 1 else 1
+        else:
+            col_sizes = row
+            height = 1
+        return col_sizes, height
+
+    parsed_rows = [parse_row(row) for row in layout_spec]
+    col_sizes_per_row = [r[0] for r in parsed_rows]
+    row_heights_raw = [r[1] for r in parsed_rows]
+    total_h = sum(row_heights_raw)
+    # Normalised row heights as percentages of the full window height.
+    row_heights = [h / total_h * 100 for h in row_heights_raw]
+
+    # The first pane already exists when the window is opened.
+    initial_id = get_active_pane_id(exec, session_name, window_name)
+
+    # ── Step 1: create rows with top-to-bottom (-v) splits ──────────────────
+    #
+    # After split-window -v -p P, the *new* pane (below) gets P % of the
+    # current pane's height and the original pane keeps (100-P) %.
+    # We always split the "remaining space" pane that was created in the
+    # previous iteration, so the formula is:
+    #
+    #   pct = sum(row_heights[i:]) / sum(row_heights[i-1:]) * 100
+    #
+    row_anchors: list[str] = [initial_id]
+    split_target = initial_id
+
+    for i in range(1, len(layout_spec)):
+        current_h = sum(row_heights[i - 1 :])
+        remaining_h = sum(row_heights[i:])
+        pct = max(1, min(99, round(remaining_h / current_h * 100)))
+
+        new_id = split_pane_with_id(
+            exec, session_name, window_name, split_target, "-v", pct, window_cwd_path
+        )
+        row_anchors.append(new_id)
+        split_target = new_id
+
+    # ── Step 2: create columns within each row with left-to-right (-h) splits
+    all_pane_ids: list[str] = []
+
+    for i, col_sizes in enumerate(col_sizes_per_row):
+        total_w = sum(col_sizes)
+        row_panes: list[str] = [row_anchors[i]]
+        split_target = row_anchors[i]
+
+        for j in range(1, len(col_sizes)):
+            current_w = sum(col_sizes[j - 1 :]) / total_w * 100
+            remaining_w = sum(col_sizes[j:]) / total_w * 100
+            pct = max(1, min(99, round(remaining_w / current_w * 100)))
+
+            new_id = split_pane_with_id(
+                exec,
+                session_name,
+                window_name,
+                split_target,
+                "-h",
+                pct,
+                window_cwd_path,
+            )
+            row_panes.append(new_id)
+            split_target = new_id
+
+        all_pane_ids.extend(row_panes)
+
+    return all_pane_ids
 
 
 if len(sys.argv) <= 1 or "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
@@ -301,7 +425,7 @@ for session_name in list(
     if "windows" in entry:
         last_tmux_session = session_name
 
-        tmux_ls = exec.safe_run(f"tmux ls")
+        tmux_ls = exec.safe_run("tmux ls")
         if tmux_ls[0] == 0 and session_name + ":" in tmux_ls[1]:
             warn(f"session {session_name} already exists")
             continue
@@ -320,8 +444,6 @@ for session_name in list(
         windows = entry["windows"]
         if isinstance(entry["windows"], dict):
             windows = [entry["windows"]]
-
-        vsplit = entry["vsplit"] if "vsplit" in entry else True
 
         for i, window in enumerate(windows):
             if "name" in window:
@@ -351,51 +473,57 @@ for session_name in list(
                     f"tmux new-window -t {session_name}:{tmux_base_index + i} -n {window_name} -c {window_cwd_path}"
                 )
 
-            vsplit = window["vsplit"] if "vsplit" in window else vsplit
             panes = window["panes"] if "panes" in window else []
             if isinstance(panes, dict):
                 panes = [window["panes"]]
 
-            for j, pane in enumerate(panes):
-                if j > 0:
-                    split_direction = pane.get(
-                        "split", "vertical" if vsplit else "horizontal"
+            # No layout → single row, one equal-width column per pane.
+            layout_spec = window.get("layout") or ([[1] * len(panes)] if panes else [])
+
+            if layout_spec:
+                total_cells = sum(
+                    len(row[0]) if isinstance(row[0], list) else len(row)
+                    for row in layout_spec
+                )
+
+                if len(panes) > total_cells:
+                    warn(
+                        f"Window '{window_name}': {len(panes)} panes configured"
+                        f" but layout only has {total_cells} cells;"
+                        f" extra panes will be ignored."
                     )
-                    arg = "-v" if split_direction == "vertical" else "-h"
 
-                    size_option = ""
-                    if "size" in pane:
-                        size_option = f"-p {pane['size']}"
+                pane_ids = create_grid_layout(
+                    exec, session_name, window_name, window_cwd_path, layout_spec
+                )
 
-                    # Use -c option to set cwd for new panes, defaulting to window cwd if available
+                for j, pane in enumerate(panes):
+                    if j >= len(pane_ids):
+                        break
+
+                    pane_id = pane_ids[j]
                     pane_cwd = (
                         parse_path(pane["cwd"]) if "cwd" in pane else window_cwd_path
                     )
-                    cwd_option = f"-c {pane_cwd}" if pane_cwd else ""
-                    exec.run(
-                        f"tmux split-window -t {session_name}:{window_name} {arg} {size_option} {cwd_option}"
-                    )
-                elif "cwd" in pane and (
-                    not window_cwd_path or pane["cwd"] != window_cwd
-                ):
-                    # Only set pane-specific cwd if it's not the same as window cwd
-                    exec.run(
-                        f"tmux send-keys -t {window_name} 'cd {parse_path(pane['cwd'])}' Enter"
-                    )
 
-                pane_ids = exec.list_panes()
-                if "exec" in pane:
-                    cmd = pane["exec"]
-                else:
-                    cmd = ""
+                    if "cwd" in pane and pane_cwd != window_cwd_path:
+                        exec.run(
+                            f"tmux send-keys -t {session_name}:{window_name}.{pane_id}"
+                            f" 'cd {pane_cwd}' Enter"
+                        )
 
-                if type(cmd) != list:
-                    cmd = [cmd]
-                for cmd in cmd:
-                    cmd = shlex.quote(cmd)
-                    exec.run(
-                        f"tmux send-keys -t {session_name}:{window_name}.{pane_ids[j]} {cmd} Enter"
-                    )
+                    if "exec" in pane:
+                        cmd = pane["exec"]
+                    else:
+                        cmd = ""
+
+                    if type(cmd) != list:
+                        cmd = [cmd]
+                    for c in cmd:
+                        c = shlex.quote(c)
+                        exec.run(
+                            f"tmux send-keys -t {session_name}:{window_name}.{pane_id} {c} Enter"
+                        )
 
 if attach and last_tmux_session is not None:
     exec = Executor()

@@ -55,3 +55,6 @@ ship = ["util", "exec", "--", "bash", "-c", "jj commit -m \"$1\" && jj bookmark 
 
 [remotes.origin]
 auto-track-bookmarks = "*"
+
+[gg.ui]
+recent-workspaces = ["/home/lyr/p/creagen-deployment"]

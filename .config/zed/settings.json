@@ -32,6 +32,9 @@
   "cli_default_open_behavior": "new_window",
   "redact_private_values": true,
   "agent_servers": {
+    "opencode": {
+      "type": "registry"
+    },
     "github-copilot-cli": {
       "type": "registry",
     },
@@ -59,9 +62,10 @@
     },
     "dock": "left",
     "default_model": {
+      "effort": "high",
       "provider": "zed.dev",
-      "model": "claude-haiku-4-5",
-      "enable_thinking": false,
+      "model": "claude-sonnet-4-6",
+      "enable_thinking": true,
     },
     "favorite_models": [],
     "model_parameters": [],
