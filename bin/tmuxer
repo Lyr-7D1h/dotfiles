@@ -184,7 +184,7 @@ def parse_template(
 def get_active_pane_id(exec: Executor, session_name: str, window_name: str) -> str:
     """Return the tmux pane ID (e.g. '%3') of the currently active pane in a window."""
     return exec.run(
-        f"tmux display-message -t {session_name}:{window_name} -p '#{{pane_id}}'"
+        f"tmux display-message -t {shlex.quote(session_name + ':' + window_name)} -p '#{{pane_id}}'"
     ).strip()
 
 
@@ -200,7 +200,7 @@ def split_pane_with_id(
     """Split *target_pane_id* and return the new pane's ID."""
     return exec.run(
         f"tmux split-window"
-        f" -t {session_name}:{window_name}.{target_pane_id}"
+        f" -t {shlex.quote(session_name + ':' + window_name + '.' + target_pane_id)}"
         f" {direction} -p {pct} -c {cwd}"
         f" -P -F '#{{pane_id}}'"
     ).strip()
@@ -461,16 +461,16 @@ for session_name in list(
             # For first window, rename instead of creating new
             if i == 0:
                 exec.run(
-                    f"tmux rename-window -t {session_name}:{tmux_base_index} {window_name}"
+                    f"tmux rename-window -t {session_name}:{tmux_base_index} {shlex.quote(window_name)}"
                 )
                 # If first window needs a different CWD than session default
                 if window_cwd:
                     exec.run(
-                        f"tmux send-keys -t {session_name}:{window_name} 'cd {window_cwd_path}' Enter"
+                        f"tmux send-keys -t {shlex.quote(session_name + ':' + window_name)} 'cd {window_cwd_path}' Enter"
                     )
             else:
                 exec.run(
-                    f"tmux new-window -t {session_name}:{tmux_base_index + i} -n {window_name} -c {window_cwd_path}"
+                    f"tmux new-window -t {session_name}:{tmux_base_index + i} -n {shlex.quote(window_name)} -c {window_cwd_path}"
                 )
 
             panes = window["panes"] if "panes" in window else []
@@ -508,7 +508,7 @@ for session_name in list(
 
                     if "cwd" in pane and pane_cwd != window_cwd_path:
                         exec.run(
-                            f"tmux send-keys -t {session_name}:{window_name}.{pane_id}"
+                            f"tmux send-keys -t {shlex.quote(session_name + ':' + window_name + '.' + pane_id)}"
                             f" 'cd {pane_cwd}' Enter"
                         )
 
@@ -522,7 +522,7 @@ for session_name in list(
                     for c in cmd:
                         c = shlex.quote(c)
                         exec.run(
-                            f"tmux send-keys -t {session_name}:{window_name}.{pane_id} {c} Enter"
+                            f"tmux send-keys -t {shlex.quote(session_name + ':' + window_name + '.' + pane_id)} {c} Enter"
                         )
 
 if attach and last_tmux_session is not None:
