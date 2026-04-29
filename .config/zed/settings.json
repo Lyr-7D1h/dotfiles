@@ -34,23 +34,30 @@
   "redact_private_values": true,
   "agent_servers": {
     "opencode": {
-      "type": "registry"
+      "favorite_config_option_values": {
+        "model": [
+          "gijspt/gijspt.openai/gpt-oss-120b",
+          "gijspt/gijspt.google/gemma-4-E4B-it",
+        ],
+      },
+      "type": "registry",
     },
     "github-copilot-cli": {
       "type": "registry",
     },
   },
   "project_panel": {
-    "dock": "right",
+    "dock": "left",
   },
   "outline_panel": {
-    "dock": "right",
+    "dock": "left",
   },
   "collaboration_panel": {
-    "dock": "right",
+    "dock": "left",
   },
   "git_panel": {
-    "dock": "right",
+    "tree_view": false,
+    "dock": "left",
   },
   "agent": {
     "default_profile": "write",
@@ -119,7 +126,7 @@
     },
   },
 
-  "show_edit_predictions": false,
+  "show_edit_predictions": true,
   "edit_predictions": {
     "disabled_globs": ["**/config.toml", "**/config.json", "**/.env"],
   },

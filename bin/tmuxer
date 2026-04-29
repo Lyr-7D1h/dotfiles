@@ -212,103 +212,125 @@ def create_grid_layout(
     window_name: str,
     window_cwd_path: str,
     layout_spec: list,
+    columns: bool = False,
 ) -> list[str]:
     """
     Build a grid layout for a tmux window and return an ordered list of pane
-    IDs (row by row, left to right).
+    IDs.
 
-    layout_spec format::
+    When ``columns=False`` (default) the spec describes *rows*, and panes are
+    returned row by row, left to right.  When ``columns=True`` the spec
+    describes *columns*, and panes are returned column by column, top to
+    bottom.
+
+    Entry format (rows mode)::
 
         [
-          [[col_size, ...], row_height],
-          ...
+          [[col_size, ...], row_height],   # explicit sizes
+          [col_size, ...],                  # row height defaults to 1
         ]
 
-    Sizes are relative – they are normalised to 100 % internally, so
-    ``[[80, 20], 20]`` and ``[[4, 1], 1]`` are equivalent.
+    Entry format (columns mode) – same shape, but each entry is a column::
 
-    Example – two rows, top row has 2 panes (80 % / 50 % wide) taking 50 % of
-    the height; bottom row has 3 panes (50 % / 20 % / 30 % wide) taking 50 %::
-
-        layout = [
-          [[80, 20], 50],
-          [[50, 20, 30], 50],
+        [
+          [[row_size, ...], col_width],
+          [row_size, ...],
         ]
+
+    Sizes are relative and normalised internally, so ``[[80, 20], 20]`` and
+    ``[[4, 1], 1]`` are equivalent.
+
+    Examples::
+
+        # Two rows, top row 2 panes, bottom row 3 panes:
+        layout = [[80, 20], [50, 20, 30]]
+
+        # Two columns, left has 2 panes, right has 1 pane:
+        columns = [[50, 50], [100]]
     """
     if not layout_spec:
         return [get_active_pane_id(exec, session_name, window_name)]
 
-    # Two supported row formats:
-    #   [[80, 20], 30]  – explicit col sizes + explicit row height
-    #   [80, 20]        – col sizes only; height defaults to 1 (uniform share)
-    def parse_row(row):
-        if isinstance(row[0], list):
-            col_sizes = row[0]
-            height = row[1] if len(row) > 1 else 1
+    # Supported entry formats:
+    #   [[80, 20], 30]  – explicit inner sizes + explicit outer size
+    #   [80, 20]        – inner sizes only; outer size defaults to 1
+    def parse_entry(entry):
+        if isinstance(entry[0], list):
+            inner = entry[0]
+            outer = entry[1] if len(entry) > 1 else 1
         else:
-            col_sizes = row
-            height = 1
-        return col_sizes, height
+            inner = entry
+            outer = 1
+        return inner, outer
 
-    parsed_rows = [parse_row(row) for row in layout_spec]
-    col_sizes_per_row = [r[0] for r in parsed_rows]
-    row_heights_raw = [r[1] for r in parsed_rows]
-    total_h = sum(row_heights_raw)
-    # Normalised row heights as percentages of the full window height.
-    row_heights = [h / total_h * 100 for h in row_heights_raw]
+    parsed = [parse_entry(e) for e in layout_spec]
+    inner_sizes_per_outer = [p[0] for p in parsed]
+    outer_sizes_raw = [p[1] for p in parsed]
+    total_outer = sum(outer_sizes_raw)
+    outer_sizes = [s / total_outer * 100 for s in outer_sizes_raw]
+
+    # rows-first: outer splits are vertical (-v), inner splits are horizontal (-h)
+    # columns-first: outer splits are horizontal (-h), inner splits are vertical (-v)
+    outer_dir = "-h" if columns else "-v"
+    inner_dir = "-v" if columns else "-h"
 
     # The first pane already exists when the window is opened.
     initial_id = get_active_pane_id(exec, session_name, window_name)
 
-    # ── Step 1: create rows with top-to-bottom (-v) splits ──────────────────
+    # ── Step 1: outer splits (rows or columns) ───────────────────────────────
     #
-    # After split-window -v -p P, the *new* pane (below) gets P % of the
-    # current pane's height and the original pane keeps (100-P) %.
-    # We always split the "remaining space" pane that was created in the
-    # previous iteration, so the formula is:
+    # After split-window -p P, the *new* pane gets P % of the current pane's
+    # dimension and the original keeps (100-P) %.  We always split the last
+    # "remaining space" pane, so the formula is:
     #
-    #   pct = sum(row_heights[i:]) / sum(row_heights[i-1:]) * 100
+    #   pct = sum(outer_sizes[i:]) / sum(outer_sizes[i-1:]) * 100
     #
-    row_anchors: list[str] = [initial_id]
+    outer_anchors: list[str] = [initial_id]
     split_target = initial_id
 
     for i in range(1, len(layout_spec)):
-        current_h = sum(row_heights[i - 1 :])
-        remaining_h = sum(row_heights[i:])
-        pct = max(1, min(99, round(remaining_h / current_h * 100)))
+        current = sum(outer_sizes[i - 1 :])
+        remaining = sum(outer_sizes[i:])
+        pct = max(1, min(99, round(remaining / current * 100)))
 
         new_id = split_pane_with_id(
-            exec, session_name, window_name, split_target, "-v", pct, window_cwd_path
+            exec,
+            session_name,
+            window_name,
+            split_target,
+            outer_dir,
+            pct,
+            window_cwd_path,
         )
-        row_anchors.append(new_id)
+        outer_anchors.append(new_id)
         split_target = new_id
 
-    # ── Step 2: create columns within each row with left-to-right (-h) splits
+    # ── Step 2: inner splits within each outer section ───────────────────────
     all_pane_ids: list[str] = []
 
-    for i, col_sizes in enumerate(col_sizes_per_row):
-        total_w = sum(col_sizes)
-        row_panes: list[str] = [row_anchors[i]]
-        split_target = row_anchors[i]
+    for i, inner_sizes in enumerate(inner_sizes_per_outer):
+        total_inner = sum(inner_sizes)
+        section_panes: list[str] = [outer_anchors[i]]
+        split_target = outer_anchors[i]
 
-        for j in range(1, len(col_sizes)):
-            current_w = sum(col_sizes[j - 1 :]) / total_w * 100
-            remaining_w = sum(col_sizes[j:]) / total_w * 100
-            pct = max(1, min(99, round(remaining_w / current_w * 100)))
+        for j in range(1, len(inner_sizes)):
+            current = sum(inner_sizes[j - 1 :]) / total_inner * 100
+            remaining = sum(inner_sizes[j:]) / total_inner * 100
+            pct = max(1, min(99, round(remaining / current * 100)))
 
             new_id = split_pane_with_id(
                 exec,
                 session_name,
                 window_name,
                 split_target,
-                "-h",
+                inner_dir,
                 pct,
                 window_cwd_path,
             )
-            row_panes.append(new_id)
+            section_panes.append(new_id)
             split_target = new_id
 
-        all_pane_ids.extend(row_panes)
+        all_pane_ids.extend(section_panes)
 
     return all_pane_ids
 
@@ -478,12 +500,18 @@ for session_name in list(
                 panes = [window["panes"]]
 
             # No layout → single row, one equal-width column per pane.
-            layout_spec = window.get("layout") or ([[1] * len(panes)] if panes else [])
+            columns_spec = window.get("columns")
+            layout_spec = (
+                window.get("layout")
+                or window.get("rows")
+                or (None if columns_spec else ([[1] * len(panes)] if panes else []))
+            )
 
-            if layout_spec:
+            active_spec = columns_spec or layout_spec
+            if active_spec:
                 total_cells = sum(
-                    len(row[0]) if isinstance(row[0], list) else len(row)
-                    for row in layout_spec
+                    len(entry[0]) if isinstance(entry[0], list) else len(entry)
+                    for entry in active_spec
                 )
 
                 if len(panes) > total_cells:
@@ -493,9 +521,19 @@ for session_name in list(
                         f" extra panes will be ignored."
                     )
 
-                pane_ids = create_grid_layout(
-                    exec, session_name, window_name, window_cwd_path, layout_spec
-                )
+                if columns_spec:
+                    pane_ids = create_grid_layout(
+                        exec,
+                        session_name,
+                        window_name,
+                        window_cwd_path,
+                        columns_spec,
+                        columns=True,
+                    )
+                else:
+                    pane_ids = create_grid_layout(
+                        exec, session_name, window_name, window_cwd_path, layout_spec
+                    )
 
                 for j, pane in enumerate(panes):
                     if j >= len(pane_ids):
