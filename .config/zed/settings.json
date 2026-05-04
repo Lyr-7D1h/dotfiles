@@ -38,6 +38,7 @@
         "model": [
           "gijspt/gijspt.openai/gpt-oss-120b",
           "gijspt/gijspt.google/gemma-4-E4B-it",
+          "gijspt/gijspt.Qwen/Qwen3.6-35B-A3B-FP8"
         ],
       },
       "type": "registry",
