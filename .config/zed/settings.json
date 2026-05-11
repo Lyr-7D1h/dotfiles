@@ -114,7 +114,7 @@
     "dock": "left",
     "default_model": {
       "provider": "Gijspt",
-      "model": "gijspt.cyankiwi/gemma-4-31B-it-AWQ-4bit",
+      "model": "gijspt.Qwen/Qwen3.6-35B-A3B-FP8",
       "enable_thinking": false,
     },
     "favorite_models": [
@@ -132,6 +132,11 @@
         "provider": "Gijspt",
         "model": "gijspt.openai/gpt-oss-120b",
         "enable_thinking": false
+      },
+      {
+        "provider": "copilot_chat",
+        "model": "claude-sonnet-4.5",
+        "enable_thinking": true
       }
     ],
     "model_parameters": [],
@@ -171,12 +176,14 @@
   },
   "languages": {
     "TSX": {
+      "language_servers": ["eslint", "vtsls", "tailwindcss-language-server"],
       "code_actions_on_format": {
         "source.organizeImports": true,
         "source.fixAll.eslint": true,
       },
     },
     "TypeScript": {
+      "language_servers": ["eslint", "vtsls", "tailwindcss-language-server"],
       "code_actions_on_format": {
         "source.organizeImports": true,
         "source.fixAll.eslint": true,

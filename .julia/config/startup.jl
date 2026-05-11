@@ -8,4 +8,3 @@ function mixed_fraction(x::Real)
 		return (int_part, r)
     end
 end
-
