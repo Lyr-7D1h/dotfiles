@@ -5,19 +5,19 @@
 # output makes sense before approving a release.
 #
 
+import argparse
 import json
 import os
 import re
 import subprocess
 import sys
 from abc import ABCMeta, abstractmethod
+from genericpath import exists
 from os import chdir
 from shutil import rmtree
 from tempfile import mkdtemp
 from typing import Dict, List, NoReturn, Optional
 from urllib.request import Request, urlopen
-
-from genericpath import exists
 
 
 def error(*args) -> NoReturn:
@@ -58,7 +58,21 @@ def request(url: str, headers: Optional[Dict[str, str]] = None) -> str:
 
 
 HOME = os.environ["HOME"]
-VERSION = sys.argv[1]
+
+# Parse command line arguments
+parser = argparse.ArgumentParser(
+    description="Create a new release for detected packages"
+)
+parser.add_argument("version", help="Version number (e.g., 1.0.0)")
+parser.add_argument(
+    "--platform",
+    "-p",
+    choices=["git", "github", "cargo", "aur"],
+    help="Release only to specified platform (default: all detected platforms)",
+)
+args = parser.parse_args()
+
+VERSION = args.version
 pattern = "^[0-9]*\\.[0-9]*\\.[0-9]*$"
 if re.match(pattern, VERSION) == None:
     error("No version given")
@@ -86,6 +100,44 @@ class Module(metaclass=ABCMeta):
     @abstractmethod
     def release(self) -> None:
         """Make release on given module"""
+
+
+class Git(Module):
+    def __init__(self):
+        self.remote = None
+
+    def should_load(self):
+        # Always load if we're in a git repository
+        try:
+            exec("git rev-parse --git-dir")
+            return True
+        except:
+            return False
+
+    def link(self):
+        try:
+            return exec("git remote get-url origin")
+        except:
+            return None
+
+    def validate(self):
+        # Check if tag already exists
+        try:
+            existing_tags = exec("git tag -l")
+            if VERSION in existing_tags.split("\n"):
+                error(f"Tag {VERSION} already exists")
+        except:
+            pass
+
+    def set_remote(self, remote: str):
+        """Set the remote to use for pushing tags"""
+        self.remote = remote
+
+    def release(self):
+        if self.remote is None:
+            error("Git remote not set")
+        exec(f"git tag {VERSION}")
+        exec(f"git push {self.remote} --tags")
 
 
 class Github(Module):
@@ -280,7 +332,7 @@ def prepare_branch() -> str:
     return remote
 
 
-DEFAULT_MODULES = [Github(), Cargo(), Aur()]
+DEFAULT_MODULES = [Git(), Github(), Cargo(), Aur()]
 
 
 def release():
@@ -296,8 +348,20 @@ def release():
     modules: List[Module] = []
     for module in DEFAULT_MODULES:
         if module.should_load():
+            # If platform filter is specified, only include matching module
+            if args.platform and module.name().lower() != args.platform.lower():
+                debug(f"Skipping {module.name()} (not selected platform)")
+                continue
             debug(f"Found {module.name()}")
             modules.append(module)
+
+    if len(modules) == 0:
+        if args.platform:
+            error(
+                f"Platform '{args.platform}' not found or not applicable for this project"
+            )
+        else:
+            error("No release platforms detected")
 
     for module in modules:
         module.validate()
@@ -312,8 +376,11 @@ def release():
     for module in modules:
         module.pre_release()
 
-    exec(f"git tag {VERSION}")
-    exec(f"git push {remote} --tags")
+    # Set remote for Git module if present
+    for module in modules:
+        if isinstance(module, Git):
+            module.set_remote(remote)
+
     for module in modules:
         module.release()
 
