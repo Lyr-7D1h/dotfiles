@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+set -e
+
+# Did not work
+
+ITEM='onelogin'
+
+export BW_SESSION=${BW_SESSION:-`bw unlock --raw`}
+bw sync
+
+PASSWORD=`bw get password $ITEM`
+USERNAME=`bw get username $ITEM`
+TOTP=`bw get totp $ITEM`
+
+#echo -en "$PASSWORD\n$TOTP" | sudo openconnect --juniper https://homeworker.persgroep.net -u ivo.velthoven@persgroep.net --passwd-on-stdin --csd-wrapper ~/tmp/juniper-vnp-py/tncc.py --script-tun --script "tunsocks -D 1080"
+echo -en "$PASSWORD\n$TOTP" | sudo openconnect --protocol=nc --useragent 'Mozilla/5.0 (Linux) Firefox' --csd-wrapper ~/a -u ivo.velthoven@persgroep.net --passwd-on-stdin https://homeworker.persgroep.net
+# echo -en "$PASSWORD\n$TOTP" | sudo openconnect --protocol=pulse --useragent 'Mozilla/5.0 (Linux) Firefox' -u ivo.velthoven@persgroep.net --passwd-on-stdin https://homeworker.persgroep.net
+#echo -en "$PASSWORD\n$TOTP" | sudo openconnect --juniper https://homeworker.persgroep.net -u ivo.velthoven@persgroep.net --passwd-on-stdin --useragent "Pulse-Secure/9.1.11.6725" --os=win

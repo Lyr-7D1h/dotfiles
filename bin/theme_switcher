@@ -1,0 +1,50 @@
+#!/bin/bash
+# switch gnome theme from dark to light depending on args or time of day
+# theme_switcher [dark|light]
+
+set -eu
+
+code() {
+	local path="$HOME/.config/Code/User/settings.json"
+	if [[ ! -f "$path" ]]; then
+		return
+	fi
+  local theme="${1:-"light"}"
+  if [[ "$theme" == "dark" ]]; then
+    sed -i 's/"workbench.colorTheme": "Light 2026",/"workbench.colorTheme": "Dark 2026",/' "$path"
+  else
+    sed -i 's/"workbench.colorTheme": "Dark 2026",/"workbench.colorTheme": "Light 2026",/' "$path"
+  fi
+}
+
+dark() {
+  echo "Setting dark"
+  gnome-extensions disable light-style@gnome-shell-extensions.gcampax.github.com
+  gsettings set org.gnome.desktop.interface color-scheme prefer-dark
+  code dark
+}
+
+light() {
+  echo "Setting light"
+  gnome-extensions enable light-style@gnome-shell-extensions.gcampax.github.com
+  gsettings set org.gnome.desktop.interface color-scheme default
+  code light
+}
+
+theme="${1:-""}"
+if [[ "$theme" == "dark" ]]; then
+  dark
+  exit 0
+elif [[ "$theme" == "light" ]]; then
+  light
+  exit 0
+fi
+
+# debug time for light
+/home/lyr/bin/time_for_light
+
+if [[ "$($HOME/bin/time_for_light)" == "true" ]]; then
+	light
+else
+	dark
+fi

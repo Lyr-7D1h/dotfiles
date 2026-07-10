@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -e
+
+if ! command -v jq &>/dev/null ; then
+	echo "Please install jq"
+	exit 1
+fi
+
+if ! command -v gh &>/dev/null ; then
+	echo "Please install github cli"
+	exit 1
+fi
+
+gh api https://api.github.com/notifications | jq '.|length'

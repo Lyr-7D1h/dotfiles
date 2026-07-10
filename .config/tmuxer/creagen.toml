@@ -1,0 +1,85 @@
+[versie]
+path = "~/p/versie"
+repo = "git@github.com:Lyr-7d1h/versie.git"
+update = true
+
+[creagen-editor]
+path = "~/p/creagen-editor"
+repo = "git@github.com:Lyr-7d1h/creagen-editor.git"
+update = true
+
+[creagen-generations]
+path = "~/p/creagen-generations"
+repo = "git@github.com:Lyr-7d1h/creagen-generations.git"
+update = true
+
+[creagen-deployment]
+path = "~/p/creagen-deployment"
+repo = "git@github.com:Lyr-7d1h/creagen-cloudflare.git"
+update = true
+
+[creagen]
+path = "~/p/creagen"
+repo = "git@github.com:Lyr-7d1h/creagen.git"
+execnow = "zeditor ~/p/creagen ~/p/creagen-editor ~/p/creagen-generations ~/p/creagen-deployment ~/p/versie"
+update= true
+
+[[creagen.windows]]
+name = "versie"
+cwd = "~/p/versie"
+columns = [[100],[30,70]]
+[[creagen.windows.panes]]
+exec = "watch --interval=1 --color --no-title \"jj --color=always -r 'all()'\""
+[[creagen.windows.panes]]
+exec = ["npm i", "npm run build:watch"]
+[[creagen.windows.panes]]
+exec = ""
+
+[[creagen.windows]]
+name = "creagen"
+columns = [[100],[30,70]]
+[[creagen.windows.panes]]
+exec = "watch --interval=1 --color --no-title \"jj --color=always -r 'all()'\""
+[[creagen.windows.panes]]
+exec = ["npm i", "npm run build:watch"]
+[[creagen.windows.panes]]
+exec = ""
+
+[[creagen.windows]]
+name = "creagen-editor"
+cwd = "~/p/creagen-editor"
+columns = [
+	[100],
+	[30,70]
+]
+[[creagen.windows.panes]]
+exec = "watch --interval=1 --color --no-title \"jj --color=always -r 'all()'\""
+[[creagen.windows.panes]]
+exec = [
+	"npm i",
+# CREAGEN_DEV_PATH=../creagen CREAGEN_TURNSTILE_SITE_KEY=0x4AAAAAAC1B7j42DqgKtO_I CREAGEN_REMOTE_URL=https://storage.creagen.dev npm start
+	"CREAGEN_DEV_PATH=../creagen CREAGEN_REMOTE_URL=http://localhost:8788 CREAGEN_EDITOR_CONTROLLER_URL=http://localhost:8787 npm start",
+]
+[[creagen.windows.panes]]
+exec = ""
+
+[[creagen.windows]]
+cwd = "~/p/creagen-deployment"
+name = "deployment"
+layout = [
+	[20,40,40],
+	[20,80]
+]
+[[creagen.windows.panes]]
+cwd = "~/p/creagen-deployment/controller"
+exec = ["npm i", "npm start"]
+[[creagen.windows.panes]]
+exec = "watch --interval=1 --color --no-title \"jj --color=always -r 'all()'\""
+[[creagen.windows.panes]]
+cwd = "~/p/creagen-deployment/editor"
+[[creagen.windows.panes]]
+cwd = "~/p/creagen-deployment/storage"
+exec = ["npm i", "npm start"]
+[[creagen.windows.panes]]
+cwd = "~/p/creagen-deployment/storage"
+exec = ""

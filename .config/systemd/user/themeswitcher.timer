@@ -1,0 +1,11 @@
+[Unit]
+Description=Switch time based
+After=network-online.target
+
+[Timer]
+OnCalendar=*:0/10
+Persistent=true
+Unit=themeswitcher.service
+
+[Install]
+WantedBy=timers.target

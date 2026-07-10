@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+get_ip() {
+    local interfaces=$(ip link show up | grep -P "(?<=^[0-9]: )((enp)|(wlo)|(eth)|(wlp))[^:]*" -o)
+    local routes=$(ip route show | grep -E '^default')
+    local default=${interfaces[0]}
+    for interface in $interfaces; do
+        gateway=$(ip route show | grep -P "(?<=^default via )([0-9]|[.])*(?= dev $interface)" -o)
+        if [[ "$gateway" != "" ]]; then
+            default=$interface
+            break
+        fi
+    done
+
+    echo `ip a show dev $default | grep 'inet' | awk '{print $2}' | head -n 1 | cut -d '/' -f1`
+}
+
+get_ip

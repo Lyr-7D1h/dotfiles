@@ -1,0 +1,42 @@
+# https://alacritty.org/config-alacritty.html
+
+[mouse]
+hide_when_typing = true
+
+[font]
+size = 13.0
+
+[font.normal]
+family = "Ubuntu Mono Nerd Font"
+
+[window]
+opacity = 1.0
+
+[window.padding]
+x = 10
+y = 10
+
+[keyboard]
+bindings = [
+	# https://stackoverflow.com/questions/67633333/how-to-send-ctrlshift6-as-ansi-escape-sequence
+	# https://en.wikipedia.org/wiki/List_of_Unicode_characters
+	# To make a key ctrl+key you have to subtract 0x40?
+	# not sure how this works but allows ctrl+shift+{key} keybinds in neovim
+	# { key = "N", mods = "Control|Shift", chars = "\u001e\u0024" },
+	# { key = "N", mods = "Control|Shift", chars = "\u001e\u0024" },
+	# { key = "P", mods = "Control|Shift", chars = "\u001e\u0030" },
+	# { key = "P", mods = "Control|Shift", chars = "\u001e" },
+]
+
+[env]
+# HACK: firefox needs WAYLAND_DISPLAY set
+WAYLAND_DISPLAY="wayland-0"
+
+[[hints.enabled]]
+command = "/home/lyr/.config/alacritty/firefox-wayland" 
+hyperlinks = true
+post_processing = true
+persist = false
+mouse.enabled = true
+binding = { key = "U", mods = "Control|Shift" }
+regex = "(ipfs:|ipns:|magnet:|mailto:|gemini://|gopher://|https://|http://|news:|file:|git://|ssh:|ftp://)[^\u0000-\u001F\u007F-\u009F<>\"\\s{-}\\^⟨⟩`]+"

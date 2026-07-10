@@ -1,0 +1,61 @@
+"$schema" = "https://jj-vcs.github.io/jj/latest/config-schema.json"
+
+[user]
+name = "Lyr"
+email = "lyr-7d1h@pm.me"
+
+[ui]
+default-command = "log"
+pager = "delta"
+diff-formatter = ":git"
+diff-editor = ":builtin"
+merge-editor = "vscode"
+
+[git]
+# Don't commit anything labeled octomerge
+# private-commits = "description('[octomerge]')"
+
+[templates]
+git_push_bookmark = '"lyr/push-" ++ change_id.short()'
+# show diff in commands like 'describe'
+draft_commit_description = '''
+concat(
+  coalesce(description, default_commit_description, "\n"),
+  surround(
+    "\nJJ: This commit contains the following changes:\n", "",
+    indent("JJ:     ", diff.stat(72)),
+  ),
+  "\nJJ: ignore-rest\n",
+  diff.git(),
+)
+'''
+
+[revset-aliases]
+# MegaMerge flow https://isaaccorbrey.com/notes/jujutsu-megamerges-for-fun-and-profit
+"closest_merge(to)" = "heads(::to & merges())"
+
+[aliases]
+# MegaMerge flow https://isaaccorbrey.com/notes/jujutsu-megamerges-for-fun-and-profit
+# `jj stack <revset>` to include specific revs
+stack = ["rebase", "--after", "trunk()", "--before", "closest_merge(@)", "--revisions"]
+# `jj stage` to include the whole stack after the megamerge
+stage = ["stack", "closest_merge(@).. ~ empty()"]
+# `jj restack` to rebase all changes onto `trunk()`
+restack = ["rebase", "-d", "trunk()", "--source", "roots(trunk()..) & mutable()"]
+
+gp = ["git", "push"]
+# Push new bookmarks for all bookmarks before working commit
+gpd = ["git", "push", "--revisions", "::@"]
+gf = ["git", "fetch"]
+dm = ["desc", "-m"]
+cm = ["commit", "-m"]
+e = ["edit"]
+outdated = ["log", "-r", "bookmarks() & ~(master@origin | remote_bookmarks())"]
+# Commit changes with a message and point master to it
+ship = ["util", "exec", "--", "bash", "-c", "jj commit -m \"$1\" && jj bookmark set master -r @-", "--"]
+
+[remotes.origin]
+auto-track-bookmarks = "*"
+
+[gg.ui]
+recent-workspaces = ["/home/lyr/p/creagen-deployment"]

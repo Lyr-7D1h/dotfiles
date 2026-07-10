@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# time bound theme for alacritty
+
+set -eu
+
+if [[ "$($HOME/bin/time_for_light)" == "true" ]]; then
+	/usr/bin/alacritty --config-file=/home/lyr/.config/alacritty/light.toml
+else
+	/usr/bin/alacritty
+fi

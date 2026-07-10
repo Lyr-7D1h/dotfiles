@@ -1,0 +1,568 @@
+#!/usr/bin/env python
+
+import os
+import re
+import shlex
+import shutil
+import subprocess
+import sys
+from typing import NoReturn, Optional
+
+import tomllib
+
+TMUXER_CONFIG_PATH = os.path.expanduser("~/.config/tmuxer")
+
+
+def error(*args) -> NoReturn:
+    print("\033[91m" + " ".join(args) + "\033[0m", file=sys.stderr)
+    exit(1)
+
+
+def warn(*args) -> None:
+    print("\033[38;5;208m" + " ".join(args) + "\033[0m", file=sys.stderr)
+
+
+def debug(*args: str) -> None:
+    print("\033[94m" + " ".join(args) + "\033[0m")
+
+
+def info(*args: str) -> None:
+    print("\033[34m" + " ".join(args) + "\033[0m")
+
+
+def parse_path(path: str) -> str:
+    expanded_path = os.path.expanduser(os.path.expandvars(path))
+    if not os.path.isabs(expanded_path):
+        if config_path:
+            # Get path relative to config path given
+            expanded_path = os.path.abspath(
+                os.path.join(os.path.dirname(config_path), expanded_path)
+            )
+        else:
+            expanded_path = os.path.abspath(expanded_path)
+    return expanded_path
+
+
+class Executor:
+    def __init__(self, cwd: Optional[str] = None):
+        self.cwd = cwd
+
+    def parse_vars(self, text: str, variables: Optional[dict[str, str]] = None) -> None:
+        if "{{HOME}}" in text:
+            text = text.replace("{{HOME}}", os.path.expanduser("~"))
+        if "{{LOCAL_IP}}" in text:
+            text = text.replace("{{LOCAL_IP}}", self.local_ip())
+        if variables:
+            for key, value in variables.items():
+                text = text.replace(f"{{{{{key}}}}}", value)
+        return text
+
+    def _parse_command(self, command: str) -> str:
+        command = self.parse_vars(command)
+        wait_on_port = re.search(r"{{wait_on_port ([0-9]+)}}", command)
+        if wait_on_port is not None:
+            port = wait_on_port.group(1)
+            command = command.replace(
+                wait_on_port.group(0),
+                f"while ! nc -z localhost {port}; do  sleep 0.1; done",
+            )
+
+        return command
+
+    # exec a command that can fail and return output and returncode
+    def safe_run(
+        self,
+        command: str,
+    ) -> tuple[int, str]:
+        command = self._parse_command(command)
+        debug(f"Executing '{command}'")
+        res = subprocess.run(command, capture_output=True, shell=True, cwd=self.cwd)
+        if res.returncode != 0:
+            out = res.stderr.decode("utf-8").rstrip()
+        else:
+            out = res.stdout.decode("utf-8").rstrip()
+        return (res.returncode, out)
+
+    def run(
+        self,
+        command: str,
+    ) -> str:
+        (code, out) = self.safe_run(command)
+        if code != 0:
+            error(f"Command failed with code {code}\n", out)
+        return out
+
+    def local_ip(self) -> str:
+        """Get local IP address in a cross-platform way."""
+        system = self.os()
+
+        if system == "Darwin":  # macOS
+            try:
+                # First try the primary interface en0
+                ip = self.run("ipconfig getifaddr en0")
+                return ip
+            except:
+                # Fall back to alternative interfaces if en0 fails
+                try:
+                    return self.run("ipconfig getifaddr en1")
+                except:
+                    warn("Could not determine local IP on macOS")
+                    return "127.0.0.1"
+
+        elif system == "Linux":
+            # Existing Linux implementation
+            try:
+                interfaces = self.run(
+                    "ip link show up | grep -P '(?<=^[0-9]: )((enp)|(wlo)|(eth)|(wlp))[^:]*' -o"
+                )
+                if not interfaces:
+                    warn("No network interfaces found")
+                    return "127.0.0.1"
+
+                default = interfaces.split("\n")[0]
+                for interface in interfaces.split("\n"):
+                    gateway = self.safe_run(
+                        f"ip route show | grep -P '(?<=^default via )([0-9]|[.])*(?= dev {interface})' -o"
+                    )[1]
+                    if gateway != "":
+                        default = interface
+                        break
+                return self.run(
+                    f"ip a show dev {default} | grep 'inet' | awk '{{print $2}}' | head -n 1 | cut -d '/' -f1"
+                )
+            except:
+                warn("Could not determine local IP on Linux")
+                return "127.0.0.1"
+
+        else:
+            # Fallback for other systems
+            warn(f"Getting local IP not supported on {system}, returning localhost")
+            return "127.0.0.1"
+
+    # Returns Linux, Darwin, FreeBSD or the output of uname
+    def os(self) -> str:
+        """Returns the operating system name in a more reliable way using Python's platform module"""
+        # Use Python's built-in platform module instead of running external command
+        import platform
+
+        system = platform.system()
+        # Return standardized names for common systems
+        if system in ["Linux", "Darwin", "FreeBSD"]:
+            return system
+        # Fall back to uname for other Unix variants if needed
+        return self.safe_run("uname")[1]
+
+    def hostname(self) -> str:
+        os = self.os()
+        if os == "Linux":
+            hostname = self.run("hostname -I")
+            warn(f"It's probably {hostname} but make sure")
+        elif os == "Darwin":
+            hostname = self.run("ipconfig getifaddr en0")
+            warn(f"It's probably {hostname} but make sure")
+        else:
+            error("Unable to determine the OS")
+        return hostname
+
+
+def parse_template(
+    executor: Executor, source: str, secrets: Optional[str]
+) -> tuple[str, str]:
+    if secrets:
+        secrets_path = parse_path(secrets)
+        if os.path.exists(secrets_path):
+            info(f"Parsing secrets from {secrets_path}")
+            with open(secrets_path, "rb") as secrets_file:
+                secrets = tomllib.load(secrets_file)
+
+    source = parse_path(source)
+    template_content = open(source).read()
+    parsed = executor.parse_vars(template_content, secrets)
+    return parsed
+
+
+def get_active_pane_id(exec: Executor, session_name: str, window_name: str) -> str:
+    """Return the tmux pane ID (e.g. '%3') of the currently active pane in a window."""
+    return exec.run(
+        f"tmux display-message -t {shlex.quote(session_name + ':' + window_name)} -p '#{{pane_id}}'"
+    ).strip()
+
+
+def split_pane_with_id(
+    exec: Executor,
+    session_name: str,
+    window_name: str,
+    target_pane_id: str,
+    direction: str,  # "-v" (top/bottom) or "-h" (left/right)
+    pct: int,
+    cwd: str,
+) -> str:
+    """Split *target_pane_id* and return the new pane's ID."""
+    return exec.run(
+        f"tmux split-window"
+        f" -t {shlex.quote(session_name + ':' + window_name + '.' + target_pane_id)}"
+        f" {direction} -p {pct} -c {cwd}"
+        f" -P -F '#{{pane_id}}'"
+    ).strip()
+
+
+def create_grid_layout(
+    exec: Executor,
+    session_name: str,
+    window_name: str,
+    window_cwd_path: str,
+    layout_spec: list,
+    columns: bool = False,
+) -> list[str]:
+    """
+    Build a grid layout for a tmux window and return an ordered list of pane
+    IDs.
+
+    When ``columns=False`` (default) the spec describes *rows*, and panes are
+    returned row by row, left to right.  When ``columns=True`` the spec
+    describes *columns*, and panes are returned column by column, top to
+    bottom.
+
+    Entry format (rows mode)::
+
+        [
+          [[col_size, ...], row_height],   # explicit sizes
+          [col_size, ...],                  # row height defaults to 1
+        ]
+
+    Entry format (columns mode) – same shape, but each entry is a column::
+
+        [
+          [[row_size, ...], col_width],
+          [row_size, ...],
+        ]
+
+    Sizes are relative and normalised internally, so ``[[80, 20], 20]`` and
+    ``[[4, 1], 1]`` are equivalent.
+
+    Examples::
+
+        # Two rows, top row 2 panes, bottom row 3 panes:
+        layout = [[80, 20], [50, 20, 30]]
+
+        # Two columns, left has 2 panes, right has 1 pane:
+        columns = [[50, 50], [100]]
+    """
+    if not layout_spec:
+        return [get_active_pane_id(exec, session_name, window_name)]
+
+    # Supported entry formats:
+    #   [[80, 20], 30]  – explicit inner sizes + explicit outer size
+    #   [80, 20]        – inner sizes only; outer size defaults to 1
+    def parse_entry(entry):
+        if isinstance(entry[0], list):
+            inner = entry[0]
+            outer = entry[1] if len(entry) > 1 else 1
+        else:
+            inner = entry
+            outer = 1
+        return inner, outer
+
+    parsed = [parse_entry(e) for e in layout_spec]
+    inner_sizes_per_outer = [p[0] for p in parsed]
+    outer_sizes_raw = [p[1] for p in parsed]
+    total_outer = sum(outer_sizes_raw)
+    outer_sizes = [s / total_outer * 100 for s in outer_sizes_raw]
+
+    # rows-first: outer splits are vertical (-v), inner splits are horizontal (-h)
+    # columns-first: outer splits are horizontal (-h), inner splits are vertical (-v)
+    outer_dir = "-h" if columns else "-v"
+    inner_dir = "-v" if columns else "-h"
+
+    # The first pane already exists when the window is opened.
+    initial_id = get_active_pane_id(exec, session_name, window_name)
+
+    # ── Step 1: outer splits (rows or columns) ───────────────────────────────
+    #
+    # After split-window -p P, the *new* pane gets P % of the current pane's
+    # dimension and the original keeps (100-P) %.  We always split the last
+    # "remaining space" pane, so the formula is:
+    #
+    #   pct = sum(outer_sizes[i:]) / sum(outer_sizes[i-1:]) * 100
+    #
+    outer_anchors: list[str] = [initial_id]
+    split_target = initial_id
+
+    for i in range(1, len(layout_spec)):
+        current = sum(outer_sizes[i - 1 :])
+        remaining = sum(outer_sizes[i:])
+        pct = max(1, min(99, round(remaining / current * 100)))
+
+        new_id = split_pane_with_id(
+            exec,
+            session_name,
+            window_name,
+            split_target,
+            outer_dir,
+            pct,
+            window_cwd_path,
+        )
+        outer_anchors.append(new_id)
+        split_target = new_id
+
+    # ── Step 2: inner splits within each outer section ───────────────────────
+    all_pane_ids: list[str] = []
+
+    for i, inner_sizes in enumerate(inner_sizes_per_outer):
+        total_inner = sum(inner_sizes)
+        section_panes: list[str] = [outer_anchors[i]]
+        split_target = outer_anchors[i]
+
+        for j in range(1, len(inner_sizes)):
+            current = sum(inner_sizes[j - 1 :]) / total_inner * 100
+            remaining = sum(inner_sizes[j:]) / total_inner * 100
+            pct = max(1, min(99, round(remaining / current * 100)))
+
+            new_id = split_pane_with_id(
+                exec,
+                session_name,
+                window_name,
+                split_target,
+                inner_dir,
+                pct,
+                window_cwd_path,
+            )
+            section_panes.append(new_id)
+            split_target = new_id
+
+        all_pane_ids.extend(section_panes)
+
+    return all_pane_ids
+
+
+if len(sys.argv) <= 1 or "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
+    print(
+        "Usage: tmuxer template|list|<config> [-n|-t|-a|-x|-o|-h|<entry>]\n"
+        "  list: list all available config files\n"
+        "  template <source> [secrets]: parse a template using optional secrets\n"
+        "  <config>: the name of the config file in ~/.config/tmuxer or the path to a toml file"
+        "  -h | --help: display this help message\n"
+        "  -a | --attach: attach to the last session\n"
+        "  -t | --template: run a config only the templates on the config\n",
+        "  -n | --no-updates: run the config without updating the repos\n",
+        "  -x | --ignore-execnow: run the config without executing execnow commands\n",
+        "  -o | --execnow-only: only execute execnow statements, skip tmux windows\n",
+        "  <entry>: Which entry in the config to execute\n"
+        "\n\n"
+        "Examples:\n"
+        "   - tmuxer list\n"
+        "   - tmuxer ./my-config my-entry -a\n"
+        "   - tmuxer ./my-config -t -n # updates just the templated configs\n"
+        "   - tmuxer ./my-config -x # skip all execnow commands\n"
+        "   - tmuxer ./my-config -o # only run execnow commands\n"
+        "   - tmuxer ./my-config",
+    )
+    exit(0)
+
+attach = "-a" in sys.argv[1:] or "--attach" in sys.argv[1:]
+template_only = "-t" in sys.argv[1:] or "--template" in sys.argv[1:]
+no_updates = "-n" in sys.argv[1:] or "--no-updates" in sys.argv[1:]
+ignore_execnow = "-x" in sys.argv[1:] or "--ignore-execnow" in sys.argv[1:]
+execnow_only = "-o" in sys.argv[1:] or "--execnow-only" in sys.argv[1:]
+
+config_arg = sys.argv[1]
+if config_arg == "list":
+    config_dir = os.path.expanduser("~/.config/tmuxer")
+    configs = [f for f in os.listdir(config_dir) if f.endswith(".toml")]
+    print("Available config files:")
+    for config in configs:
+        print(f"  - {config.split('.')[0]}")
+    exit(0)
+
+elif config_arg == "template":
+    exec = Executor()
+    source = (
+        sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith("-") else None
+    )
+    secrets = (
+        sys.argv[3] if len(sys.argv) > 3 and not sys.argv[3].startswith("-") else None
+    )
+    parsed = parse_template(exec, source, secrets)
+    print(parsed)
+    exit(0)
+
+entry = sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith("-") else ""
+if not config_arg.endswith(".toml"):
+    config_arg = os.path.expanduser(f"~/.config/tmuxer/{config_arg}.toml")
+config_path = os.path.expanduser(os.path.expandvars(config_arg))
+with open(config_path, "rb") as config_file:
+    config = tomllib.load(config_file)
+
+
+last_tmux_session = None
+for session_name in list(
+    filter(lambda session_name: len(entry) == 0 or session_name == entry, config)
+):
+    entry = config[session_name]
+    path = parse_path(entry["path"])
+    repo = entry["repo"] if "repo" in entry else None
+
+    if not os.path.exists(path):
+        info(f"Cloning {repo} to {path}")
+        exec = Executor()
+        exec.run(f"git clone --recursive {repo} {path}")
+
+    exec = Executor(path)
+
+    if no_updates is False and "update" in entry and entry["update"]:
+        exec.run("git fetch --all")
+        if exec.safe_run("git status -uno | grep -q 'Your branch is behind'")[0] == 0:
+            if exec.safe_run("git diff-index --quiet HEAD --")[0] == 0:
+                info(f"Pulling updates in {path}")
+                exec.run("git pull")
+            else:
+                warn(
+                    f"{path} is behind remote, couldn't pull due to uncommitted changes"
+                )
+
+    if "templates" in entry:
+        templates = entry["templates"]
+        if isinstance(entry["templates"], dict):
+            templates = [entry["templates"]]
+        for template in templates:
+            secrets = template["secrets"] if "secrets" in template else None
+            parsed = parse_template(exec, template["source"], secrets)
+            target = parse_path(template["target"])
+            info(f"Writing parsed template to {target}")
+            open(target, "w+").write(parsed)
+
+    if template_only:
+        continue
+
+    if not ignore_execnow and "execnow" in entry:
+        cmd = entry["execnow"]
+        if type(cmd) != list:
+            cmd = [cmd]
+        for cmd in cmd:
+            exec.run(cmd)
+
+    if execnow_only:
+        continue
+
+    if "windows" in entry:
+        last_tmux_session = session_name
+
+        tmux_ls = exec.safe_run("tmux ls")
+        if tmux_ls[0] == 0 and session_name + ":" in tmux_ls[1]:
+            warn(f"session {session_name} already exists")
+            continue
+
+        info(f"Creating new session {session_name}")
+        # Create session with the right CWD from the beginning for the first window
+        tput_size = (
+            ' -x "$(tput cols)" -y "$(tput lines)"' if shutil.which("tput") else ""
+        )
+        exec.run(f"tmux new-session -d -s {session_name} -c {path}{tput_size}")
+
+        tmux_base_index = int(
+            Executor().run("tmux show-option -gv base-index").strip() or "0"
+        )
+
+        windows = entry["windows"]
+        if isinstance(entry["windows"], dict):
+            windows = [entry["windows"]]
+
+        for i, window in enumerate(windows):
+            if "name" in window:
+                window_name = window["name"]
+            else:
+                window_name = str(i)
+
+            window_cwd_path = path
+
+            # Get window-level cwd if specified
+            window_cwd = window.get("cwd")
+            if window_cwd:
+                window_cwd_path = parse_path(window_cwd)
+
+            # For first window, rename instead of creating new
+            if i == 0:
+                exec.run(
+                    f"tmux rename-window -t {session_name}:{tmux_base_index} {shlex.quote(window_name)}"
+                )
+                # If first window needs a different CWD than session default
+                if window_cwd:
+                    exec.run(
+                        f"tmux send-keys -t {shlex.quote(session_name + ':' + window_name)} 'cd {window_cwd_path}' Enter"
+                    )
+            else:
+                exec.run(
+                    f"tmux new-window -t {session_name}:{tmux_base_index + i} -n {shlex.quote(window_name)} -c {window_cwd_path}"
+                )
+
+            panes = window["panes"] if "panes" in window else []
+            if isinstance(panes, dict):
+                panes = [window["panes"]]
+
+            # No layout → single row, one equal-width column per pane.
+            columns_spec = window.get("columns")
+            layout_spec = (
+                window.get("layout")
+                or window.get("rows")
+                or (None if columns_spec else ([[1] * len(panes)] if panes else []))
+            )
+
+            active_spec = columns_spec or layout_spec
+            if active_spec:
+                total_cells = sum(
+                    len(entry[0]) if isinstance(entry[0], list) else len(entry)
+                    for entry in active_spec
+                )
+
+                if len(panes) > total_cells:
+                    warn(
+                        f"Window '{window_name}': {len(panes)} panes configured"
+                        f" but layout only has {total_cells} cells;"
+                        f" extra panes will be ignored."
+                    )
+
+                if columns_spec:
+                    pane_ids = create_grid_layout(
+                        exec,
+                        session_name,
+                        window_name,
+                        window_cwd_path,
+                        columns_spec,
+                        columns=True,
+                    )
+                else:
+                    pane_ids = create_grid_layout(
+                        exec, session_name, window_name, window_cwd_path, layout_spec
+                    )
+
+                for j, pane in enumerate(panes):
+                    if j >= len(pane_ids):
+                        break
+
+                    pane_id = pane_ids[j]
+                    pane_cwd = (
+                        parse_path(pane["cwd"]) if "cwd" in pane else window_cwd_path
+                    )
+
+                    if "cwd" in pane and pane_cwd != window_cwd_path:
+                        exec.run(
+                            f"tmux send-keys -t {shlex.quote(session_name + ':' + window_name + '.' + pane_id)}"
+                            f" 'cd {pane_cwd}' Enter"
+                        )
+
+                    if "exec" in pane:
+                        cmd = pane["exec"]
+                    else:
+                        cmd = ""
+
+                    if type(cmd) != list:
+                        cmd = [cmd]
+                    for c in cmd:
+                        c = shlex.quote(c)
+                        exec.run(
+                            f"tmux send-keys -t {shlex.quote(session_name + ':' + window_name + '.' + pane_id)} {c} Enter"
+                        )
+
+if attach and last_tmux_session is not None:
+    exec = Executor()
+    exec.run(f"tmux attach-session -t {last_tmux_session}")

@@ -1,0 +1,241 @@
+#!/bin/sh
+#
+# Multiple remarkable scripts added togheter for easier use.
+#
+# Prerequisites:
+#
+# * The ssh access has to be configured under the host alias 'remarkable'
+#   (or another alias specified in the env variable REMARKABLE_HOST),
+#   e.g. by putting the following in .ssh/config :
+#   | host remarkable
+#   |        Hostname 10.11.99.1
+#   |        User root
+#   |        ForwardX11 no
+#   |        ForwardAgent no
+#   (and setup ssh public key authentication to avoid typing your passwd)
+#
+# * Beyond core utilities (date, basename,...), the following software
+#   has to be installed on the host computer:
+#   - uuidgen
+#   - nmap
+
+set -eo pipefail
+
+# This is where ssh will try to copy the files associated with the document
+REMARKABLE_HOST=$1
+REMARKABLE_XOCHITL_DIR=".local/share/remarkable/xochitl/"
+
+SSH_OPTIONS="-o ConnectTimeout=1 -o PasswordAuthentication=no -o PubkeyAcceptedKeyTypes=+ssh-rsa -o HostKeyAlgorithms=+ssh-rsa"
+
+ssh_cmd() {
+    echo "[SSH]" "$@" >&2
+    ssh $SSH_OPTIONS "$REMARKABLE_HOST" "$@"
+}
+
+get_ip() {
+    if [[ "$1" == "-h" ]] || [[ "$1" == "--help" ]]; then
+        echo "Search for remarkable ip on your network"
+        echo "$(basename $0) ip [-h]"
+    fi
+    local gateway=$(ip route show | grep -E '^default' | grep -P "(?<=^default via )([0-9]|[.])*" -o)
+
+	if [[ "$gateway" == "" ]]; then
+		echo "failed to find gateway" >&2
+		exit 1
+	fi
+
+    local ips=$(sudo nmap -sn -n $gateway/24 | grep "Ampak Technology" -B 2 | grep -P "(?<=Nmap scan report for )([0-9]|[.]){3,16}" -o)
+
+	local ip=$(echo $ips | cut -d ' ' -f1)
+
+	if [[ "$ip" == "" ]]; then
+		echo "failed to find ip" >&2
+		exit 1
+	fi
+
+    echo $(echo $ips | cut -d ' ' -f1)
+}
+
+sync() {
+    TARGET_DIR="${REMARKABLE_HOST}:${REMARKABLE_XOCHITL_DIR}*"
+    echo "Syncing files from $TARGET_DIR"
+    scp $SSH_OPTIONS -r "$TARGET_DIR" .
+}
+
+# https://github.com/adaerr/reMarkableScripts/blob/master/pdf2remarkable.sh
+upload() {
+    TARGET_DIR="${REMARKABLE_HOST}:${REMARKABLE_XOCHITL_DIR}"
+
+    # Check if we have something to do
+    if [ $# -lt 1 ]; then
+        echo "Transfer PDF or EPUB document(s) to a reMarkable tablet."
+        echo "See comments/documentation at start of script."
+        echo "usage: $(basename $0) upload path-to-file [path-to-file]..."
+        exit 1
+    fi
+
+    # Create directory where we prepare the files as the reMarkable expects them
+    tmpdir=$(mktemp -d)
+
+    # Loop over the command line arguments,
+    # which we expect are paths to the files to be transferred
+    for filename in "$@" ; do
+
+        # reMarkable documents appear to be identified by universally unique IDs (UUID),
+        # so we generate one for the document at hand
+        uuid=$(uuidgen | tr '[:upper:]' '[:lower:]')
+
+        extension="${filename##*.}"
+
+        # Copy the file itself
+        cp -- "$filename" "${tmpdir}/${uuid}.${extension}"
+
+        # Add metadata
+        # The lastModified item appears to contain the date in milliseconds since Epoch
+        cat <<EOF >>${tmpdir}/${uuid}.metadata
+    {
+        "deleted": false,
+        "lastModified": "$(date +%s)000",
+        "metadatamodified": false,
+        "modified": false,
+        "parent": "",
+        "pinned": false,
+        "synced": false,
+        "type": "DocumentType",
+        "version": 1,
+        "visibleName": "$(basename -- "$filename" ".$extension")"
+    }
+EOF
+
+        if [ "$extension" = "pdf" ]; then
+            # Add content information
+            cat <<EOF >${tmpdir}/${uuid}.content
+    {
+        "extraMetadata": {
+        },
+        "fileType": "pdf",
+        "fontName": "",
+        "lastOpenedPage": 0,
+        "lineHeight": -1,
+        "margins": 100,
+        "pageCount": 1,
+        "textScale": 1,
+        "transform": {
+            "m11": 1,
+            "m12": 1,
+            "m13": 1,
+            "m21": 1,
+            "m22": 1,
+            "m23": 1,
+            "m31": 1,
+            "m32": 1,
+            "m33": 1
+        }
+    }
+EOF
+
+            # Add cache directory
+            mkdir ${tmpdir}/${uuid}.cache
+
+            # Add highlights directory
+            mkdir ${tmpdir}/${uuid}.highlights
+
+            # Add thumbnails directory
+            mkdir ${tmpdir}/${uuid}.thumbnails
+
+        elif [ "$extension" = "epub" ]; then
+
+            # Add content information
+            cat <<EOF >${tmpdir}/${uuid}.content
+    {
+        "fileType": "epub"
+    }
+EOF
+
+        else
+            echo "Unknown extension: $extension, skipping $filename"
+            rm -rf ${tmpdir}/*
+            continue
+        fi
+
+        # Transfer files
+        echo "Transferring $filename as $uuid"
+        scp $SSH_OPTIONS -r ${tmpdir}/* "${TARGET_DIR}"
+        rm -rf ${tmpdir}/*
+    done
+
+    rm -rf ${tmpdir}
+
+    echo "Restarting Xochitl..."
+    ssh_cmd "systemctl restart xochitl"
+    echo "Done."
+}
+
+# https://github.com/rien/reStream
+stream() {
+	if ! command -v restream; then
+		echo "Please install restream" 
+		echo "https://raw.githubusercontent.com/rien/reStream"
+		exit 1
+	fi
+	GDK_BACKEND=x11 SDL_VIDEODRIVER=x11 restream -s $(get_ip) ${@}
+}
+
+interactive_ssh() {
+    ssh $SSH_OPTIONS $REMARKABLE_HOST
+}
+
+
+case $1 in
+    "ip")
+        get_ip ${@:2}
+        exit 0
+        ;;
+    "sync")
+        REMARKABLE_HOST=root@$(get_ip)
+        sync
+        exit 0
+        ;;
+    "ssh")
+        REMARKABLE_HOST=root@$(get_ip)
+        interactive_ssh
+        exit 0
+        ;;
+    "stream")
+        stream ${@:2}
+        exit 0
+        ;;
+    "upload")
+        REMARKABLE_HOST=root@$(get_ip)
+        upload ${@:2}
+        exit 0
+        ;;
+esac
+
+case $2 in 
+    "ssh")
+        interactive_ssh
+        exit 0
+        ;;
+    "stream")
+        stream ${@:3}
+        exit 0
+        ;;
+    "upload")
+        upload ${@:3}
+        exit 0
+        ;;
+esac
+
+echo "$(basename $0) {sync|HOST|ip|upload|stream} {upload|stream} [OPTIONS]
+
+HOST is your ssh host (eg. root@192.168.1.5)
+
+EXAMPLES
+
+Search host and use that to stream in portrait mode
+$(basename $0) stream -p
+
+Download all files
+$(basename $0) sync"
+exit 1

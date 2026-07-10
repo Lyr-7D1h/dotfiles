@@ -1,0 +1,105 @@
+* {
+  border: none;
+  border-radius: 0;
+  font-family: "UbuntuMono Nerd Font";
+  /* font-family: "Ubuntu Nerd Font 12"; */
+  /* font-family: "UbuntuMono"; */
+  /* letter-spacing: 1px; */
+  font-size: 14px;
+  min-height: 0;
+  box-shadow: none;
+  text-shadow: none;
+  transition-duration: 0s;
+}
+
+window#waybar {
+  color: rgba(217, 216, 216, 1);
+  background: rgba(35, 39, 42, 1);
+}
+
+box {
+  color: rgba(217, 216, 216, 1);
+}
+
+.modules-left button:hover,
+.modules-center button:hover,
+.modules-right button:hover {
+  background: rgba(20, 20, 20, 0.2);
+}
+
+window#waybar.top {
+  color: rgba(217, 216, 216, 1);
+  border-bottom: 1px solid rgba(56, 56, 56, 0.7);
+}
+
+window#waybar.bottom {
+  color: rgba(217, 216, 216, 1);
+  border-top: 1px solid rgba(56, 56, 56, 0.7);
+}
+
+#workspaces button:hover {
+  background: rgba(217, 216, 216, 0.4);
+}
+
+#workspaces button {
+  padding: 0 5px 0 5px;
+  color: rgba(217, 216, 216, 0.4);
+}
+
+#workspaces button.visible {
+  color: rgba(217, 216, 216, 1);
+}
+
+#workspaces button.focused {
+  background-color: #7289da; 
+  color: white;
+}
+
+#workspaces button.urgent {
+  color: rgba(238, 46, 36, 1);
+}
+
+#mode,
+#battery,
+#disk,
+#bluetooth,
+#clock,
+#temperature,
+#cpu,
+#memory,
+#pulseaudio,
+#idle_inhibitor,
+#backlight,
+#network,
+#custom-storage,
+#custom-ip,
+#custom-spotify,
+#custom-weather,
+#custom-nextmeeting,
+#custom-ghnotify,
+#custom-weather,
+#tray,
+#custom-mail {
+  color: rgba(217, 216, 216, 1);
+  padding: 0px 10px 0px 10px;
+  margin: 0px 0px 0px 0px;
+  min-width: 25px;
+}
+
+#battery.warning {
+  color: rgba(255, 210, 4, 1);
+}
+#temperature.critical,
+#battery.critical {
+  color: rgba(238, 46, 36, 1);
+}
+#battery.charging {
+  color: rgba(217, 216, 216, 1);
+}
+
+#disk.warning {
+  color: rgba(255, 210, 4, 1);
+}
+#disk.critical {
+  color: rgba(238, 46, 36, 1);
+}
