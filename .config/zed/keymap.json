@@ -41,5 +41,35 @@
     "unbind": {
       "g r i": "editor::GoToImplementation"
     }
+  },
+  {
+    "context": "Workspace",
+    "unbind": {
+      "ctrl-n": "workspace::NewFile"
+    }
+  },
+  {
+    "context": "Welcome",
+    "unbind": {
+      "ctrl-n": "workspace::NewFile"
+    }
+  },
+  {
+    "context": "!Terminal",
+    "bindings": {
+      "ctrl-p": "file_finder::Toggle"
+    }
+  },
+  {
+    "context": "Workspace",
+    "unbind": {
+      "ctrl-p": "file_finder::Toggle"
+    }
+  },
+  {
+    "context": "!Terminal",
+    "bindings": {
+      "ctrl-e": "workspace::ToggleLeftDock"
+    }
   }
 ]
