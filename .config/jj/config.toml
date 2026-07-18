@@ -53,6 +53,9 @@ e = ["edit"]
 outdated = ["log", "-r", "bookmarks() & ~(master@origin | remote_bookmarks())"]
 # Commit changes with a message and point master to it
 ship = ["util", "exec", "--", "bash", "-c", "jj commit -m \"$1\" && jj bookmark set master -r @-", "--"]
+# Sync WIP changes with remote
+wip = ["util", "exec", "--", "sh", "-c", "jj git fetch && jj edit wip && jj git push -b wip"]
+
 
 [remotes.origin]
 auto-track-bookmarks = "*"
