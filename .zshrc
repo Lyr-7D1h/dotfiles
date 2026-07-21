@@ -127,7 +127,7 @@ export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
 if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='vim'
 else
-  export EDITOR='nvim'
+  export EDITOR='zeditor --wait -n'
 fi
 
 

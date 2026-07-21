@@ -9,6 +9,6 @@ columns = [
 [[lssg.windows.panes]]
 exec = ["watch --interval 1 --color --no-title \"jj --color=always -r 'all()'\""]
 [[lssg.windows.panes]]
-exec = ["cargo watch -x 'run -- examples/lyrx/home.md ./build --no-media-optimization --preview'"]
+exec = ["cargo watch -x 'run -- examples/lyrx/home.md ./build --no-media-optimization --preview --log-location'"]
 [[lssg.windows.panes]]
 exec = [""]
