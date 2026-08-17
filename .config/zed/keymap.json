@@ -55,14 +55,8 @@
     }
   },
   {
-    "context": "!Terminal",
+    "context": "Workspace && !Terminal && !Menu",
     "bindings": {
-      "ctrl-p": "file_finder::Toggle"
-    }
-  },
-  {
-    "context": "Workspace",
-    "unbind": {
       "ctrl-p": "file_finder::Toggle"
     }
   },
@@ -78,6 +72,36 @@
     "bindings": {
       "ctrl-t": ["terminal::SendKeystroke", "ctrl-t"],
       "ctrl-s": ["terminal::SendKeystroke", "ctrl-s"]
+    }
+  },
+  {
+    "context": "Editor && mode == full",
+    "bindings": {
+      "ctrl-t": "tab_switcher::Toggle"
+    }
+  },
+  {
+    "context": "Workspace",
+    "unbind": {
+      "ctrl-tab": "tab_switcher::Toggle"
+    }
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "g t": "project_symbols::Toggle"
+    }
+  },
+  {
+    "context": "Workspace",
+    "unbind": {
+      "ctrl-t": "project_symbols::Toggle"
+    }
+  },
+  {
+    "context": "(VimControl && !menu) || (!Editor && !Terminal)",
+    "unbind": {
+      "g t": "vim::GoToTab"
     }
   }
 ]
