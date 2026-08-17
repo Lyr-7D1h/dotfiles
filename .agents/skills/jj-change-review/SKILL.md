@@ -4,7 +4,7 @@ description: Use jj to get the diff of current open change and use AI to review 
 disable-model-invocation: true
 ---
 
-Then run `jj diff --git --no-pager` to get the changes of this commit, and `jj log --no-graph -T description -r @ --no-pager` to get its description.
+Run `jj diff --git --no-pager` to get the changes of this commit, and `jj log --no-graph -T description -r @ --no-pager` to get its description.
 
 Please review this branch diff carefully. Point out any issues, potential bugs, or improvement opportunities you find.
 Review the changes and focus on:

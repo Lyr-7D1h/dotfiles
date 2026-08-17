@@ -55,10 +55,3 @@ outdated = ["log", "-r", "bookmarks() & ~(master@origin | remote_bookmarks())"]
 ship = ["util", "exec", "--", "bash", "-c", "jj commit -m \"$1\" && jj bookmark set master -r @-", "--"]
 # Sync WIP changes with remote
 wip = ["util", "exec", "--", "sh", "-c", "jj git fetch && jj edit wip && jj rebase -d master@origin && jj git push -b wip"]
-
-
-[remotes.origin]
-auto-track-bookmarks = "*"
-
-[gg.ui]
-recent-workspaces = ["/home/lyr/p/creagen-deployment"]
