@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+# Check if git-cliff is installed
+if ! command -v git-cliff &>/dev/null; then
+    echo "Error: git-cliff is not installed."
+    echo ""
+    echo "Install it with one of:"
+    echo "  cargo install git-cliff"
+    echo "  brew install git-cliff"
+    echo "  apt install git-cliff"
+    exit 1
+fi
+
+# Fetch latest from origin
+git fetch --tags origin
+
+# Get the default branch name from origin remote
+DEFAULT_BRANCH=$(git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
+echo "Default branch: $DEFAULT_BRANCH"
+
+# Get the latest commit of the default branch (tag there, regardless of current branch)
+DEFAULT_HEAD=$(git rev-parse origin/"$DEFAULT_BRANCH")
+
+TAG="r$(date +%y.%m.%d)"
+
+# Check if the tag already exists
+if git rev-parse -q --verify "$TAG" >/dev/null 2>&1; then
+    # Tag exists. Check if it's on the default branch's latest commit.
+    TAG_COMMIT=$(git rev-list -n 1 "$TAG")
+
+    if [ "$TAG_COMMIT" == "$DEFAULT_HEAD" ]; then
+        echo "Tag $TAG already exists on the latest default branch commit. Skipping."
+        exit 0
+    else
+        echo "Tag $TAG exists on a different commit. Creating ${TAG}_1 on the default branch tip."
+        TAG="${TAG}_1"
+    fi
+fi
+
+NOTES=$(git cliff --unreleased --strip all --tag "$TAG")
+echo "$NOTES"
+
+# Don't use # as comment character, used for gitlab issues
+git -c core.commentChar=";" tag -a "$TAG" -m "$NOTES" "$DEFAULT_HEAD"
+git push origin "$TAG"
+git show "$TAG"
