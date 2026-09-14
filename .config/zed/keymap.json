@@ -55,6 +55,12 @@
     }
   },
   {
+    "context": "Workspace",
+    "unbind": {
+      "ctrl-p": "file_finder::Toggle"
+    }
+  },
+  {
     "context": "Workspace && !Terminal && !Menu",
     "bindings": {
       "ctrl-p": "file_finder::Toggle"
