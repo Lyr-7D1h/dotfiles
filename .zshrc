@@ -126,8 +126,10 @@ export DEBUGINFOD_URLS="https://debuginfod.archlinux.org"
 # Preferred editor for local and remote sessions
 if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='vim'
+  export VISUAL='vim'
 else
   export EDITOR='nvim'
+  export VISUAL='nvim'
 fi
 
 
@@ -135,10 +137,6 @@ fi
 if command -v go > /dev/null; then
   export PATH=$PATH:/usr/local/go/bin
   export PATH=$PATH:$(go env GOPATH)/bin
-fi
-
-if command -v julia > /dev/null; then
-	export PATH="$PATH:/path/to/your/julia/bin"
 fi
 
 if command -v symfony > /dev/null; then

@@ -76,10 +76,11 @@ exec = ["npm i", "npm start"]
 [[creagen.windows.panes]]
 exec = "watch --interval=1 --color --no-title \"jj --color=always -r 'all()'\""
 [[creagen.windows.panes]]
-cwd = "~/p/creagen-deployment/editor"
+cwd = "~/p/creagen-deployment/storage"
+exec = ""
 [[creagen.windows.panes]]
 cwd = "~/p/creagen-deployment/storage"
 exec = ["npm i", "npm start"]
 [[creagen.windows.panes]]
-cwd = "~/p/creagen-deployment/storage"
-exec = ""
+cwd = "~/p/creagen-deployment/platform"
+exec = "npm start"
