@@ -93,7 +93,7 @@
     }
   },
   {
-    "context": "Workspace",
+    "context": "VimControl && !menu",
     "bindings": {
       "g t": "project_symbols::Toggle"
     }

@@ -337,7 +337,7 @@ def create_grid_layout(
 
 if len(sys.argv) <= 1 or "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
     print(
-        "Usage: tmuxer template|list|<config> [-n|-t|-a|-x|-o|-h|<entry>]\n"
+        "Usage: tmuxer template|list|<config> [-n|-t|-a|-x|-o|-h|<entry>...]\n"
         "  list: list all available config files\n"
         "  template <source> [secrets]: parse a template using optional secrets\n"
         "  <config>: the name of the config file in ~/.config/tmuxer or the path to a toml file"
@@ -347,11 +347,12 @@ if len(sys.argv) <= 1 or "--help" in sys.argv[1:] or "-h" in sys.argv[1:]:
         "  -n | --no-updates: run the config without updating the repos\n",
         "  -x | --ignore-execnow: run the config without executing execnow commands\n",
         "  -o | --execnow-only: only execute execnow statements, skip tmux windows\n",
-        "  <entry>: Which entry in the config to execute\n"
+        "  <entry>: which entries in the config to execute (can be given multiple times)\n"
         "\n\n"
         "Examples:\n"
         "   - tmuxer list\n"
         "   - tmuxer ./my-config my-entry -a\n"
+        "   - tmuxer ./my-config entry1 entry2 # run multiple entries\n"
         "   - tmuxer ./my-config -t -n # updates just the templated configs\n"
         "   - tmuxer ./my-config -x # skip all execnow commands\n"
         "   - tmuxer ./my-config -o # only run execnow commands\n"
@@ -386,17 +387,21 @@ elif config_arg == "template":
     print(parsed)
     exit(0)
 
-entry = sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith("-") else ""
+entries = [arg for arg in sys.argv[2:] if not arg.startswith("-")]
 if not config_arg.endswith(".toml"):
     config_arg = os.path.expanduser(f"~/.config/tmuxer/{config_arg}.toml")
 config_path = os.path.expanduser(os.path.expandvars(config_arg))
 with open(config_path, "rb") as config_file:
     config = tomllib.load(config_file)
 
+for e in entries:
+    if e not in config:
+        warn(f"Unknown entry: {e}")
+
 
 last_tmux_session = None
 for session_name in list(
-    filter(lambda session_name: len(entry) == 0 or session_name == entry, config)
+    filter(lambda session_name: not entries or session_name in entries, config)
 ):
     entry = config[session_name]
     path = parse_path(entry["path"])
