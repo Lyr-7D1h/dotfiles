@@ -367,34 +367,6 @@ bindkey  "^[[H"   beginning-of-line
 bindkey  "^[[F"   end-of-line
 bindkey  "^[[3~"  delete-char
 
-# copilot
-copilot_what_the_shell () {
-    TMPFILE=$(mktemp);
-    trap 'rm -f $TMPFILE' EXIT;
-    if /home/lyr/.nvm/versions/node/v23.11.1/bin/github-copilot-cli what-the-shell "$@" --shellout $TMPFILE; then
-      if [ -e "$TMPFILE" ]; then
-        FIXED_CMD=$(cat $TMPFILE);
-        print -s "$FIXED_CMD";
-        eval "$FIXED_CMD"
-      else
-        echo "Apologies! Extracting command failed"
-      fi
-    else
-      return 1
-    fi
-  };
-
-copilot_what_the_shell_widget() {
-  local query="$BUFFER"
-  zle push-line # Save current buffer
-  BUFFER="copilot_what_the_shell \"$query\""
-  zle accept-line
-}
-alias '??'='copilot_what_the_shell';
-zle -N copilot_what_the_shell_widget
-bindkey '^[i' copilot_what_the_shell_widget;  # bind Alt+i to suggest
-
-
 ### Aliases
 alias g="git"
 alias grc="git rebase --continue"
