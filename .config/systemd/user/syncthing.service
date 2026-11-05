@@ -1,0 +1,9 @@
+[Unit]
+Description=Syncthing
+BindsTo=run-user-1000.mount
+
+[Service]
+ExecStart=/usr/bin/syncthing
+
+[Install]
+WantedBy=run-user-1000.mount

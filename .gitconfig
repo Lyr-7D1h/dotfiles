@@ -1,0 +1,82 @@
+# https://blog.gitbutler.com/how-git-core-devs-configure-git/
+[user]
+	email = lyr-7d1h@pm.me
+	name = Lyr
+	signingkey = F0E576DC4C752710F168C87C650AC1B95E7FEE6E
+[interactive]
+	diffFilter = delta --color-only --features=interactive
+[init]
+	defaultBranch = master
+[rebase]
+	# Automatically squash fixup commits when rebasing
+	autoSquash = true
+	updateRefs = true
+	autoStash = true
+[pull]
+	rebase = true
+[push]
+	# create branch on remote if not setup yet
+	autoSetupRemote = true
+	default = simple
+	# push all tags on push
+	followTags = false
+[core]
+	editor = vim
+	pager = delta
+[alias]
+	# Create a fixup commit to a previous commit
+	fixup = "!f() { \
+		hash=$(git log -n 50 --pretty=format:'%h %s' --no-merges | fzf | cut -c -7) && \
+		if [[ -z \"$hash\" ]]; then \
+			exit 0; \
+		fi && \
+		git commit --fixup=${hash} && \
+		if ! git diff-index --quiet HEAD --; then \
+			changes=1; \
+			git stash; \
+		fi && \
+		git rebase --autosquash ${hash}~1 ; \
+		if [[ \"$changes\" == \"1\" ]]; then \
+			changes=1; \
+			git stash pop; \
+		fi; \
+	}; f"
+	pushfii = "push --force-if-includes"
+	pushfwl = "push --force-with-lease"
+	staash = stash --all
+	lgb = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset%n' --abbrev-commit --date=relative --branches
+# when merge conflict fixed before apply again
+[rerere]
+	enabled = true
+	autoupdate = true
+[column]
+	ui = auto
+[includeIf "gitdir:~/b/"]
+  path = .gitconfig-bit
+
+[delta]
+	navigate = true
+	side-by-side = true
+[merge]
+	conflictstyle = zdiff3
+[diff]
+	algorithm = histogram
+	mnemonicPrefix = true
+	renames = true
+[branch]
+	sort = -committerdate
+[tag]
+	sort = version:refname
+[fetch]
+	#prune = true
+	#pruneTags = true
+	#all = true
+[help]
+	autocorrect = prompt
+[commit]
+	verbose = true
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
