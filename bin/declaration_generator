@@ -1,0 +1,71 @@
+#!/usr/bin/env python
+#
+# requires python-xlsxwriter python-toml and libreoffice
+#
+
+import os
+import xlsxwriter
+import toml
+import sys
+from datetime import date
+
+config = toml.load(open(sys.argv[1]))
+
+name_date = date(config['year'], config['month'], 1).strftime('%B %Y')
+file_name = f"Reiskosten {name_date}.xlsx"
+ 
+workbook = xlsxwriter.Workbook(file_name)
+ 
+# The workbook object is then used to add new 
+# worksheet via the add_worksheet() method.
+worksheet = workbook.add_worksheet()
+
+header_row_format = workbook.add_format({'bold': True})
+worksheet.set_row(0, None, header_row_format)
+# Use the worksheet object to write
+# data via the write() method.
+worksheet.write('A1', 'Naam')
+worksheet.write('B1', 'Rekening-nummer')
+worksheet.write('C1', 'Datum')
+worksheet.write('D1', 'Van')
+worksheet.write('E1', 'Naar')
+worksheet.write('F1', 'Km enkele reis (google maps)')
+worksheet.write('G1', 'Km * 0,23 (cent per km)')
+
+total = 0
+i=2
+for day in config['schedule']:
+    d = date(config['year'], config['month'], day)
+    cost = round(config['km'] * config['cost'], 4)
+    worksheet.write(f"A{i}", config['name'])
+    worksheet.write(f"B{i}", config['back_account'])
+    worksheet.write(f"C{i}", d.strftime('%d/%m/%y'))
+    worksheet.write(f"D{i}", config['from'])
+    worksheet.write(f"E{i}", config['to'])
+    worksheet.write(f"F{i}", config['km'])
+    worksheet.write(f"G{i}", f"{cost}")
+    i+=1
+    worksheet.write(f"A{i}", config['name'])
+    worksheet.write(f"B{i}", config['back_account'])
+    worksheet.write(f"C{i}", d.strftime('%d/%m/%y'))
+    worksheet.write(f"D{i}", config['to'])
+    worksheet.write(f"E{i}", config['from'])
+    worksheet.write(f"F{i}", config['km'])
+    worksheet.write(f"G{i}", f"{cost}")
+    total += 2*cost
+    i+=1
+
+worksheet.write(f"F{i}", 'Totaal')
+worksheet.write(f"G{i}", f"{round(total, 4)}")
+
+euro_format = workbook.add_format({'num_format': '€#,##0.00'})
+worksheet.set_column('A:A', None, euro_format)
+ 
+worksheet.autofit()
+
+print(f"writing to {file_name}")
+workbook.close()
+
+print("Converting xlsx to pdf")
+os.system(f"libreoffice --headless --convert-to pdf '{file_name}'")
+os.remove(file_name)

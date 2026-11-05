@@ -1,0 +1,145 @@
+#!/usr/bin/env bash
+#
+# For sync features set a "Host home" in .ssh/config
+#
+# Requirements:
+#	- nvim, vim or nano
+#	- scp
+#	- fzf
+#
+
+SYNC_HOST="home"
+NOTES_FOLDER=~/notes
+NOTES_WRITE_FOLDER=~/notes/notes
+
+set -e
+
+if [[ ! -d $NOTES_FOLDER  ]]; then
+	echo "Making notes directory..."
+	mkdir $NOTES_FOLDER
+	chmod -R 644 $NOTES_FOLDER
+fi
+
+help() {
+	echo "note {help|[name]|open|rm|sync|latest|todo}"
+	exit 1
+}
+
+sync_host_exists() {
+	if [[ ! -f ~/.ssh/config ]] || [[ "$(grep -r "Host $SYNC_HOST" ~/.ssh/config)" == "" ]]; then
+		return 1
+	fi
+	return 0
+}
+
+# Overwrite local files by newer host files
+sync_down() {
+	if ! sync_host_exists ; then
+		echo "Sync disabled host doesn't exist"
+		return 0
+	fi
+	# TODO improve performance by using tar
+	local path
+	path=$(mktemp --directory)
+	# Copy from host to local
+	# ssh $SYNC_HOST 'TMP=$(mktemp --directory) ; tar cvf $TMP/notes.tar $NOTES_FOLDER/* ; rm -r $TMP'
+	scp -prq "$SYNC_HOST:$NOTES_FOLDER/*" "$path"
+	cp -ru "$path/*" $NOTES_FOLDER
+	rm -r "$path"
+}
+
+# Overwrite host files by newer local files
+sync_up() {
+	if ! sync_host_exists ; then
+		echo "Sync disabled host doesn't exist"
+		return 0
+	fi
+	# Copy from local to host
+	local path
+	path=$(ssh home mktemp --directory)
+	scp -prq $NOTES_FOLDER/* "$SYNC_HOST:$path"
+	ssh $SYNC_HOST "cp -ru $path/* $NOTES_FOLDER ; rm -r $path"
+}
+
+# Search notes
+get_notes() {
+  local note
+  note="$(find -L "$NOTES_FOLDER" -name '*.md' -printf '%T@ %p\0' | sort -zrn | sed -z "s|^[^ ]* $NOTES_FOLDER/||" | fzf --read0)"
+  if [[ -z $note ]]; then
+    echo "No note selected" >&2
+    return 1
+  fi
+
+	echo "$NOTES_FOLDER/$note"
+}
+
+latest_note() {
+  local entry note
+  IFS= read -r -d '' entry < <(find -L "$NOTES_FOLDER" -name '*.md' -printf '%T@ %p\0' | sort -zrn | head -z -n 1)
+  note="${entry#* }"
+  if [[ -z $note ]]; then
+    echo "No notes found" >&2
+    return 1
+  fi
+
+	echo "$note"
+}
+
+rm_file() {
+	local path="$1"
+	echo "Removing $path"
+	rm "$path"
+	ssh $SYNC_HOST "rm ${path}"
+}
+
+# open {filename}
+open() {
+	if [[ -z $1 ]]; then
+		echo "Invalid file given"
+		exit 1
+	fi
+	path=$(printf %q "$1")
+
+	echo "Opened note $path"
+	if command -v nvim &>/dev/null ; then
+		nvim --cmd 'set ft=markdown' "$path"
+	elif command -v vim &>/dev/null ; then
+		vim --cmd 'set ft=markdown' "$path"
+	else
+		nano "$path"
+	fi
+}
+
+if [[ "$1" == "sync" ]]; then
+	sync_down
+	sync_up
+	exit 0
+elif [[ "$1" == "rm" ]]; then
+	file=$(get_notes)
+	rm_file "${file}"
+	exit 0
+fi
+
+
+sync_down || true
+if [[ "$1" == "latest" ]]; then
+	open "$(latest_note)"
+elif [[ "$1" == "todo" ]]; then
+	open "$NOTES_WRITE_FOLDER/todo.md"
+elif [[ "$1" == "btodo" ]]; then
+	open "$NOTES_WRITE_FOLDER/btodo.md"
+elif [[ "$1" == "stodo" ]]; then
+	open "$NOTES_WRITE_FOLDER/stodo.md"
+elif [[ "$1" == "did" ]]; then
+	open "$NOTES_WRITE_FOLDER/did.md"
+elif [[ "$1" == "journal" ]]; then
+	open "$NOTES_WRITE_FOLDER/journal.md"
+elif [[ "$1" == "open" ]]; then
+	open "$(get_notes)"
+elif [[ "$1" != "" ]]; then
+	id=$(date '+%y%m%d')
+	open "${NOTES_WRITE_FOLDER}/${id}_$*.md"
+else
+	open "$(get_notes)"
+fi
+sync_up &

@@ -1,0 +1,350 @@
+#!/usr/bin/env bash
+
+set -eu
+
+# Extract timezone info from timedatectl
+get_location_from_timedatectl() {
+    local timezone_info
+    timezone_info=$(timedatectl show --property=Timezone --value)
+    
+    if [[ -z "$timezone_info" ]]; then
+        echo "Error: Could not get timezone from timedatectl" >&2
+        return 1
+    fi
+    
+    # Parse timezone format like "America/New_York" or "Europe/London"
+    if [[ "$timezone_info" =~ ^([^/]+)/(.+)$ ]]; then
+        local region="${BASH_REMATCH[1]}"
+        local city_tz="${BASH_REMATCH[2]}"
+        
+        # Convert timezone city to actual city name (remove underscores, get main city)
+        local city
+        city=$(echo "$city_tz" | sed 's/_/ /g' | cut -d'/' -f1)
+        
+        # Map regions to country codes
+        case "$region" in
+            "America")
+                # For America, we need to determine the country based on the city/subregion
+                if [[ "$city_tz" =~ ^(New_York) ]]; then
+                    echo "US" "New York"
+                elif [[ "$city_tz" =~ ^(Chicago) ]]; then
+                    echo "US" "Chicago"
+                elif [[ "$city_tz" =~ ^(Denver) ]]; then
+                    echo "US" "Denver"
+                elif [[ "$city_tz" =~ ^(Los_Angeles) ]]; then
+                    echo "US" "San Francisco"
+                elif [[ "$city_tz" =~ ^(Detroit) ]]; then
+                    echo "US" "Detroit"
+                elif [[ "$city_tz" =~ ^(Phoenix) ]]; then
+                    echo "US" "Phoenix"
+                elif [[ "$city_tz" =~ ^(Anchorage) ]]; then
+                    echo "US" "Anchorage"
+                elif [[ "$city_tz" =~ ^(Honolulu) ]]; then
+                    echo "US" "Honolulu"
+                elif [[ "$city_tz" =~ ^(Toronto|Vancouver|Montreal|Edmonton) ]]; then
+                    echo "CA" "$city"
+                elif [[ "$city_tz" =~ ^(Mexico_City|Tijuana|Cancun) ]]; then
+                    echo "MX" "$city"
+                elif [[ "$city_tz" =~ ^(Sao_Paulo|Rio_de_Janeiro) ]]; then
+                    echo "BR" "$city"
+                elif [[ "$city_tz" =~ ^(Buenos_Aires|Cordoba) ]]; then
+                    echo "AR" "$city"
+                else
+                    # Default to US for other American timezones
+                    echo "US" "New York"
+                fi
+                ;;
+            "Europe")
+                case "$city_tz" in
+                    "London") echo "GB" "London" ;;
+                    "Paris") echo "FR" "Paris" ;;
+                    "Berlin"|"Munich") echo "DE" "$city" ;;
+                    "Rome"|"Milan") echo "IT" "$city" ;;
+                    "Madrid"|"Barcelona") echo "ES" "$city" ;;
+                    "Amsterdam") echo "NL" "Amsterdam" ;;
+                    "Brussels") echo "BE" "Brussels" ;;
+                    "Vienna") echo "AT" "Vienna" ;;
+                    "Zurich") echo "CH" "Zurich" ;;
+                    "Stockholm") echo "SE" "Stockholm" ;;
+                    "Oslo") echo "NO" "Oslo" ;;
+                    "Copenhagen") echo "DK" "Copenhagen" ;;
+                    "Helsinki") echo "FI" "Helsinki" ;;
+                    "Warsaw") echo "PL" "Warsaw" ;;
+                    "Prague") echo "CZ" "Prague" ;;
+                    "Budapest") echo "HU" "Budapest" ;;
+                    "Moscow") echo "RU" "Moscow" ;;
+                    *) echo "GB" "$city" ;; # Default to UK for other European timezones
+                esac
+                ;;
+            "Asia")
+                case "$city_tz" in
+                    "Tokyo") echo "JP" "Tokyo" ;;
+                    "Shanghai"|"Beijing") echo "CN" "$city" ;;
+                    "Seoul") echo "KR" "Seoul" ;;
+                    "Bangkok") echo "TH" "Bangkok" ;;
+                    "Singapore") echo "SG" "Singapore" ;;
+                    "Hong_Kong") echo "HK" "Hong Kong" ;;
+                    "Mumbai"|"Kolkata") echo "IN" "$city" ;;
+                    "Dubai") echo "AE" "Dubai" ;;
+                    *) echo "JP" "$city" ;; # Default to Japan for other Asian timezones
+                esac
+                ;;
+            "Australia")
+                echo "AU" "$city"
+                ;;
+            "Africa")
+                case "$city_tz" in
+                    "Cairo") echo "EG" "Cairo" ;;
+                    "Johannesburg") echo "ZA" "Johannesburg" ;;
+                    "Lagos") echo "NG" "Lagos" ;;
+                    *) echo "EG" "$city" ;; # Default to Egypt for other African timezones
+                esac
+                ;;
+            *)
+                echo "US" "New York" # Default fallback
+                ;;
+        esac
+    else
+        echo "Error: Invalid timezone format: $timezone_info" >&2
+        return 1
+    fi
+}
+
+# Get country and city from timedatectl
+if ! LOCATION_INFO=$(get_location_from_timedatectl); then
+    echo "Failed to get location from timedatectl, using defaults" >&2
+    COUNTRY="US"
+    CITY="New York"
+else
+    read -r COUNTRY CITY <<< "$LOCATION_INFO"
+    echo "Detected location: $CITY, $COUNTRY" >&2
+fi
+
+CACHE_ENABLED=0
+CACHE_FILE=/tmp/time_for_light.cache
+
+# Function to get sunrise/sunset data using GWeather
+get_sunrise_sunset_gweather() {
+    local city="$1"
+    local country="$2"
+    
+    if ! python3 -c "import gi; gi.require_version('GWeather', '4.0'); from gi.repository import GWeather" 2>/dev/null; then
+        echo "GWeather not available" >&2
+        return 1
+    fi
+    
+    if ! GWEATHER_DATA=$(python3 - "$city" "$country" <<'PYTHON_EOF'
+import gi
+import sys
+import json
+import time
+import math
+from datetime import datetime, timezone
+
+# Import GWeather library
+gi.require_version("GWeather", "4.0")
+from gi.repository import GWeather
+
+
+def calculate_sunrise_sunset(lat, lon, date=None):
+    """Calculate sunrise/sunset using astronomical formulas"""
+    if date is None:
+        date = datetime.now()
+    
+    # Day of year
+    day_of_year = date.timetuple().tm_yday
+    
+    # Solar declination
+    declination = 23.45 * math.sin(math.radians(360 * (284 + day_of_year) / 365))
+    
+    # Hour angle
+    lat_rad = math.radians(lat)
+    decl_rad = math.radians(declination)
+    
+    try:
+        hour_angle = math.acos(-math.tan(lat_rad) * math.tan(decl_rad))
+        hour_angle_deg = math.degrees(hour_angle)
+        
+        # Sunrise and sunset times (in hours from solar noon)
+        sunrise_hour = 12 - hour_angle_deg / 15
+        sunset_hour = 12 + hour_angle_deg / 15
+        
+        # Convert to timestamps (assuming UTC, adjust for timezone later)
+        base_date = date.replace(hour=0, minute=0, second=0, microsecond=0)
+        sunrise_time = base_date.replace(hour=int(sunrise_hour), 
+                                       minute=int((sunrise_hour % 1) * 60))
+        sunset_time = base_date.replace(hour=int(sunset_hour), 
+                                      minute=int((sunset_hour % 1) * 60))
+        
+        return int(sunrise_time.timestamp()), int(sunset_time.timestamp())
+    except ValueError:
+        # Polar day/night
+        return 0, 0
+
+
+def get_sunrise_sunset(city, country):
+    # Initialize world database
+    world = GWeather.Location.get_world()
+    country_locations = world.find_by_country_code(country)
+    if not country_locations:
+        sys.stderr.write(f"Error: Could not find location for {city}, {country}\n")
+        sys.exit(1)
+
+    location = None
+    child = country_locations.next_child()
+    while child:
+        if child.get_name() == city:
+            location = child
+            break
+        child = country_locations.next_child(child)
+
+    if not location:
+        sys.stderr.write(f"Error: Could not find location for {city}, {country}\n")
+        sys.exit(1)
+
+    # Get coordinates from location
+    lat, lon = location.get_coords()
+    
+    # Try the GWeather approach first with proper setup
+    info = GWeather.Info.new(location)
+    info.set_application_id("com.example.weather")
+    info.set_contact_info("user@example.com")
+    
+    # Try to get sunrise/sunset directly without network update
+    sunrise = info.get_value_sunrise()
+    sunset = info.get_value_sunset()
+    
+    if sunrise[0] and sunset[0]:
+        # GWeather has the data
+        timezone_offset = int(time.timezone * -1)
+        return json.dumps({
+            "timezone": timezone_offset,
+            "sunrise": int(sunrise[1]),
+            "sunset": int(sunset[1]),
+        })
+    else:
+        # Fall back to calculation
+        sunrise_ts, sunset_ts = calculate_sunrise_sunset(lat, lon)
+        
+        # Calculate timezone offset
+        timezone_offset = int(time.timezone * -1)
+        
+        return json.dumps({
+            "timezone": timezone_offset,
+            "sunrise": sunrise_ts,
+            "sunset": sunset_ts,
+            "method": "calculated"
+        })
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        sys.stderr.write("Usage: script.py CITY COUNTRY [LAT LON]\n")
+        sys.exit(1)
+
+    city = sys.argv[1]
+    country = sys.argv[2]
+
+    print(
+        get_sunrise_sunset(
+            city,
+            country,
+        )
+    )
+PYTHON_EOF
+); then
+        echo "GWeather script failed" >&2
+        return 1
+    fi
+    
+    # Parse the JSON response
+    echo "$GWEATHER_DATA" | jq -r '.timezone, .sunrise, .sunset'
+}
+
+# Function to get sunrise/sunset data using OpenWeather API
+get_sunrise_sunset_openweather() {
+    local city="$1"
+    local country="$2"
+    
+    # URL encode the city name (replace spaces with %20)
+    local encoded_city
+    encoded_city=$(printf '%s' "$city" | sed 's/ /%20/g')
+    
+    # Check if API key is available
+    if [[ -z "${OPENWEATHER_API_KEY:-}" ]]; then
+        echo "OpenWeather API key not set" >&2
+        return 1
+    fi
+    
+    # Get weather data from OpenWeather API
+    if ! API_RESPONSE=$(curl --fail-with-body -s "https://api.openweathermap.org/data/2.5/weather?q=$encoded_city,$country&appid=$OPENWEATHER_API_KEY"); then
+        echo "Error response from OpenWeather API" >&2
+        return 1
+    fi
+    
+    # Extract and output the relevant data
+    echo "$API_RESPONSE" | jq -r '.timezone, .sys.sunrise, .sys.sunset'
+}
+
+if [[ -f "$HOME/.secrets" ]]; then
+    source "$HOME/.secrets"
+fi
+
+# source from cache to only call the first time you check timezone offset
+if [[ "$CACHE_ENABLED" == "1" ]] && [[ -f "$CACHE_FILE" ]]; then
+    # check if only these 3 vars are set
+    if grep -q -E '^(TIMEZONE_OFFSET|SUNRISE_UNIX|SUNSET_UNIX)=' "$CACHE_FILE" && \
+       ! grep -q -v -E '^(TIMEZONE_OFFSET|SUNRISE_UNIX|SUNSET_UNIX)=' "$CACHE_FILE"; then
+        # shellcheck source=/dev/null
+        source "$CACHE_FILE"
+    else
+        echo "invalid cache file"
+        exit 1 
+    fi
+fi
+
+
+if [[ -z "${TIMEZONE_OFFSET:-}" ]]; then
+    # Try GWeather first, then fall back to OpenWeather API
+    if ! WEATHER_DATA=$(get_sunrise_sunset_gweather "$CITY" "$COUNTRY"); then
+        echo "Failed to get from gweather: $WEATHER_DATA" >&2
+        if ! WEATHER_DATA=$(get_sunrise_sunset_openweather "$CITY" "$COUNTRY"); then
+            echo "$WEATHER_DATA" >&2
+            echo "Failed to get weather data from any source" >&2
+            exit 1
+        fi
+    fi
+
+    # Read the data (both functions output in the same format)
+    WEATHER_DATA=$(echo "$WEATHER_DATA" | tr '\n' ' ')
+    read -r TIMEZONE_OFFSET SUNRISE_UNIX SUNSET_UNIX <<< "$WEATHER_DATA"
+
+    if [[ "$CACHE_ENABLED" == "1" ]]; then
+        # Check if the cache file is writable
+        if [[ ! -w "$CACHE_FILE" ]]; then
+            echo "Cache file is not writable: $CACHE_FILE" >&2
+            exit 1
+        fi
+
+        # Write the data to the cache file
+        echo "Writing to cache file: $CACHE_FILE"
+        echo "TIMEZONE_OFFSET=$TIMEZONE_OFFSET
+SUNRISE_UNIX=$SUNRISE_UNIX
+SUNSET_UNIX=$SUNSET_UNIX" > "$CACHE_FILE"
+    fi
+fi
+
+# Convert timestamps to local time
+# use utc for calculating all timezones
+export TZ="UTC"
+SUNRISE_LOCAL=$(date -d @$((SUNRISE_UNIX + TIMEZONE_OFFSET)) +%H:%M:%S)
+SUNSET_LOCAL=$(date -d @$((SUNSET_UNIX + TIMEZONE_OFFSET)) +%H:%M:%S)
+CURRENT_TIME=$(date -d @$(($(date +%s) + TIMEZONE_OFFSET)) +%H:%M:%S)
+
+
+if [[ "$CURRENT_TIME" > "$SUNRISE_LOCAL" && "$CURRENT_TIME" < "$SUNSET_LOCAL" ]]; then
+    echo "true"
+else
+    echo "false"
+fi
+

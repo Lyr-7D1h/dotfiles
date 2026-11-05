@@ -1,0 +1,169 @@
+#!/usr/bin/env node
+
+const fs = require("fs");
+const path = require("path");
+const { readdir, rename } = require("fs/promises");
+const { exec } = require("child_process");
+const https = require("https");
+
+const HOME_FOLDER = `/home/${process.env.USER}`;
+const WALLPAPERS_PATH = HOME_FOLDER + "/Pictures/daily_paper";
+const NETWORK_RETRY_POLICY = 10;
+
+const SUBREDDIT = process.env.REDDIT_SUBREDDIT || "wallpaper";
+const USER_AGENT =
+  "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0";
+
+fs.mkdirSync(WALLPAPERS_PATH, { recursive: true });
+
+function fetchWallpaperPosts() {
+  return new Promise((res, rej) => {
+    https
+      .request(
+        `https://www.reddit.com/r/${SUBREDDIT}/top.rss?t=week&limit=25`,
+        { headers: { "User-Agent": USER_AGENT } },
+        (response) => {
+          if (response.statusCode !== 200)
+            return rej(
+              new Error(
+                `Could not fetch posts: call failed with code "${response.statusCode}"`,
+              ),
+            );
+          let body = "";
+          response.on("data", (d) => {
+            body += d;
+          });
+          response.on("error", rej);
+          response.on("end", () => {
+            const posts = [];
+            const entries = body.match(/<entry>[\/\S\s]*?<\/entry>/gm) || [];
+            for (const entry of entries) {
+              const idMatch = entry.match(/<id>t3_([a-z0-9]+)<\/id>/i);
+              // The [link] anchor in the HTML-encoded content points to the direct image URL
+              const urlMatch = entry.match(
+                /href=&quot;(https:\/\/[^&]+\.(?:jpe?g|png))&quot;&gt;\[link\]/,
+              );
+              if (idMatch && urlMatch)
+                posts.push({ id: idMatch[1], url: urlMatch[1] });
+            }
+            res(posts);
+          });
+        },
+      )
+      .on("error", rej)
+      .end();
+  });
+}
+
+function fetchImage(url, destPath) {
+  return new Promise((res, rej) => {
+    https
+      .request(url, { headers: { "User-Agent": USER_AGENT } }, (response) => {
+        if (response.statusCode === 301 || response.statusCode === 302)
+          return fetchImage(response.headers.location, destPath)
+            .then(res)
+            .catch(rej);
+        if (response.statusCode !== 200)
+          return rej(
+            new Error(
+              `Could not fetch image: call failed with code "${response.statusCode}"`,
+            ),
+          );
+        response.pipe(fs.createWriteStream(destPath)).on("close", res);
+      })
+      .on("error", rej)
+      .end();
+  });
+}
+
+function execCommand(cmd) {
+  return new Promise((resolve, reject) => {
+    exec(cmd, (e, stdout, stderr) => {
+      if (stdout) console.log(stdout);
+      if (stderr) console.error(stderr);
+      if (e) reject(e);
+      else resolve();
+    });
+  });
+}
+
+async function execWallpaper(wallpaperPath) {
+  const wallpaper = `${HOME_FOLDER}/.wallpaper`;
+  if (fs.existsSync(wallpaper)) fs.rmSync(wallpaper);
+  fs.symlinkSync(wallpaperPath, wallpaper);
+
+  if (process.env.XDG_CURRENT_DESKTOP === "sway") {
+    console.log("Setting wallpaper for sway");
+    await execCommand(`swaymsg output "*" background ${wallpaperPath} fill`);
+  } else {
+    console.log("Setting wallpaper for gnome");
+    await Promise.all([
+      execCommand(
+        `gsettings set org.gnome.desktop.background picture-uri file://${wallpaperPath}`,
+      ),
+      execCommand(
+        `gsettings set org.gnome.desktop.background picture-uri-dark file://${wallpaperPath}`,
+      ),
+    ]);
+  }
+}
+
+function ping() {
+  return new Promise((res) => {
+    https
+      .request("https://1.1.1.1", (response) => {
+        if (response.statusCode >= 400) return res(false);
+        res(true);
+      })
+      .on("error", () => res(false))
+      .end();
+  });
+}
+
+async function setWallpaper() {
+  let retries = 0;
+  let connected = await ping();
+  while (!connected && retries <= NETWORK_RETRY_POLICY) {
+    retries += 1;
+    if (retries === NETWORK_RETRY_POLICY)
+      throw new Error("Failed to connect to network");
+    console.error(`No internet connection, retrying in ${2 ** retries}s`);
+    await new Promise((resolve) => setTimeout(resolve, 2 ** retries * 1000));
+    connected = await ping();
+  }
+
+  const posts = await fetchWallpaperPosts();
+  const files = await readdir(WALLPAPERS_PATH);
+
+  const validPosts = posts;
+
+  const fetchMostRecent = async () => {
+    postLoop: for (const post of validPosts) {
+      for (const f of files) {
+        const exists = f.startsWith(post.id);
+        const is_used = f.includes("used");
+
+        if (exists && !is_used) return path.join(WALLPAPERS_PATH, f);
+        if (exists && is_used) continue postLoop;
+      }
+
+      const extension = path.parse(new URL(post.url).pathname).ext;
+      const latestPath = path.join(WALLPAPERS_PATH, `${post.id}${extension}`);
+      await fetchImage(post.url, latestPath);
+      return latestPath;
+    }
+  };
+
+  const latestPath = await fetchMostRecent();
+  if (!latestPath) throw new Error("No new wallpapers available");
+
+  const { name: filename, ext: extension } = path.parse(latestPath);
+  const usedPath = path.join(WALLPAPERS_PATH, `${filename}_used${extension}`);
+  await rename(latestPath, usedPath);
+  await execWallpaper(usedPath);
+}
+
+setWallpaper().catch((e) => {
+  console.error("Error:", e.message);
+  process.exit(1);
+});
