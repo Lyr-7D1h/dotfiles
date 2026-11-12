@@ -157,35 +157,6 @@ export PATH="$HOME/.cargo/bin:$PATH"
 # Add Deno Install
 export DENO_INSTALL="/home/lyr/.deno"
 
-# Nvm - lazy load to improve startup time
-export NVM_DIR="$HOME/.nvm"
-# Only set up nvm when it's actually called
-nvm() {
-  unset -f nvm node npm npx
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-  nvm "$@"
-}
-# Lazy load node, npm, npx as well
-node() {
-  unset -f nvm node npm npx
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-  node "$@"
-}
-npm() {
-  unset -f nvm node npm npx
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-  npm "$@"
-}
-npx() {
-  unset -f nvm node npm npx
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-  npx "$@"
-}
-
 export PATH="$DENO_INSTALL/bin:$PATH"
 
 # Add gem executables
